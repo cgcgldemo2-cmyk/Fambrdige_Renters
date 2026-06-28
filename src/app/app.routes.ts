@@ -32,6 +32,12 @@ export const routes: Routes = [
         .then(m => m.VehicleFormComponent)
   },
   {
+    path: 'booking-requests',
+    loadComponent: () =>
+      import('./pages/booking-requests/booking-requests.component')
+        .then(m => m.BookingRequestsComponent)
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'

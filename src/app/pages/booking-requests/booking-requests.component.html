@@ -1,0 +1,278 @@
+<app-lessor-sidebar>
+  <section class="booking-requests-page">
+
+    <!-- HERO -->
+    <section class="page-hero">
+      <div>
+        <p>Booking Requests</p>
+        <h1>Review renter booking requests</h1>
+        <span>
+          Check reservation fee status, renter trust profile, documents, and approve or reject requests.
+        </span>
+      </div>
+    </section>
+
+    <!-- SUMMARY -->
+    <section class="summary-grid">
+      <article>
+        <span>Pending Approval</span>
+        <strong>{{ pendingCount }}</strong>
+        <p>Waiting for lessor review</p>
+      </article>
+
+      <article>
+        <span>Paid Reservation</span>
+        <strong>{{ paidReservationCount }}</strong>
+        <p>Reservation fee received</p>
+      </article>
+
+      <article>
+        <span>Approved</span>
+        <strong>{{ approvedCount }}</strong>
+        <p>Confirmed by lessor</p>
+      </article>
+
+      <article>
+        <span>Low Trust Score</span>
+        <strong>{{ lowTrustCount }}</strong>
+        <p>Needs careful review</p>
+      </article>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="filter-card">
+      <div class="search-field">
+        <label>Search Booking</label>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          placeholder="Search by request no, renter, vehicle, or location"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label>Booking Status</label>
+        <select [(ngModel)]="selectedStatus">
+          <option *ngFor="let status of bookingStatuses" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Reservation Fee</label>
+        <select [(ngModel)]="selectedReservationStatus">
+          <option *ngFor="let status of reservationStatuses" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+    </section>
+
+    <!-- EMPTY -->
+    <section class="empty-state" *ngIf="filteredRequests.length === 0">
+      <div class="empty-icon">📭</div>
+      <h2>No booking requests found</h2>
+      <p>Try changing your search or filters.</p>
+    </section>
+
+    <!-- CONTENT -->
+    <section class="requests-layout" *ngIf="filteredRequests.length > 0">
+
+      <!-- LIST -->
+      <div class="request-list">
+        <article
+          class="request-card"
+          *ngFor="let item of filteredRequests"
+          [class.selected]="selectedRequest?.id === item.id"
+          (click)="openRequest(item)"
+        >
+          <div class="request-top">
+            <div>
+              <span class="request-no">{{ item.requestNo }}</span>
+              <h2>{{ item.renterName }}</h2>
+              <p>{{ item.vehicleName }}</p>
+            </div>
+
+            <span
+              class="status-badge"
+              [class.pending]="item.bookingStatus === 'Pending Lessor Approval'"
+              [class.approved]="item.bookingStatus === 'Approved'"
+              [class.rejected]="item.bookingStatus === 'Rejected'"
+              [class.cancelled]="item.bookingStatus === 'Cancelled'"
+            >
+              {{ item.bookingStatus }}
+            </span>
+          </div>
+
+          <div class="request-info-grid">
+            <div>
+              <span>Pickup</span>
+              <strong>{{ item.pickupDate }}</strong>
+            </div>
+
+            <div>
+              <span>Return</span>
+              <strong>{{ item.returnDate }}</strong>
+            </div>
+
+            <div>
+              <span>Rental Type</span>
+              <strong>{{ item.rentalType }}</strong>
+            </div>
+
+            <div>
+              <span>Reservation Fee</span>
+              <strong
+                [class.good]="item.reservationStatus === 'Paid'"
+                [class.warning]="item.reservationStatus === 'Unpaid'"
+                [class.danger]="item.reservationStatus === 'Failed'"
+              >
+                ₱{{ item.reservationFee | number }} · {{ item.reservationStatus }}
+              </strong>
+            </div>
+          </div>
+
+          <div class="trust-row">
+            <div>
+              <span>Trust Score</span>
+              <strong [class.warning]="item.trustScore < 70">
+                {{ item.trustScore }}/100
+              </strong>
+            </div>
+
+            <div>
+              <span>Verified Docs</span>
+              <strong>{{ item.verifiedDocuments }}</strong>
+            </div>
+
+            <div>
+              <span>Successful Rentals</span>
+              <strong>{{ item.successfulRentals }}</strong>
+            </div>
+          </div>
+
+          <div class="request-actions" (click)="$event.stopPropagation()">
+            <button
+              type="button"
+              class="approve-btn"
+              [disabled]="item.bookingStatus === 'Approved'"
+              (click)="approveRequest(item)"
+            >
+              Approve
+            </button>
+
+            <button
+              type="button"
+              class="reject-btn"
+              [disabled]="item.bookingStatus === 'Rejected'"
+              (click)="rejectRequest(item)"
+            >
+              Reject
+            </button>
+
+            <button type="button" class="view-btn" (click)="openRequest(item)">
+              View Details
+            </button>
+          </div>
+        </article>
+      </div>
+
+      <!-- DETAIL PANEL -->
+      <aside class="detail-panel" *ngIf="selectedRequest as request">
+        <div class="detail-header">
+          <div>
+            <p>Booking Detail</p>
+            <h2>{{ request.requestNo }}</h2>
+            <span>{{ request.vehicleName }}</span>
+          </div>
+
+          <button type="button" (click)="closeRequest()">×</button>
+        </div>
+
+        <div class="renter-profile-card">
+          <div class="avatar">
+            {{ request.renterName.charAt(0) }}
+          </div>
+
+          <div>
+            <h3>{{ request.renterName }}</h3>
+            <span>{{ request.renterTrustId }}</span>
+          </div>
+        </div>
+
+        <div class="trust-score-box">
+          <strong>{{ request.trustScore }}</strong>
+          <span>Trust Score</span>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <span>Verified Documents</span>
+            <strong>{{ request.verifiedDocuments }}</strong>
+          </div>
+
+          <div>
+            <span>Successful Rentals</span>
+            <strong>{{ request.successfulRentals }}</strong>
+          </div>
+
+          <div>
+            <span>Reservation Fee</span>
+            <strong>₱{{ request.reservationFee | number }}</strong>
+          </div>
+
+          <div>
+            <span>Reservation Status</span>
+            <strong>{{ request.reservationStatus }}</strong>
+          </div>
+
+          <div>
+            <span>Pickup Location</span>
+            <strong>{{ request.pickupLocation }}</strong>
+          </div>
+
+          <div>
+            <span>Car Type</span>
+            <strong>{{ request.carType }}</strong>
+          </div>
+        </div>
+
+        <div class="document-preview">
+          <p>Document Review</p>
+          <div>
+            <strong>Watermarked documents</strong>
+            <span>Driver license, government ID, and proof of address placeholder.</span>
+          </div>
+        </div>
+
+        <div class="notes-box">
+          <p>Renter Notes</p>
+          <span>{{ request.notes }}</span>
+        </div>
+
+        <div class="detail-actions">
+          <button
+            type="button"
+            class="approve-btn"
+            [disabled]="request.bookingStatus === 'Approved'"
+            (click)="approveRequest(request)"
+          >
+            Approve Booking
+          </button>
+
+          <button
+            type="button"
+            class="reject-btn"
+            [disabled]="request.bookingStatus === 'Rejected'"
+            (click)="rejectRequest(request)"
+          >
+            Reject Booking
+          </button>
+        </div>
+      </aside>
+
+    </section>
+
+  </section>
+</app-lessor-sidebar>
