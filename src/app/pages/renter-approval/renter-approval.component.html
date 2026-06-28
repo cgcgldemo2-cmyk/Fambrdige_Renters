@@ -1,0 +1,462 @@
+<app-lessor-sidebar>
+  <section class="renter-approval-page">
+
+    <section class="page-hero">
+      <div>
+        <p>Renter Approval</p>
+        <h1>Review renter approval requests</h1>
+        <span>
+          Check renter profile, Trust ID, documents, rental references, and approve or request more information.
+        </span>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article>
+        <span>Pending Approval</span>
+        <strong>{{ pendingCount }}</strong>
+        <p>Waiting for lessor review</p>
+      </article>
+
+      <article>
+        <span>Approved Renters</span>
+        <strong>{{ approvedCount }}</strong>
+        <p>Allowed to book smoothly</p>
+      </article>
+
+      <article>
+        <span>Need More Documents</span>
+        <strong>{{ needMoreDocsCount }}</strong>
+        <p>Waiting for renter update</p>
+      </article>
+
+      <article>
+        <span>Rejected Renters</span>
+        <strong>{{ rejectedCount }}</strong>
+        <p>Not approved by lessor</p>
+      </article>
+    </section>
+
+    <section class="approval-note">
+      <div class="note-icon">🛡️</div>
+
+      <div>
+        <strong>Approval Rule</strong>
+        <span>
+          Renter approval is controlled by the rental business owner. FamBridge provides the system,
+          Trust ID, document workflow, and audit notes, but the lessor makes the final approval decision.
+        </span>
+      </div>
+    </section>
+
+    <section class="filter-card">
+      <div class="search-field">
+        <label>Search Renter</label>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          placeholder="Search by name, Trust ID, email, or mobile"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label>Approval Status</label>
+        <select [(ngModel)]="selectedStatus">
+          <option *ngFor="let status of approvalStatuses" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+    </section>
+
+    <section class="empty-state" *ngIf="filteredRenters.length === 0">
+      <div class="empty-icon">👤</div>
+      <h2>No renter approval requests found</h2>
+      <p>Try changing your search or approval status filter.</p>
+    </section>
+
+    <section
+      id="renterApprovalList"
+      class="records-layout single-column"
+      *ngIf="filteredRenters.length > 0"
+    >
+      <div class="records-list">
+        <article
+          class="renter-card"
+          *ngFor="let renter of visibleRenters"
+          [class.selected]="selectedRenter?.id === renter.id"
+          (click)="openRenter(renter)"
+        >
+          <div class="renter-top">
+            <div class="renter-main">
+              <div class="avatar">
+                {{ renter.renterName.charAt(0) }}
+              </div>
+
+              <div>
+                <span class="trust-id">{{ renter.trustId }}</span>
+                <h2>{{ renter.renterName }}</h2>
+                <p>{{ renter.email }} · {{ renter.mobile }}</p>
+              </div>
+            </div>
+
+            <div class="status-stack">
+              <div class="status-item">
+                <small>Approval Status</small>
+
+                <span
+                  class="approval-status"
+                  [class.pending]="renter.approvalStatus === 'Pending Approval'"
+                  [class.approved]="renter.approvalStatus === 'Approved'"
+                  [class.rejected]="renter.approvalStatus === 'Rejected'"
+                  [class.docs]="renter.approvalStatus === 'Need More Documents'"
+                >
+                  {{ renter.approvalStatus }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="renter-grid">
+            <div>
+              <span>Trust Score</span>
+              <strong
+                [class.good]="renter.trustScore >= 80"
+                [class.warning]="renter.trustScore >= 60 && renter.trustScore < 80"
+                [class.danger]="renter.trustScore < 60"
+              >
+                {{ renter.trustScore }}/100
+              </strong>
+            </div>
+
+            <div>
+              <span>Documents</span>
+              <strong>{{ renter.documents.length }}</strong>
+            </div>
+
+            <div>
+              <span>Successful Rentals</span>
+              <strong>{{ renter.successfulRentals }}</strong>
+            </div>
+
+            <div>
+              <span>Previous References</span>
+              <strong>{{ renter.previousRentalCount }}</strong>
+            </div>
+          </div>
+
+          <div class="open-detail-hint" *ngIf="!selectedRenter">
+            Click this renter to review profile, documents, and approval actions
+          </div>
+        </article>
+
+        <section
+          id="renterDetailSection"
+          class="detail-panel full-width-detail"
+          *ngIf="selectedRenter as renter"
+        >
+          <div class="detail-header">
+            <div>
+              <p>Renter Review</p>
+              <h2>{{ renter.renterName }}</h2>
+              <span>{{ renter.trustId }}</span>
+            </div>
+
+            <button type="button" (click)="backToList()">Back</button>
+          </div>
+
+          <div class="profile-card">
+            <div class="large-avatar">
+              {{ renter.renterName.charAt(0) }}
+            </div>
+
+            <div>
+              <h3>{{ renter.renterName }}</h3>
+              <span>{{ renter.email }}</span>
+              <span>{{ renter.mobile }}</span>
+            </div>
+
+            <div class="trust-score">
+              <strong>{{ renter.trustScore }}</strong>
+              <span>Trust Score</span>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div>
+              <span>Approval Status</span>
+              <strong
+                [class.good]="renter.approvalStatus === 'Approved'"
+                [class.warning]="renter.approvalStatus === 'Pending Approval' || renter.approvalStatus === 'Need More Documents'"
+                [class.danger]="renter.approvalStatus === 'Rejected'"
+              >
+                {{ renter.approvalStatus }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Submitted Date</span>
+              <strong>{{ renter.submittedDate }}</strong>
+            </div>
+
+            <div>
+              <span>Successful Rentals</span>
+              <strong>{{ renter.successfulRentals }}</strong>
+            </div>
+
+            <div>
+              <span>Previous References</span>
+              <strong>{{ renter.previousRentalCount }}</strong>
+            </div>
+
+            <div *ngIf="renter.approvedDate">
+              <span>Approved Date</span>
+              <strong>{{ renter.approvedDate }}</strong>
+            </div>
+
+            <div *ngIf="renter.approvedBy">
+              <span>Approved By</span>
+              <strong>{{ renter.approvedBy }}</strong>
+            </div>
+
+            <div *ngIf="renter.rejectedDate">
+              <span>Rejected Date</span>
+              <strong>{{ renter.rejectedDate }}</strong>
+            </div>
+
+            <div *ngIf="renter.rejectedBy">
+              <span>Rejected By</span>
+              <strong>{{ renter.rejectedBy }}</strong>
+            </div>
+          </div>
+
+          <div class="documents-card">
+            <div class="section-header">
+              <p>Renter Documents</p>
+              <span>{{ renter.documents.length }} document(s)</span>
+            </div>
+
+            <div class="document-list">
+              <div
+                class="document-item"
+                *ngFor="let doc of renter.documents"
+                [class.verified]="doc.status === 'Verified'"
+                [class.submitted]="doc.status === 'Submitted'"
+                [class.rejected]="doc.status === 'Rejected'"
+                [class.missing]="doc.status === 'Missing'"
+              >
+                <div class="doc-preview">
+                  📄
+                  <small>Watermarked</small>
+                </div>
+
+                <div>
+                  <h3>{{ doc.name }}</h3>
+                  <span>{{ doc.submittedDate || 'Not submitted' }}</span>
+                  <p>{{ doc.remarks || 'No remarks.' }}</p>
+                </div>
+
+                <strong>{{ doc.status }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="references-card">
+            <div class="section-header">
+              <p>Rental References</p>
+              <span>{{ renter.references.length }} reference(s)</span>
+            </div>
+
+            <div class="reference-list" *ngIf="renter.references.length > 0">
+              <div class="reference-item" *ngFor="let ref of renter.references">
+                <div>
+                  <h3>{{ ref.companyName }}</h3>
+                  <span>{{ ref.platform }}</span>
+                  <p>{{ ref.url }}</p>
+                </div>
+
+                <strong
+                  [class.good]="ref.status === 'Verified'"
+                  [class.warning]="ref.status === 'Provided' || ref.status === 'Needs Review'"
+                >
+                  {{ ref.status }}
+                </strong>
+              </div>
+            </div>
+
+            <div class="no-data" *ngIf="renter.references.length === 0">
+              No previous rental references submitted.
+            </div>
+          </div>
+
+          <div class="action-box reject-action-box" *ngIf="showRejectBox">
+            <p>Reject Renter</p>
+            <span>
+              Add a reason why this renter approval request is being rejected.
+            </span>
+
+            <textarea
+              [(ngModel)]="rejectReason"
+              rows="4"
+              placeholder="Example: Uploaded documents do not match the renter profile."
+            ></textarea>
+
+            <div class="action-box-buttons">
+              <button
+                type="button"
+                class="proceed-reject-btn"
+                [disabled]="!rejectReason.trim()"
+                (click)="proceedRejectRenter()"
+              >
+                Proceed Reject Renter
+              </button>
+
+              <button type="button" class="cancel-action-btn" (click)="cancelAction()">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <div class="action-box request-docs-action-box" *ngIf="showRequestDocsBox">
+            <p>Request More Documents</p>
+            <span>
+              Select the document types or corrections the renter needs to submit.
+            </span>
+
+            <div class="document-request-grid">
+              <button
+                type="button"
+                class="document-request-option"
+                *ngFor="let option of requestDocumentOptions"
+                [class.selected]="isRequestDocumentSelected(option.documentTypeCode)"
+                (click)="toggleRequestDocument(option)"
+              >
+                <div class="request-doc-icon">
+                  {{ option.icon }}
+                </div>
+
+                <div>
+                  <strong>{{ option.label }}</strong>
+                  <span>{{ option.description }}</span>
+                  <small>{{ option.documentTypeCode }}</small>
+                </div>
+
+                <i>{{ isRequestDocumentSelected(option.documentTypeCode) ? '✓' : '+' }}</i>
+              </button>
+            </div>
+
+            <div class="selected-documents" *ngIf="selectedRequestDocuments.length > 0">
+              <div class="selected-documents-header">
+                <strong>Selected document(s)</strong>
+                <span>{{ selectedRequestDocuments.length }}</span>
+              </div>
+
+              <div class="selected-document-chips">
+                <button
+                  type="button"
+                  class="selected-document-chip"
+                  *ngFor="let document of selectedRequestDocuments"
+                  (click)="removeRequestDocument(document.documentTypeCode)"
+                >
+                  {{ document.label }}
+                  <small>×</small>
+                </button>
+              </div>
+            </div>
+
+            <div class="selected-documents empty-selection" *ngIf="selectedRequestDocuments.length === 0">
+              Select at least one document type to continue.
+            </div>
+
+            <label class="correction-note-field">
+              <span>Additional instructions / correction notes</span>
+              <textarea
+                [(ngModel)]="requestDocsReason"
+                rows="4"
+                placeholder="Example: Please upload a clearer Government ID and updated proof of address."
+              ></textarea>
+            </label>
+
+            <div class="request-docs-info">
+              This request will be sent to the renter with the selected document type codes for API processing.
+            </div>
+
+            <div class="action-box-buttons">
+              <button
+                type="button"
+                class="proceed-request-docs-btn"
+                [disabled]="!requestDocsReason.trim() || selectedRequestDocuments.length === 0"
+                (click)="proceedRequestMoreDocuments()"
+              >
+                Proceed Request Documents
+              </button>
+
+              <button type="button" class="cancel-action-btn" (click)="cancelAction()">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <div class="notes-box">
+            <div class="notes-header">
+              <p>Approval Notes</p>
+              <span>{{ renter.notes.length }} note(s)</span>
+            </div>
+
+            <div class="note-list" *ngIf="renter.notes.length > 0">
+              <div
+                class="note-item"
+                *ngFor="let note of renter.notes"
+                [class.renter]="note.source === 'Renter'"
+                [class.system]="note.source === 'System'"
+                [class.lessor]="note.source === 'Lessor'"
+              >
+                <div class="note-top">
+                  <span class="note-source">{{ note.source }}</span>
+                  <small>{{ note.createdAt }}</small>
+                </div>
+
+                <strong>{{ note.createdBy }}</strong>
+                <p>{{ note.message }}</p>
+              </div>
+            </div>
+
+            <div class="no-notes" *ngIf="renter.notes.length === 0">
+              No approval notes added.
+            </div>
+          </div>
+
+          <div class="detail-actions">
+            <button
+              type="button"
+              class="approve-btn"
+              [disabled]="renter.approvalStatus === 'Approved'"
+              (click)="approveRenter(renter)"
+            >
+              Approve Renter
+            </button>
+
+            <button
+              type="button"
+              class="request-docs-btn"
+              [disabled]="renter.approvalStatus === 'Approved'"
+              (click)="startRequestMoreDocuments(renter)"
+            >
+              Request More Documents
+            </button>
+
+            <button
+              type="button"
+              class="reject-btn"
+              [disabled]="renter.approvalStatus === 'Rejected'"
+              (click)="startRejectRenter(renter)"
+            >
+              Reject Renter
+            </button>
+          </div>
+        </section>
+      </div>
+    </section>
+
+  </section>
+</app-lessor-sidebar>

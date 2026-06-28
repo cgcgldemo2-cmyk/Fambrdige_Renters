@@ -44,6 +44,12 @@ export const routes: Routes = [
         .then(m => m.ReservationFeesComponent)
   },
   {
+    path: 'renter-approval',
+    loadComponent: () =>
+      import('./pages/renter-approval/renter-approval.component')
+        .then(m => m.RenterApprovalComponent)
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
