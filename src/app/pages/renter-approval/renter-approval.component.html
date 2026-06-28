@@ -6,7 +6,7 @@
         <p>Renter Approval</p>
         <h1>Review renter approval requests</h1>
         <span>
-          Check renter profile, Trust ID, documents, rental references, and approve or request more information.
+          Check renter profile, Trust ID, grouped document requirements, rental references, and approval notes.
         </span>
       </div>
     </section>
@@ -43,8 +43,8 @@
       <div>
         <strong>Approval Rule</strong>
         <span>
-          Renter approval is controlled by the rental business owner. FamBridge provides the system,
-          Trust ID, document workflow, and audit notes, but the lessor makes the final approval decision.
+          Documents are grouped by lessor requirements. The card shows the latest uploaded document by default.
+          Older uploads stay in the history list for audit and review tracking.
         </span>
       </div>
     </section>
@@ -130,23 +130,23 @@
             </div>
 
             <div>
-              <span>Documents</span>
-              <strong>{{ renter.documents.length }}</strong>
+              <span>Requirement Groups</span>
+              <strong>{{ renter.documentGroups.length }}</strong>
             </div>
 
             <div>
-              <span>Successful Rentals</span>
-              <strong>{{ renter.successfulRentals }}</strong>
+              <span>Uploaded Documents</span>
+              <strong>{{ getUploadedDocumentCount(renter) }}</strong>
             </div>
 
             <div>
-              <span>Previous References</span>
-              <strong>{{ renter.previousRentalCount }}</strong>
+              <span>Verified Documents</span>
+              <strong>{{ getVerifiedDocumentCount(renter) }}</strong>
             </div>
           </div>
 
           <div class="open-detail-hint" *ngIf="!selectedRenter">
-            Click this renter to review profile, documents, and approval actions
+            Click this renter to review grouped documents, upload history, and approval actions
           </div>
         </article>
 
@@ -233,34 +233,159 @@
           <div class="documents-card">
             <div class="section-header">
               <p>Renter Documents</p>
-              <span>{{ renter.documents.length }} document(s)</span>
+              <span>{{ renter.documentGroups.length }} requirement group(s)</span>
             </div>
 
-            <div class="document-list">
-              <button
-                type="button"
-                class="document-item"
-                *ngFor="let doc of renter.documents"
-                [class.verified]="doc.status === 'Verified'"
-                [class.submitted]="doc.status === 'Submitted'"
-                [class.rejected]="doc.status === 'Rejected'"
-                [class.missing]="doc.status === 'Missing'"
-                (click)="openDocumentViewer(doc)"
+            <div class="document-group-list">
+              <article
+                class="document-group-card"
+                *ngFor="let group of renter.documentGroups"
+                [class.verified]="getGroupStatus(group) === 'Verified'"
+                [class.submitted]="getGroupStatus(group) === 'Submitted'"
+                [class.rejected]="getGroupStatus(group) === 'Rejected'"
+                [class.missing]="getGroupStatus(group) === 'Missing'"
               >
-                <div class="doc-preview">
-                  📄
-                  <small>Watermarked</small>
+                <div class="document-group-main">
+                  <button
+                    type="button"
+                    class="latest-document-button"
+                    [disabled]="!getLatestDocument(group)"
+                    (click)="openLatestDocumentViewer(group)"
+                  >
+                    <div class="doc-preview">
+                      <ng-container *ngIf="getLatestDocument(group) as latest; else noDocumentThumbnail">
+                        <img *ngIf="latest.thumbnailUrl" [src]="latest.thumbnailUrl" [alt]="latest.documentLabel" />
+                        <span *ngIf="!latest.thumbnailUrl">📄</span>
+                        <small>Latest</small>
+                      </ng-container>
+
+                      <ng-template #noDocumentThumbnail>
+                        <span>—</span>
+                        <small>Missing</small>
+                      </ng-template>
+                    </div>
+                  </button>
+
+                  <div class="document-group-copy">
+                    <div class="document-group-title-row">
+                      <div>
+                        <h3>{{ group.icon }} {{ group.label }}</h3>
+                        <p>{{ group.description }}</p>
+                      </div>
+
+                      <strong
+                        class="document-status"
+                        [class.good]="getGroupStatus(group) === 'Verified'"
+                        [class.warning]="getGroupStatus(group) === 'Submitted'"
+                        [class.danger]="getGroupStatus(group) === 'Rejected'"
+                      >
+                        {{ getGroupStatus(group) }}
+                      </strong>
+                    </div>
+
+                    <div class="accepted-documents">
+                      <span>Accepted document types</span>
+                      <div>
+                        <small *ngFor="let code of group.acceptedDocumentTypeCodes">{{ code }}</small>
+                      </div>
+                    </div>
+
+                    <div class="latest-document-summary" *ngIf="getLatestDocument(group) as latest">
+                      <div>
+                        <span>Latest Upload</span>
+                        <strong>{{ latest.documentLabel }}</strong>
+                      </div>
+
+                      <div>
+                        <span>Date Time</span>
+                        <strong>{{ latest.uploadedAt || 'No date' }}</strong>
+                      </div>
+
+                      <div>
+                        <span>User</span>
+                        <strong>{{ latest.uploadedBy }}</strong>
+                      </div>
+
+                      <div>
+                        <span>Remarks</span>
+                        <strong>{{ latest.remarks || 'No remarks.' }}</strong>
+                      </div>
+                    </div>
+
+                    <div class="latest-document-summary missing-summary" *ngIf="!getLatestDocument(group)">
+                      <div>
+                        <span>Latest Upload</span>
+                        <strong>No document uploaded yet.</strong>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    class="history-toggle-btn"
+                    [disabled]="group.uploads.length <= 1"
+                    (click)="toggleDocumentGroup(group)"
+                  >
+                    {{ group.uploads.length > 1 ? (group.isExpanded ? 'Hide History' : 'View History') : 'No History' }}
+                  </button>
                 </div>
 
-                <div>
-                  <h3>{{ doc.name }}</h3>
-                  <span>{{ doc.submittedDate || 'Not submitted' }}</span>
-                  <p>{{ doc.remarks || 'No remarks.' }}</p>
-                  <small class="doc-code">{{ doc.documentTypeCode }}</small>
-                </div>
+                <div class="document-upload-history" *ngIf="group.isExpanded && group.uploads.length > 1">
+                  <div class="history-header">
+                    <strong>Uploaded Document History</strong>
+                    <span>{{ group.uploads.length }} uploads</span>
+                  </div>
 
-                <strong>{{ doc.status }}</strong>
-              </button>
+                  <div class="history-table">
+                    <div class="history-row history-head">
+                      <span>Thumbnail</span>
+                      <span>Date Time</span>
+                      <span>Status</span>
+                      <span>User</span>
+                      <span>Remarks</span>
+                      <span>Action</span>
+                    </div>
+
+                    <div class="history-row" *ngFor="let upload of group.uploads">
+                      <div class="history-thumb">
+                        <img *ngIf="upload.thumbnailUrl" [src]="upload.thumbnailUrl" [alt]="upload.documentLabel" />
+                        <span *ngIf="!upload.thumbnailUrl">📄</span>
+                      </div>
+
+                      <div>
+                        <small>Date Time</small>
+                        <strong>{{ upload.uploadedAt || 'No date' }}</strong>
+                      </div>
+
+                      <div>
+                        <small>Status</small>
+                        <strong
+                          [class.good]="upload.status === 'Verified'"
+                          [class.warning]="upload.status === 'Submitted'"
+                          [class.danger]="upload.status === 'Rejected'"
+                        >
+                          {{ upload.status }}
+                        </strong>
+                      </div>
+
+                      <div>
+                        <small>User</small>
+                        <strong>{{ upload.reviewedBy || upload.uploadedBy }}</strong>
+                        <span *ngIf="upload.reviewedAt">{{ upload.reviewedAt }}</span>
+                      </div>
+
+                      <div>
+                        <small>Remarks</small>
+                        <strong>{{ upload.remarks || 'No remarks.' }}</strong>
+                      </div>
+
+                      <button type="button" class="history-view-btn" (click)="openDocumentViewer(group, upload)">
+                        View
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </article>
             </div>
           </div>
 
@@ -323,7 +448,7 @@
           <div class="action-box request-docs-action-box" *ngIf="showRequestDocsBox">
             <p>Request More Documents</p>
             <span>
-              Select the document types or corrections the renter needs to submit.
+              Select the document requirement groups or corrections the renter needs to submit.
             </span>
 
             <div class="document-request-grid">
@@ -331,7 +456,7 @@
                 type="button"
                 class="document-request-option"
                 *ngFor="let option of requestDocumentOptions"
-                [class.selected]="isRequestDocumentSelected(option.documentTypeCode)"
+                [class.selected]="isRequestDocumentSelected(option.requirementCode)"
                 (click)="toggleRequestDocument(option)"
               >
                 <div class="request-doc-icon">
@@ -341,16 +466,16 @@
                 <div>
                   <strong>{{ option.label }}</strong>
                   <span>{{ option.description }}</span>
-                  <small>{{ option.documentTypeCode }}</small>
+                  <small>{{ option.requirementCode }}</small>
                 </div>
 
-                <i>{{ isRequestDocumentSelected(option.documentTypeCode) ? '✓' : '+' }}</i>
+                <i>{{ isRequestDocumentSelected(option.requirementCode) ? '✓' : '+' }}</i>
               </button>
             </div>
 
             <div class="selected-documents" *ngIf="selectedRequestDocuments.length > 0">
               <div class="selected-documents-header">
-                <strong>Selected document(s)</strong>
+                <strong>Selected requirement group(s)</strong>
                 <span>{{ selectedRequestDocuments.length }}</span>
               </div>
 
@@ -359,7 +484,7 @@
                   type="button"
                   class="selected-document-chip"
                   *ngFor="let document of selectedRequestDocuments"
-                  (click)="removeRequestDocument(document.documentTypeCode)"
+                  (click)="removeRequestDocument(document.requirementCode)"
                 >
                   {{ document.label }}
                   <small>×</small>
@@ -368,7 +493,7 @@
             </div>
 
             <div class="selected-documents empty-selection" *ngIf="selectedRequestDocuments.length === 0">
-              Select at least one document type to continue.
+              Select at least one document requirement group to continue.
             </div>
 
             <label class="correction-note-field">
@@ -376,12 +501,12 @@
               <textarea
                 [(ngModel)]="requestDocsReason"
                 rows="4"
-                placeholder="Example: Please upload a clearer Government ID and updated proof of address."
+                placeholder="Example: Please upload a clearer Driver License and any valid Government ID such as UMID, National ID, or PRC ID."
               ></textarea>
             </label>
 
             <div class="request-docs-info">
-              This request will be sent to the renter with the selected document type codes for API processing.
+              This request will be sent to the renter using requirement group codes and accepted document type codes for API processing.
             </div>
 
             <div class="action-box-buttons">
@@ -471,8 +596,10 @@
         <header class="document-viewer-header">
           <div>
             <p>Document Viewer</p>
-            <h2>{{ document.name }}</h2>
-            <span>{{ document.documentTypeCode }} · {{ document.status }}</span>
+            <h2>{{ document.documentLabel }}</h2>
+            <span>
+              {{ selectedDocumentGroup?.label }} · {{ document.documentTypeCode }} · {{ document.status }}
+            </span>
           </div>
 
           <button type="button" class="viewer-close-btn" (click)="closeDocumentViewer()">
@@ -502,13 +629,13 @@
             <img
               *ngIf="document.fileUrl"
               [src]="document.fileUrl"
-              [alt]="document.name"
+              [alt]="document.documentLabel"
               draggable="false"
             />
 
             <div class="document-viewer-placeholder" *ngIf="!document.fileUrl">
               <div>📄</div>
-              <strong>{{ document.name }}</strong>
+              <strong>{{ document.documentLabel }}</strong>
               <span>Document preview placeholder</span>
               <small>{{ document.documentTypeCode }}</small>
             </div>
@@ -532,8 +659,23 @@
           </div>
 
           <div>
-            <span>Submitted Date</span>
-            <strong>{{ document.submittedDate || 'Not submitted' }}</strong>
+            <span>Uploaded Date</span>
+            <strong>{{ document.uploadedAt || 'Not uploaded' }}</strong>
+          </div>
+
+          <div>
+            <span>Uploaded By</span>
+            <strong>{{ document.uploadedBy }}</strong>
+          </div>
+
+          <div>
+            <span>Reviewed By</span>
+            <strong>{{ document.reviewedBy || 'Not reviewed yet' }}</strong>
+          </div>
+
+          <div>
+            <span>Reviewed Date</span>
+            <strong>{{ document.reviewedAt || 'Not reviewed yet' }}</strong>
           </div>
 
           <div>
