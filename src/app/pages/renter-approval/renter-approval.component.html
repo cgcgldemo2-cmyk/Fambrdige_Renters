@@ -1,12 +1,12 @@
-<app-lessor-sidebar>
+<app-lessor-sidebar [activeRoute]="'/renter-approval'" [currentPageTitle]="'Renters'">
   <section class="renter-approval-page">
-
     <section class="page-hero">
       <div>
         <p>Renter Approval</p>
         <h1>Review renter approval requests</h1>
         <span>
-          Check renter profile, Trust ID, grouped document requirements, rental references, and approval notes.
+          Check renter profile, Trust ID, grouped document requirements, booking history,
+          ratings and reviews, driving history, and approval notes.
         </span>
       </div>
     </section>
@@ -37,15 +37,14 @@
       </article>
     </section>
 
-    <section class="approval-note">
-      <div class="note-icon">🛡️</div>
-
+    <section class="rule-card">
+      <div class="rule-icon">ℹ️</div>
       <div>
         <strong>Approval Rule</strong>
-        <span>
+        <p>
           Documents are grouped by lessor requirements. The card shows the latest uploaded document by default.
           Older uploads stay in the history list for audit and review tracking.
-        </span>
+        </p>
       </div>
     </section>
 
@@ -62,543 +61,502 @@
       <div class="filter-field">
         <label>Approval Status</label>
         <select [(ngModel)]="selectedStatus">
-          <option *ngFor="let status of approvalStatuses" [value]="status">
-            {{ status }}
-          </option>
+          <option *ngFor="let status of approvalStatuses" [value]="status">{{ status }}</option>
         </select>
       </div>
     </section>
 
-    <section class="empty-state" *ngIf="filteredRenters.length === 0">
-      <div class="empty-icon">👤</div>
-      <h2>No renter approval requests found</h2>
-      <p>Try changing your search or approval status filter.</p>
-    </section>
-
     <section
       id="renterApprovalList"
-      class="records-layout single-column"
-      *ngIf="filteredRenters.length > 0"
+      class="records-wrap"
+      *ngIf="filteredRecords.length > 0; else emptyStateTpl"
     >
-      <div class="records-list">
+      <div class="record-list" *ngIf="!selectedRecord">
         <article
-          class="renter-card"
-          *ngFor="let renter of visibleRenters"
-          [class.selected]="selectedRenter?.id === renter.id"
-          (click)="openRenter(renter)"
+          class="record-card"
+          *ngFor="let record of filteredRecords"
+          [attr.id]="'renter-card-' + record.id"
+          [class.active]="$any(selectedRecord)?.id === $any(record).id"
+          [class.return-focus]="returningRenterId === record.id"
+          (click)="selectRecord(record)"
         >
-          <div class="renter-top">
-            <div class="renter-main">
-              <div class="avatar">
-                {{ renter.renterName.charAt(0) }}
-              </div>
-
-              <div>
-                <span class="trust-id">{{ renter.trustId }}</span>
-                <h2>{{ renter.renterName }}</h2>
-                <p>{{ renter.email }} · {{ renter.mobile }}</p>
-              </div>
+          <div class="record-top">
+            <div class="avatar">{{ record.renterName.charAt(0) }}</div>
+            <div class="record-header-copy">
+              <small>{{ record.trustId }}</small>
+              <h3>{{ record.renterName }}</h3>
+              <p>{{ record.email }} · {{ record.mobile }}</p>
             </div>
 
-            <div class="status-stack">
-              <div class="status-item">
-                <small>Approval Status</small>
-
-                <span
-                  class="approval-status"
-                  [class.pending]="renter.approvalStatus === 'Pending Approval'"
-                  [class.approved]="renter.approvalStatus === 'Approved'"
-                  [class.rejected]="renter.approvalStatus === 'Rejected'"
-                  [class.docs]="renter.approvalStatus === 'Need More Documents'"
-                >
-                  {{ renter.approvalStatus }}
-                </span>
+            <div class="status-col">
+              <span>Approval Status</span>
+              <div class="status-badge pending" [ngClass]="{
+                'pending': record.approvalStatus === 'Pending Approval',
+                'approved': record.approvalStatus === 'Approved',
+                'need-docs': record.approvalStatus === 'Need More Documents',
+                'rejected': record.approvalStatus === 'Rejected'
+              }">
+                {{ record.approvalStatus }}
               </div>
             </div>
           </div>
 
-          <div class="renter-grid">
+          <div class="record-metrics-grid">
             <div>
               <span>Trust Score</span>
-              <strong
-                [class.good]="renter.trustScore >= 80"
-                [class.warning]="renter.trustScore >= 60 && renter.trustScore < 80"
-                [class.danger]="renter.trustScore < 60"
-              >
-                {{ renter.trustScore }}/100
-              </strong>
+              <strong>{{ record.trustScore }}/100</strong>
             </div>
-
             <div>
               <span>Requirement Groups</span>
-              <strong>{{ renter.documentGroups.length }}</strong>
+              <strong>{{ record.requirementGroups }}</strong>
             </div>
-
             <div>
               <span>Uploaded Documents</span>
-              <strong>{{ getUploadedDocumentCount(renter) }}</strong>
+              <strong>{{ record.uploadedDocuments }}</strong>
             </div>
-
             <div>
               <span>Verified Documents</span>
-              <strong>{{ getVerifiedDocumentCount(renter) }}</strong>
+              <strong>{{ record.verifiedDocuments }}</strong>
             </div>
-          </div>
-
-          <div class="open-detail-hint" *ngIf="!selectedRenter">
-            Click this renter to review grouped documents, upload history, and approval actions
           </div>
         </article>
+      </div>
 
-        <section
-          id="renterDetailSection"
-          class="detail-panel full-width-detail"
-          *ngIf="selectedRenter as renter"
-        >
-          <div class="detail-header">
-            <div>
-              <p>Renter Review</p>
-              <h2>{{ renter.renterName }}</h2>
-              <span>{{ renter.trustId }}</span>
-            </div>
-
-            <button type="button" (click)="backToList()">Back</button>
+      <section id="renterDetailSection" class="detail-section" *ngIf="selectedRecord as record">
+        <header class="detail-header">
+          <div>
+            <p>Renter Review</p>
+            <h2>{{ record.renterName }}</h2>
+            <span>{{ record.trustId }}</span>
           </div>
 
-          <div class="profile-card">
-            <div class="large-avatar">
-              {{ renter.renterName.charAt(0) }}
-            </div>
+          <div class="detail-actions-top">
+            <button type="button" class="btn back" (click)="backToRenterList()">Back to List</button>
+            <button type="button" class="btn approve" (click)="approveRenter()">Approve Renter</button>
+            <button type="button" class="btn request" (click)="requestMoreDocuments()">Request More Documents</button>
+            <button type="button" class="btn reject" (click)="rejectRenter()">Reject Renter</button>
+          </div>
+        </header>
 
+        <section class="top-overview-grid">
+          <article class="profile-card wide">
+            <div class="profile-avatar">{{ record.renterName.charAt(0) }}</div>
             <div>
-              <h3>{{ renter.renterName }}</h3>
-              <span>{{ renter.email }}</span>
-              <span>{{ renter.mobile }}</span>
+              <h3>{{ record.renterName }}</h3>
+              <span>{{ record.email }}</span>
+              <small>{{ record.mobile }}</small>
             </div>
+          </article>
 
-            <div class="trust-score">
-              <strong>{{ renter.trustScore }}</strong>
+          <article class="score-ring-card">
+            <div class="score-ring">
+              <strong>{{ record.trustScore }}</strong>
               <span>Trust Score</span>
             </div>
-          </div>
+          </article>
 
-          <div class="detail-grid">
+          <article class="overview-stat">
+            <div class="icon green">📄</div>
             <div>
-              <span>Approval Status</span>
-              <strong
-                [class.good]="renter.approvalStatus === 'Approved'"
-                [class.warning]="renter.approvalStatus === 'Pending Approval' || renter.approvalStatus === 'Need More Documents'"
-                [class.danger]="renter.approvalStatus === 'Rejected'"
-              >
-                {{ renter.approvalStatus }}
-              </strong>
+              <span>Verified Documents</span>
+              <strong>{{ record.verifiedDocuments }} / {{ record.uploadedDocuments }}</strong>
+              <small>60% Verified</small>
             </div>
+          </article>
 
+          <article class="overview-stat">
+            <div class="icon blue">📅</div>
             <div>
-              <span>Submitted Date</span>
-              <strong>{{ renter.submittedDate }}</strong>
+              <span>Completed Bookings</span>
+              <strong>{{ record.completedBookings }}</strong>
+              <small>View History</small>
             </div>
+          </article>
 
+          <article class="overview-stat">
+            <div class="icon gold">⭐</div>
             <div>
-              <span>Successful Rentals</span>
-              <strong>{{ renter.successfulRentals }}</strong>
+              <span>Average Rating</span>
+              <strong>{{ record.averageRating }} / 5</strong>
+              <small>Based on {{ record.reviewCount }} reviews</small>
             </div>
+          </article>
 
+          <article class="overview-stat">
+            <div class="icon purple">🚘</div>
             <div>
-              <span>Previous References</span>
-              <strong>{{ renter.previousRentalCount }}</strong>
+              <span>Driving Score</span>
+              <strong>Soon</strong>
+              <small>Tracking not enabled</small>
             </div>
-
-            <div *ngIf="renter.approvedDate">
-              <span>Approved Date</span>
-              <strong>{{ renter.approvedDate }}</strong>
-            </div>
-
-            <div *ngIf="renter.approvedBy">
-              <span>Approved By</span>
-              <strong>{{ renter.approvedBy }}</strong>
-            </div>
-
-            <div *ngIf="renter.rejectedDate">
-              <span>Rejected Date</span>
-              <strong>{{ renter.rejectedDate }}</strong>
-            </div>
-
-            <div *ngIf="renter.rejectedBy">
-              <span>Rejected By</span>
-              <strong>{{ renter.rejectedBy }}</strong>
-            </div>
-          </div>
-
-          <div class="documents-card">
-            <div class="section-header">
-              <p>Renter Documents</p>
-              <span>{{ renter.documentGroups.length }} requirement group(s)</span>
-            </div>
-
-            <div class="document-group-list">
-              <article
-                class="document-group-card"
-                *ngFor="let group of renter.documentGroups"
-                [class.verified]="getGroupStatus(group) === 'Verified'"
-                [class.submitted]="getGroupStatus(group) === 'Submitted'"
-                [class.rejected]="getGroupStatus(group) === 'Rejected'"
-                [class.missing]="getGroupStatus(group) === 'Missing'"
-              >
-                <div class="document-group-main">
-                  <button
-                    type="button"
-                    class="latest-document-button"
-                    [disabled]="!getLatestDocument(group)"
-                    (click)="openLatestDocumentViewer(group)"
-                  >
-                    <div class="doc-preview">
-                      <ng-container *ngIf="getLatestDocument(group) as latest; else noDocumentThumbnail">
-                        <img *ngIf="latest.thumbnailUrl" [src]="latest.thumbnailUrl" [alt]="latest.documentLabel" />
-                        <span *ngIf="!latest.thumbnailUrl">📄</span>
-                        <small>Latest</small>
-                      </ng-container>
-
-                      <ng-template #noDocumentThumbnail>
-                        <span>—</span>
-                        <small>Missing</small>
-                      </ng-template>
-                    </div>
-                  </button>
-
-                  <div class="document-group-copy">
-                    <div class="document-group-title-row">
-                      <div>
-                        <h3>{{ group.icon }} {{ group.label }}</h3>
-                        <p>{{ group.description }}</p>
-                      </div>
-
-                      <strong
-                        class="document-status"
-                        [class.good]="getGroupStatus(group) === 'Verified'"
-                        [class.warning]="getGroupStatus(group) === 'Submitted'"
-                        [class.danger]="getGroupStatus(group) === 'Rejected'"
-                      >
-                        {{ getGroupStatus(group) }}
-                      </strong>
-                    </div>
-
-                    <div class="accepted-documents">
-                      <span>Accepted document types</span>
-                      <div>
-                        <small *ngFor="let code of group.acceptedDocumentTypeCodes">{{ code }}</small>
-                      </div>
-                    </div>
-
-                    <div class="latest-document-summary" *ngIf="getLatestDocument(group) as latest">
-                      <div>
-                        <span>Latest Upload</span>
-                        <strong>{{ latest.documentLabel }}</strong>
-                      </div>
-
-                      <div>
-                        <span>Date Time</span>
-                        <strong>{{ latest.uploadedAt || 'No date' }}</strong>
-                      </div>
-
-                      <div>
-                        <span>User</span>
-                        <strong>{{ latest.uploadedBy }}</strong>
-                      </div>
-
-                      <div>
-                        <span>Remarks</span>
-                        <strong>{{ latest.remarks || 'No remarks.' }}</strong>
-                      </div>
-                    </div>
-
-                    <div class="latest-document-summary missing-summary" *ngIf="!getLatestDocument(group)">
-                      <div>
-                        <span>Latest Upload</span>
-                        <strong>No document uploaded yet.</strong>
-                      </div>
-                    </div>
-                  </div>
-
-                  <button
-                    type="button"
-                    class="history-toggle-btn"
-                    [disabled]="group.uploads.length <= 1"
-                    (click)="toggleDocumentGroup(group)"
-                  >
-                    {{ group.uploads.length > 1 ? (group.isExpanded ? 'Hide History' : 'View History') : 'No History' }}
-                  </button>
-                </div>
-
-                <div class="document-upload-history" *ngIf="group.isExpanded && group.uploads.length > 1">
-                  <div class="history-header">
-                    <strong>Uploaded Document History</strong>
-                    <span>{{ group.uploads.length }} uploads</span>
-                  </div>
-
-                  <div class="history-table">
-                    <div class="history-row history-head">
-                      <span>Thumbnail</span>
-                      <span>Date Time</span>
-                      <span>Status</span>
-                      <span>User</span>
-                      <span>Remarks</span>
-                      <span>Action</span>
-                    </div>
-
-                    <div class="history-row" *ngFor="let upload of group.uploads">
-                      <div class="history-thumb">
-                        <img *ngIf="upload.thumbnailUrl" [src]="upload.thumbnailUrl" [alt]="upload.documentLabel" />
-                        <span *ngIf="!upload.thumbnailUrl">📄</span>
-                      </div>
-
-                      <div>
-                        <small>Date Time</small>
-                        <strong>{{ upload.uploadedAt || 'No date' }}</strong>
-                      </div>
-
-                      <div>
-                        <small>Status</small>
-                        <strong
-                          [class.good]="upload.status === 'Verified'"
-                          [class.warning]="upload.status === 'Submitted'"
-                          [class.danger]="upload.status === 'Rejected'"
-                        >
-                          {{ upload.status }}
-                        </strong>
-                      </div>
-
-                      <div>
-                        <small>User</small>
-                        <strong>{{ upload.reviewedBy || upload.uploadedBy }}</strong>
-                        <span *ngIf="upload.reviewedAt">{{ upload.reviewedAt }}</span>
-                      </div>
-
-                      <div>
-                        <small>Remarks</small>
-                        <strong>{{ upload.remarks || 'No remarks.' }}</strong>
-                      </div>
-
-                      <button type="button" class="history-view-btn" (click)="openDocumentViewer(group, upload)">
-                        View
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </article>
-            </div>
-          </div>
-
-          <div class="references-card">
-            <div class="section-header">
-              <p>Rental References</p>
-              <span>{{ renter.references.length }} reference(s)</span>
-            </div>
-
-            <div class="reference-list" *ngIf="renter.references.length > 0">
-              <div class="reference-item" *ngFor="let ref of renter.references">
-                <div>
-                  <h3>{{ ref.companyName }}</h3>
-                  <span>{{ ref.platform }}</span>
-                  <p>{{ ref.url }}</p>
-                </div>
-
-                <strong
-                  [class.good]="ref.status === 'Verified'"
-                  [class.warning]="ref.status === 'Provided' || ref.status === 'Needs Review'"
-                >
-                  {{ ref.status }}
-                </strong>
-              </div>
-            </div>
-
-            <div class="no-data" *ngIf="renter.references.length === 0">
-              No previous rental references submitted.
-            </div>
-          </div>
-
-          <div class="action-box reject-action-box" *ngIf="showRejectBox">
-            <p>Reject Renter</p>
-            <span>
-              Add a reason why this renter approval request is being rejected.
-            </span>
-
-            <textarea
-              [(ngModel)]="rejectReason"
-              rows="4"
-              placeholder="Example: Uploaded documents do not match the renter profile."
-            ></textarea>
-
-            <div class="action-box-buttons">
-              <button
-                type="button"
-                class="proceed-reject-btn"
-                [disabled]="!rejectReason.trim()"
-                (click)="proceedRejectRenter()"
-              >
-                Proceed Reject Renter
-              </button>
-
-              <button type="button" class="cancel-action-btn" (click)="cancelAction()">
-                Cancel
-              </button>
-            </div>
-          </div>
-
-          <div class="action-box request-docs-action-box" *ngIf="showRequestDocsBox">
-            <p>Request More Documents</p>
-            <span>
-              Select the document requirement groups or corrections the renter needs to submit.
-            </span>
-
-            <div class="document-request-grid">
-              <button
-                type="button"
-                class="document-request-option"
-                *ngFor="let option of requestDocumentOptions"
-                [class.selected]="isRequestDocumentSelected(option.requirementCode)"
-                (click)="toggleRequestDocument(option)"
-              >
-                <div class="request-doc-icon">
-                  {{ option.icon }}
-                </div>
-
-                <div>
-                  <strong>{{ option.label }}</strong>
-                  <span>{{ option.description }}</span>
-                  <small>{{ option.requirementCode }}</small>
-                </div>
-
-                <i>{{ isRequestDocumentSelected(option.requirementCode) ? '✓' : '+' }}</i>
-              </button>
-            </div>
-
-            <div class="selected-documents" *ngIf="selectedRequestDocuments.length > 0">
-              <div class="selected-documents-header">
-                <strong>Selected requirement group(s)</strong>
-                <span>{{ selectedRequestDocuments.length }}</span>
-              </div>
-
-              <div class="selected-document-chips">
-                <button
-                  type="button"
-                  class="selected-document-chip"
-                  *ngFor="let document of selectedRequestDocuments"
-                  (click)="removeRequestDocument(document.requirementCode)"
-                >
-                  {{ document.label }}
-                  <small>×</small>
-                </button>
-              </div>
-            </div>
-
-            <div class="selected-documents empty-selection" *ngIf="selectedRequestDocuments.length === 0">
-              Select at least one document requirement group to continue.
-            </div>
-
-            <label class="correction-note-field">
-              <span>Additional instructions / correction notes</span>
-              <textarea
-                [(ngModel)]="requestDocsReason"
-                rows="4"
-                placeholder="Example: Please upload a clearer Driver License and any valid Government ID such as UMID, National ID, or PRC ID."
-              ></textarea>
-            </label>
-
-            <div class="request-docs-info">
-              This request will be sent to the renter using requirement group codes and accepted document type codes for API processing.
-            </div>
-
-            <div class="action-box-buttons">
-              <button
-                type="button"
-                class="proceed-request-docs-btn"
-                [disabled]="!requestDocsReason.trim() || selectedRequestDocuments.length === 0"
-                (click)="proceedRequestMoreDocuments()"
-              >
-                Proceed Request Documents
-              </button>
-
-              <button type="button" class="cancel-action-btn" (click)="cancelAction()">
-                Cancel
-              </button>
-            </div>
-          </div>
-
-          <div class="notes-box">
-            <div class="notes-header">
-              <p>Approval Notes</p>
-              <span>{{ renter.notes.length }} note(s)</span>
-            </div>
-
-            <div class="note-list" *ngIf="renter.notes.length > 0">
-              <div
-                class="note-item"
-                *ngFor="let note of renter.notes"
-                [class.renter]="note.source === 'Renter'"
-                [class.system]="note.source === 'System'"
-                [class.lessor]="note.source === 'Lessor'"
-              >
-                <div class="note-top">
-                  <span class="note-source">{{ note.source }}</span>
-                  <small>{{ note.createdAt }}</small>
-                </div>
-
-                <strong>{{ note.createdBy }}</strong>
-                <p>{{ note.message }}</p>
-              </div>
-            </div>
-
-            <div class="no-notes" *ngIf="renter.notes.length === 0">
-              No approval notes added.
-            </div>
-          </div>
-
-          <div class="detail-actions">
-            <button
-              type="button"
-              class="approve-btn"
-              [disabled]="renter.approvalStatus === 'Approved'"
-              (click)="approveRenter(renter)"
-            >
-              Approve Renter
-            </button>
-
-            <button
-              type="button"
-              class="request-docs-btn"
-              [disabled]="renter.approvalStatus === 'Approved'"
-              (click)="startRequestMoreDocuments(renter)"
-            >
-              Request More Documents
-            </button>
-
-            <button
-              type="button"
-              class="reject-btn"
-              [disabled]="renter.approvalStatus === 'Rejected'"
-              (click)="startRejectRenter(renter)"
-            >
-              Reject Renter
-            </button>
-          </div>
+          </article>
         </section>
-      </div>
+
+        <nav class="tab-nav">
+          <button type="button" [class.active]="activeTab === 'documents'" (click)="selectTab('documents')">📄 Documents</button>
+          <button type="button" [class.active]="activeTab === 'booking-history'" (click)="selectTab('booking-history')">📅 Booking History</button>
+          <button type="button" [class.active]="activeTab === 'ratings'" (click)="selectTab('ratings')">⭐ Ratings &amp; Reviews</button>
+          <button type="button" [class.active]="activeTab === 'driving-history'" (click)="selectTab('driving-history')">🚘 Driving History <span class="soon-pill">Soon</span></button>
+          <button type="button" [class.active]="activeTab === 'notes'" (click)="selectTab('notes')">📝 Notes &amp; Activity</button>
+        </nav>
+
+        <div class="detail-layout" [ngSwitch]="activeTab">
+          <ng-container *ngSwitchCase="'documents'">
+            <section class="main-column card-shell">
+              <div class="section-title-row">
+                <div>
+                  <h3>Renter Documents</h3>
+                  <p>Review renter submitted documents and verification history.</p>
+                </div>
+                <small>{{ record.documents.length }} requirement group(s)</small>
+              </div>
+
+              <div class="document-group-card" *ngFor="let doc of record.documents">
+                <div class="document-group-head">
+                  <div class="document-meta">
+                    <div class="doc-icon">{{ doc.icon }}</div>
+                    <div>
+                      <h4>{{ doc.title }}</h4>
+                      <p>{{ doc.description }}</p>
+                      <div class="tags">
+                        <span *ngFor="let type of doc.acceptedTypes">{{ type }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="doc-top-actions">
+                    <span class="mini-status">{{ doc.status }}</span>
+                    <button type="button" (click)="openDocumentViewer(doc); $event.stopPropagation()">View Document</button>
+                    <button type="button" class="dark" (click)="openDocumentViewer(doc); $event.stopPropagation()">View Full History</button>
+                  </div>
+                </div>
+
+                <div class="document-content-grid">
+                  <div class="latest-upload-box">
+                    <div class="preview-thumb">{{ doc.latestThumbnail }}</div>
+                    <div>
+                      <small>Latest Upload</small>
+                      <strong>{{ doc.latestFileName }}</strong>
+                      <span>{{ doc.latestUploadedAt }}</span>
+                    </div>
+                  </div>
+
+                  <div class="history-table-wrap">
+                    <table class="history-table">
+                      <thead>
+                        <tr>
+                          <th>Thumbnail</th>
+                          <th>Date Time</th>
+                          <th>Status</th>
+                          <th>User</th>
+                          <th>Remarks</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr
+                          class="history-row"
+                          *ngFor="let item of doc.history"
+                          (click)="openDocumentViewer(doc, item)"
+                        >
+                          <td>{{ item.thumbnail }}</td>
+                          <td>{{ item.dateTime }}</td>
+                          <td>
+                            <span class="table-status" [ngClass]="{
+                              'verified': item.status === 'Verified',
+                              'rejected': item.status === 'Rejected',
+                              'uploaded': item.status === 'Uploaded'
+                            }">{{ item.status }}</span>
+                          </td>
+                          <td>{{ item.user }}</td>
+                          <td>{{ item.remarks }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <aside class="side-column">
+              <section class="side-card">
+                <div class="section-title-row compact">
+                  <div>
+                    <h3>Booking History</h3>
+                    <p>View renter's past bookings and rental activities.</p>
+                  </div>
+                  <small>Total Bookings: {{ record.bookingHistory.length }}</small>
+                </div>
+
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Booking No</th>
+                      <th>Vehicle</th>
+                      <th>Rental Dates</th>
+                      <th>Rental Form</th>
+                      <th>Status</th>
+                      <th>Fee Status</th>
+                      <th>Lessor</th>
+                      <th>Remarks</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let item of record.bookingHistory | slice:0:3">
+                      <td>{{ item.bookingNo }}</td>
+                      <td>{{ item.vehicle }}</td>
+                      <td>{{ item.rentalDates }}</td>
+                      <td>{{ item.rentalForm }}</td>
+                      <td><span class="table-status verified">{{ item.status }}</span></td>
+                      <td><span class="table-status verified">{{ item.feeStatus }}</span></td>
+                      <td>{{ item.lessor }}</td>
+                      <td>{{ item.remarks }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section class="side-card">
+                <div class="section-title-row compact">
+                  <div>
+                    <h3>Ratings &amp; Reviews</h3>
+                    <p>Ratings and feedback from previous lessors.</p>
+                  </div>
+                </div>
+
+                <div class="ratings-summary-row">
+                  <div class="rating-score-box highlight">
+                    <span>Average Rating</span>
+                    <strong>{{ record.averageRating }} / 5</strong>
+                    <small>Based on {{ record.reviewCount }} reviews</small>
+                  </div>
+                  <div class="rating-score-box"><span>Cleanliness</span><strong>{{ averageRatingBreakdown.cleanliness }}</strong></div>
+                  <div class="rating-score-box"><span>Communication</span><strong>{{ averageRatingBreakdown.communication }}</strong></div>
+                  <div class="rating-score-box"><span>Payment Reliability</span><strong>{{ averageRatingBreakdown.paymentReliability }}</strong></div>
+                  <div class="rating-score-box"><span>Vehicle Care</span><strong>{{ averageRatingBreakdown.vehicleCare }}</strong></div>
+                  <div class="rating-score-box"><span>Punctuality</span><strong>{{ averageRatingBreakdown.punctuality }}</strong></div>
+                </div>
+
+                <table class="simple-table">
+                  <thead>
+                    <tr>
+                      <th>Lessor</th>
+                      <th>Rating</th>
+                      <th>Date</th>
+                      <th>Comment</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let review of record.reviews">
+                      <td>{{ review.lessor }}</td>
+                      <td class="gold-text">{{ getStars(review.rating) }}</td>
+                      <td>{{ review.date }}</td>
+                      <td>{{ review.comment }}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </section>
+
+              <section class="side-card soon-card">
+                <div class="section-title-row compact">
+                  <div>
+                    <h3>Driving History</h3>
+                    <p>Soon - GPS logs, driving behavior, and trip recordings (if tracking enabled).</p>
+                  </div>
+                  <span class="soon-pill">Soon</span>
+                </div>
+
+                <div class="driving-grid">
+                  <div><span>Driving Score</span><strong>Soon</strong></div>
+                  <div><span>Total Trips Tracked</span><strong>Soon</strong></div>
+                  <div><span>Sudden Brakes</span><strong>Soon</strong></div>
+                  <div><span>Sudden Turns</span><strong>Soon</strong></div>
+                  <div><span>Overspeeding Events</span><strong>Soon</strong></div>
+                  <div><span>Night Driving</span><strong>Soon</strong></div>
+                </div>
+
+                <div class="notice-box">
+                  Driving history will be available once GPS tracking and trip recording are enabled and renter has agreed to tracking during the rental.
+                </div>
+              </section>
+
+              <section class="side-card">
+                <div class="section-title-row compact">
+                  <div>
+                    <h3>Notes &amp; Activity</h3>
+                    <p>Notes, comments, actions, and logs.</p>
+                  </div>
+                  <small>{{ record.notes.length }} note(s)</small>
+                </div>
+
+                <div class="note-card" *ngFor="let note of record.notes" [ngClass]="{
+                  'renter': note.source === 'Renter',
+                  'system': note.source === 'System',
+                  'lessor': note.source === 'Lessor'
+                }">
+                  <div class="note-badge">{{ note.source }}</div>
+                  <div class="note-body">
+                    <strong>{{ note.createdBy }}</strong>
+                    <p>{{ note.message }}</p>
+                  </div>
+                  <span>{{ note.createdAt }}</span>
+                </div>
+              </section>
+            </aside>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'booking-history'">
+            <section class="full-card">
+              <div class="section-title-row">
+                <div>
+                  <h3>Booking History</h3>
+                  <p>View renter's booking records, reservation status, and remarks.</p>
+                </div>
+                <small>Total Bookings: {{ record.bookingHistory.length }}</small>
+              </div>
+
+              <table class="simple-table wide-table">
+                <thead>
+                  <tr>
+                    <th>Booking No</th>
+                    <th>Vehicle</th>
+                    <th>Rental Dates</th>
+                    <th>Rental Form</th>
+                    <th>Status</th>
+                    <th>Fee Status</th>
+                    <th>Lessor</th>
+                    <th>Remarks</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let item of record.bookingHistory">
+                    <td>{{ item.bookingNo }}</td>
+                    <td>{{ item.vehicle }}</td>
+                    <td>{{ item.rentalDates }}</td>
+                    <td>{{ item.rentalForm }}</td>
+                    <td><span class="table-status verified">{{ item.status }}</span></td>
+                    <td><span class="table-status verified">{{ item.feeStatus }}</span></td>
+                    <td>{{ item.lessor }}</td>
+                    <td>{{ item.remarks }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'ratings'">
+            <section class="full-card">
+              <div class="section-title-row">
+                <div>
+                  <h3>Ratings &amp; Reviews</h3>
+                  <p>Feedback from previous lessors to help with approval decisions.</p>
+                </div>
+              </div>
+
+              <div class="ratings-summary-row large-gap">
+                <div class="rating-score-box highlight">
+                  <span>Average Rating</span>
+                  <strong>{{ record.averageRating }} / 5</strong>
+                  <small>Based on {{ record.reviewCount }} reviews</small>
+                </div>
+                <div class="rating-score-box"><span>Cleanliness</span><strong>{{ averageRatingBreakdown.cleanliness }}</strong></div>
+                <div class="rating-score-box"><span>Communication</span><strong>{{ averageRatingBreakdown.communication }}</strong></div>
+                <div class="rating-score-box"><span>Payment Reliability</span><strong>{{ averageRatingBreakdown.paymentReliability }}</strong></div>
+                <div class="rating-score-box"><span>Vehicle Care</span><strong>{{ averageRatingBreakdown.vehicleCare }}</strong></div>
+                <div class="rating-score-box"><span>Punctuality</span><strong>{{ averageRatingBreakdown.punctuality }}</strong></div>
+              </div>
+
+              <table class="simple-table wide-table">
+                <thead>
+                  <tr>
+                    <th>Lessor</th>
+                    <th>Rating</th>
+                    <th>Date</th>
+                    <th>Vehicle</th>
+                    <th>Comment</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let review of record.reviews">
+                    <td>{{ review.lessor }}</td>
+                    <td class="gold-text">{{ getStars(review.rating) }}</td>
+                    <td>{{ review.date }}</td>
+                    <td>{{ review.vehicle }}</td>
+                    <td>{{ review.comment }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </section>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'driving-history'">
+            <section class="full-card">
+              <div class="section-title-row">
+                <div>
+                  <h3>Driving History</h3>
+                  <p>Soon - this section will show GPS logs, sudden turns, sudden brakes, driving speed, and video recordings.</p>
+                </div>
+                <span class="soon-pill">Soon</span>
+              </div>
+
+              <div class="driving-grid large-grid">
+                <div><span>Driving Score</span><strong>Soon</strong></div>
+                <div><span>Total Trips Tracked</span><strong>Soon</strong></div>
+                <div><span>Sudden Brakes</span><strong>Soon</strong></div>
+                <div><span>Sudden Turns</span><strong>Soon</strong></div>
+                <div><span>Overspeeding Events</span><strong>Soon</strong></div>
+                <div><span>Average Speed</span><strong>Soon</strong></div>
+                <div><span>Night Driving</span><strong>Soon</strong></div>
+                <div><span>Video Recordings</span><strong>Soon</strong></div>
+              </div>
+
+              <div class="notice-box big">
+                This section will become available once GPS tracking, trip logs, and driving recordings are enabled for the rental business and allowed by the renter.
+              </div>
+            </section>
+          </ng-container>
+
+          <ng-container *ngSwitchCase="'notes'">
+            <section class="full-card">
+              <div class="section-title-row">
+                <div>
+                  <h3>Notes &amp; Activity</h3>
+                  <p>System logs, renter comments, and lessor notes.</p>
+                </div>
+                <small>{{ record.notes.length }} note(s)</small>
+              </div>
+
+              <div class="note-card large" *ngFor="let note of record.notes" [ngClass]="{
+                'renter': note.source === 'Renter',
+                'system': note.source === 'System',
+                'lessor': note.source === 'Lessor'
+              }">
+                <div class="note-badge">{{ note.source }}</div>
+                <div class="note-body">
+                  <strong>{{ note.createdBy }}</strong>
+                  <p>{{ note.message }}</p>
+                </div>
+                <span>{{ note.createdAt }}</span>
+              </div>
+            </section>
+          </ng-container>
+        </div>
+      </section>
     </section>
+
 
     <section
       class="document-viewer-backdrop"
-      *ngIf="selectedDocument as document"
+      *ngIf="selectedDocumentGroup as group"
+      (click)="closeDocumentViewer()"
       (mouseup)="stopDocumentPan()"
       (mouseleave)="stopDocumentPan()"
     >
-      <div class="document-viewer-modal">
+      <div class="document-viewer-modal" (click)="$event.stopPropagation()">
         <header class="document-viewer-header">
           <div>
             <p>Document Viewer</p>
-            <h2>{{ document.documentLabel }}</h2>
+            <h2>{{ group.title }}</h2>
             <span>
-              {{ selectedDocumentGroup?.label }} · {{ document.documentTypeCode }} · {{ document.status }}
+              {{ selectedUploadHistory?.fileName }} · {{ selectedUploadHistory?.status }}
             </span>
           </div>
 
@@ -611,12 +569,13 @@
           <button type="button" (click)="zoomOutDocument()">−</button>
           <strong>{{ documentZoom | number:'1.1-1' }}x</strong>
           <button type="button" (click)="zoomInDocument()">+</button>
-          <button type="button" (click)="resetDocumentView()">Reset</button>
+          <button type="button" (click)="resetDocumentZoomAndPan()">Reset</button>
+          <span>Scroll to zoom. Drag to pan.</span>
         </div>
 
         <div
           class="document-viewer-stage"
-          [class.panning]="isPanning"
+          [class.panning]="isDocumentPanning"
           (mousedown)="startDocumentPan($event)"
           (mousemove)="moveDocumentPan($event)"
           (mouseup)="stopDocumentPan()"
@@ -627,60 +586,50 @@
             [style.transform]="'translate(' + documentPanX + 'px, ' + documentPanY + 'px) scale(' + documentZoom + ')'"
           >
             <img
-              *ngIf="document.fileUrl"
-              [src]="document.fileUrl"
-              [alt]="document.documentLabel"
+              *ngIf="selectedUploadHistory?.fileUrl"
+              [src]="selectedUploadHistory?.fileUrl"
+              [alt]="selectedUploadHistory?.fileName"
               draggable="false"
             />
 
-            <div class="document-viewer-placeholder" *ngIf="!document.fileUrl">
-              <div>📄</div>
-              <strong>{{ document.documentLabel }}</strong>
+            <div class="document-viewer-placeholder" *ngIf="!selectedUploadHistory?.fileUrl">
+              <div>{{ selectedUploadHistory?.thumbnail || group.icon }}</div>
+              <strong>{{ selectedUploadHistory?.fileName || group.title }}</strong>
               <span>Document preview placeholder</span>
-              <small>{{ document.documentTypeCode }}</small>
+              <small>{{ group.acceptedTypes.join(', ') }}</small>
             </div>
 
             <div class="viewer-watermark">
-              FamBridge Protected · {{ selectedRenter?.trustId }}
+              FamBridge Protected · {{ selectedRecord?.trustId }}
             </div>
           </div>
         </div>
 
-        <div class="document-viewer-info">
+        <div class="document-viewer-info" *ngIf="selectedUploadHistory as upload">
           <div>
             <span>Status</span>
             <strong
-              [class.good]="document.status === 'Verified'"
-              [class.warning]="document.status === 'Submitted'"
-              [class.danger]="document.status === 'Rejected'"
+              [class.good]="upload.status === 'Verified'"
+              [class.warning]="upload.status === 'Uploaded'"
+              [class.danger]="upload.status === 'Rejected'"
             >
-              {{ document.status }}
+              {{ upload.status }}
             </strong>
           </div>
 
           <div>
-            <span>Uploaded Date</span>
-            <strong>{{ document.uploadedAt || 'Not uploaded' }}</strong>
+            <span>Date Time</span>
+            <strong>{{ upload.dateTime }}</strong>
           </div>
 
           <div>
-            <span>Uploaded By</span>
-            <strong>{{ document.uploadedBy }}</strong>
-          </div>
-
-          <div>
-            <span>Reviewed By</span>
-            <strong>{{ document.reviewedBy || 'Not reviewed yet' }}</strong>
-          </div>
-
-          <div>
-            <span>Reviewed Date</span>
-            <strong>{{ document.reviewedAt || 'Not reviewed yet' }}</strong>
+            <span>User</span>
+            <strong>{{ upload.user }}</strong>
           </div>
 
           <div>
             <span>Remarks</span>
-            <strong>{{ document.remarks || 'No remarks.' }}</strong>
+            <strong>{{ upload.remarks || 'No remarks.' }}</strong>
           </div>
         </div>
 
@@ -688,7 +637,7 @@
           <button
             type="button"
             class="verify-document-btn"
-            [disabled]="document.status === 'Verified' || document.status === 'Missing'"
+            [disabled]="selectedUploadHistory?.status === 'Verified'"
             (click)="verifySelectedDocument()"
           >
             Verify
@@ -697,7 +646,7 @@
           <button
             type="button"
             class="reject-document-btn"
-            [disabled]="document.status === 'Missing'"
+            [disabled]="selectedUploadHistory?.status === 'Rejected'"
             (click)="startRejectSelectedDocument()"
           >
             Reject
@@ -707,17 +656,17 @@
         <div class="document-reject-box" *ngIf="showDocumentRejectBox">
           <p>Reject Document</p>
           <span>
-            Please provide a clear reason. Minimum 50 characters are required before proceeding.
+            Add a clear rejection remark. Minimum 50 characters are required before proceeding.
           </span>
 
           <textarea
-            [(ngModel)]="documentRejectReason"
+            [(ngModel)]="documentRejectRemarks"
             rows="4"
-            placeholder="Example: The uploaded document is blurry and the ID number/name cannot be clearly verified."
+            placeholder="Example: The uploaded document is blurry and the name or ID number cannot be clearly verified."
           ></textarea>
 
           <div class="reject-character-count" [class.valid]="canProceedDocumentReject">
-            {{ documentRejectCharacters }}/50 minimum characters
+            {{ documentRejectCharacterCount }}/50 minimum characters
           </div>
 
           <div class="document-reject-actions">
@@ -742,5 +691,12 @@
       </div>
     </section>
 
+    <ng-template #emptyStateTpl>
+      <section class="empty-state">
+        <div class="empty-icon">📭</div>
+        <h2>No renter approval records found</h2>
+        <p>Try changing your search or filter.</p>
+      </section>
+    </ng-template>
   </section>
 </app-lessor-sidebar>

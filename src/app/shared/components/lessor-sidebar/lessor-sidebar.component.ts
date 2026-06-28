@@ -22,12 +22,12 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
   @Input() businessName = 'Juan Dela Cruz Car Rental';
   @Input() ownerInitials = 'JD';
   @Input() notificationCount = 3;
+  @Input() activeRoute = '/dashboard';
+  @Input() currentPageTitle = 'Dashboard';
 
   @Output() routeSelected = new EventEmitter<string>();
 
   isSidebarOpen = false;
-  activeRoute = '/dashboard';
-  currentPageTitle = 'Dashboard';
 
   private routerSub?: Subscription;
 

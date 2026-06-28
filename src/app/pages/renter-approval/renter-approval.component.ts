@@ -3,713 +3,727 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LessorSidebarComponent } from '../../shared/components/lessor-sidebar/lessor-sidebar.component';
 
-type ApprovalStatus =
-  | 'Pending Approval'
-  | 'Approved'
-  | 'Rejected'
-  | 'Need More Documents';
+type ApprovalStatus = 'Pending Approval' | 'Approved' | 'Need More Documents' | 'Rejected';
 
-type DocumentStatus =
-  | 'Submitted'
-  | 'Verified'
-  | 'Rejected'
-  | 'Missing';
-
+type HistoryStatus = 'Uploaded' | 'Verified' | 'Rejected';
 type NoteSource = 'Renter' | 'System' | 'Lessor';
 
-type RentalReferenceStatus = 'Provided' | 'Verified' | 'Needs Review';
+type DetailTab = 'documents' | 'booking-history' | 'ratings' | 'driving-history' | 'notes';
 
-type RentalReferencePlatform = 'Facebook' | 'Instagram' | 'TikTok' | 'Manual';
-
-interface RenterDocumentUpload {
+interface UploadHistoryItem {
   id: number;
-  documentTypeId: number;
-  documentTypeCode: string;
-  documentLabel: string;
-  status: DocumentStatus;
-  uploadedAt?: string;
-  uploadedBy: string;
+  thumbnail: string;
   fileUrl?: string;
-  thumbnailUrl?: string;
-  remarks?: string;
-  reviewedBy?: string;
-  reviewedAt?: string;
+  fileName: string;
+  dateTime: string;
+  status: HistoryStatus;
+  user: string;
+  remarks: string;
 }
 
-interface DocumentRequirementGroup {
-  requirementId: number;
-  requirementCode: string;
-  label: string;
-  description: string;
+interface DocumentGroup {
+  id: number;
+  title: string;
   icon: string;
-  acceptedDocumentTypeCodes: string[];
-  uploads: RenterDocumentUpload[];
-  isExpanded?: boolean;
+  description: string;
+  acceptedTypes: string[];
+  status: 'Submitted' | 'Verified' | 'Needs Review' | 'Rejected';
+  latestFileName: string;
+  latestUploadedAt: string;
+  latestRemarks: string;
+  latestThumbnail: string;
+  history: UploadHistoryItem[];
 }
 
-interface RenterNote {
+interface BookingHistoryItem {
+  bookingNo: string;
+  vehicle: string;
+  rentalDates: string;
+  rentalForm: string;
+  status: 'Completed' | 'Cancelled' | 'Rejected';
+  feeStatus: 'Paid' | 'Refunded' | 'N/A';
+  lessor: string;
+  remarks: string;
+}
+
+interface ReviewItem {
+  lessor: string;
+  rating: number;
+  date: string;
+  vehicle: string;
+  comment: string;
+}
+
+interface ActivityNote {
   source: NoteSource;
   createdBy: string;
   createdAt: string;
   message: string;
 }
 
-interface RentalReference {
-  companyName: string;
-  platform: RentalReferencePlatform;
-  url: string;
-  status: RentalReferenceStatus;
-}
-
-interface RequestDocumentOption {
-  requirementId: number;
-  requirementCode: string;
-  label: string;
-  description: string;
-  icon: string;
-  acceptedDocumentTypeCodes: string[];
-}
-
 interface RenterApprovalRecord {
   id: number;
-  trustId: string;
   renterName: string;
+  trustId: string;
   email: string;
   mobile: string;
   trustScore: number;
+  uploadedDocuments: number;
+  verifiedDocuments: number;
+  requirementGroups: number;
+  completedBookings: number;
+  previousReferences: number;
+  averageRating: number;
+  reviewCount: number;
   approvalStatus: ApprovalStatus;
   submittedDate: string;
-  approvedDate?: string;
-  approvedBy?: string;
-  rejectedDate?: string;
-  rejectedBy?: string;
-  requestedMoreDocsDate?: string;
-  requestedMoreDocsBy?: string;
-  successfulRentals: number;
-  previousRentalCount: number;
-  documentGroups: DocumentRequirementGroup[];
-  references: RentalReference[];
-  notes: RenterNote[];
+  documents: DocumentGroup[];
+  bookingHistory: BookingHistoryItem[];
+  reviews: ReviewItem[];
+  notes: ActivityNote[];
 }
 
 @Component({
   selector: 'app-renter-approval',
   standalone: true,
-  imports: [
-    CommonModule,
-    FormsModule,
-    LessorSidebarComponent
-  ],
+  imports: [CommonModule, FormsModule, LessorSidebarComponent],
   templateUrl: './renter-approval.component.html',
   styleUrls: ['./renter-approval.component.scss']
 })
 export class RenterApprovalComponent {
   searchText = '';
   selectedStatus = 'All';
+  activeTab: DetailTab = 'documents';
 
-  selectedRenter: RenterApprovalRecord | null = null;
+  approvalStatuses = ['All', 'Pending Approval', 'Approved', 'Need More Documents', 'Rejected'];
 
-  showRejectBox = false;
-  showRequestDocsBox = false;
-
-  rejectReason = '';
-  requestDocsReason = '';
-
-  selectedRequestDocuments: RequestDocumentOption[] = [];
-
-  selectedDocumentGroup: DocumentRequirementGroup | null = null;
-  selectedDocument: RenterDocumentUpload | null = null;
-  documentZoom = 1;
-  documentPanX = 0;
-  documentPanY = 0;
-  isPanning = false;
-  panStartX = 0;
-  panStartY = 0;
-
-  showDocumentRejectBox = false;
-  documentRejectReason = '';
-
-  approvalStatuses = [
-    'All',
-    'Pending Approval',
-    'Approved',
-    'Rejected',
-    'Need More Documents'
-  ];
-
-  requestDocumentOptions: RequestDocumentOption[] = [
-    {
-      requirementId: 1,
-      requirementCode: 'DRIVER_LICENSE',
-      label: 'Driver License',
-      description: 'Valid driver license. Multiple uploads are allowed if previous copy is blurry or rejected.',
-      icon: '🚗',
-      acceptedDocumentTypeCodes: ['DRIVER_LICENSE']
-    },
-    {
-      requirementId: 2,
-      requirementCode: 'GOVERNMENT_ID_GROUP',
-      label: 'Any Government ID',
-      description: 'SSS, GSIS, UMID, National ID, PRC, Passport, PhilHealth, Voter ID, or Postal ID.',
-      icon: '🪪',
-      acceptedDocumentTypeCodes: [
-        'SSS_ID',
-        'GSIS_ID',
-        'UMID_ID',
-        'NATIONAL_ID',
-        'PRC_ID',
-        'PASSPORT',
-        'PHILHEALTH_ID',
-        'VOTER_ID',
-        'POSTAL_ID'
-      ]
-    },
-    {
-      requirementId: 3,
-      requirementCode: 'PROOF_OF_ADDRESS',
-      label: 'Proof of Address',
-      description: 'Utility bill, billing statement, barangay certificate, or bank statement.',
-      icon: '🏠',
-      acceptedDocumentTypeCodes: [
-        'UTILITY_BILL',
-        'BILLING_STATEMENT',
-        'BARANGAY_CERTIFICATE',
-        'BANK_STATEMENT'
-      ]
-    },
-    {
-      requirementId: 4,
-      requirementCode: 'SELFIE_VERIFICATION',
-      label: 'Selfie Verification',
-      description: 'Selfie photo used to match submitted IDs and renter profile.',
-      icon: '🤳',
-      acceptedDocumentTypeCodes: ['SELFIE_VERIFICATION']
-    },
-    {
-      requirementId: 5,
-      requirementCode: 'RENTAL_REFERENCE',
-      label: 'Rental Reference',
-      description: 'Previous rental company record or reference proof.',
-      icon: '📌',
-      acceptedDocumentTypeCodes: ['RENTAL_REFERENCE']
-    }
-  ];
-
-  renters: RenterApprovalRecord[] = [
+  records: RenterApprovalRecord[] = [
     {
       id: 1,
-      trustId: 'TR-A92X7KQ4',
       renterName: 'Juan Dela Cruz',
+      trustId: 'TR-A92X7KQ4',
       email: 'juan.delacruz@email.com',
       mobile: '+63 917 123 4567',
       trustScore: 82,
+      uploadedDocuments: 15,
+      verifiedDocuments: 9,
+      requirementGroups: 4,
+      completedBookings: 12,
+      previousReferences: 3,
+      averageRating: 4.7,
+      reviewCount: 8,
       approvalStatus: 'Pending Approval',
       submittedDate: 'Jul 18, 2026 08:42 AM',
-      successfulRentals: 12,
-      previousRentalCount: 3,
-      documentGroups: [
+      documents: [
         {
-          requirementId: 1,
-          requirementCode: 'DRIVER_LICENSE',
-          label: 'Driver License',
-          description: 'Required valid driver license.',
+          id: 1,
+          title: 'Driver License',
           icon: '🚗',
-          acceptedDocumentTypeCodes: ['DRIVER_LICENSE'],
-          uploads: [
-            {
-              id: 101,
-              documentTypeId: 1,
-              documentTypeCode: 'DRIVER_LICENSE',
-              documentLabel: 'Driver License - First Upload',
-              status: 'Rejected',
-              uploadedAt: 'Jul 18, 2026 08:30 AM',
-              uploadedBy: 'Juan Dela Cruz',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Image was blurry. License number was not readable.',
-              reviewedBy: 'Admin User',
-              reviewedAt: 'Jul 18, 2026 09:05 AM'
-            },
-            {
-              id: 102,
-              documentTypeId: 1,
-              documentTypeCode: 'DRIVER_LICENSE',
-              documentLabel: 'Driver License - Re-upload',
-              status: 'Submitted',
-              uploadedAt: 'Jul 18, 2026 09:20 AM',
-              uploadedBy: 'Juan Dela Cruz',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Clearer re-upload for manual review.'
-            }
+          description: 'Required valid driver license.',
+          acceptedTypes: ['DRIVER_LICENSE'],
+          status: 'Submitted',
+          latestFileName: 'Driver License - Rev 3.jpg',
+          latestUploadedAt: 'Jul 10, 2026 09:20 AM',
+          latestRemarks: 'Clear and complete.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 11, thumbnail: '🪪', fileName: 'Driver License - Rev 3.jpg', dateTime: 'Jul 10, 2026 09:20 AM', status: 'Verified', user: 'Juan Dela Cruz', remarks: 'Clear and complete.' },
+            { id: 12, thumbnail: '🪪', fileName: 'Driver License - Rev 2.jpg', dateTime: 'Jul 10, 2026 08:15 AM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Blurry photo.' },
+            { id: 13, thumbnail: '🪪', fileName: 'Driver License.jpg', dateTime: 'Jul 7, 2026 02:40 PM', status: 'Uploaded', user: 'Juan Dela Cruz', remarks: 'Initial upload.' }
           ]
         },
         {
-          requirementId: 2,
-          requirementCode: 'GOVERNMENT_ID_GROUP',
-          label: 'Any Government ID',
-          description: 'Accepts SSS, GSIS, UMID, National ID, PRC, Passport, PhilHealth, Voter ID, or Postal ID.',
+          id: 2,
+          title: 'Any Government ID',
           icon: '🪪',
-          acceptedDocumentTypeCodes: [
-            'SSS_ID',
-            'GSIS_ID',
-            'UMID_ID',
-            'NATIONAL_ID',
-            'PRC_ID',
-            'PASSPORT',
-            'PHILHEALTH_ID',
-            'VOTER_ID',
-            'POSTAL_ID'
-          ],
-          uploads: [
-            {
-              id: 201,
-              documentTypeId: 2,
-              documentTypeCode: 'NATIONAL_ID',
-              documentLabel: 'National ID',
-              status: 'Submitted',
-              uploadedAt: 'Jul 18, 2026 08:31 AM',
-              uploadedBy: 'Juan Dela Cruz',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Needs manual review.'
-            }
+          description: 'Accepted: SSS, GSIS, UMID, National ID, PRC.',
+          acceptedTypes: ['SSS_ID', 'GSIS_ID', 'UMID_ID', 'NATIONAL_ID', 'PRC_ID', 'PASSPORT', 'PHILHEALTH_ID', 'VOTER_ID', 'POSTAL_ID'],
+          status: 'Submitted',
+          latestFileName: 'National ID.jpg',
+          latestUploadedAt: 'Jul 10, 2026 08:31 AM',
+          latestRemarks: 'Valid and readable.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 21, thumbnail: '🪪', fileName: 'National ID.jpg', dateTime: 'Jul 10, 2026 08:31 AM', status: 'Verified', user: 'Juan Dela Cruz', remarks: 'Valid and readable.' },
+            { id: 22, thumbnail: '🪪', fileName: 'UMID.jpg', dateTime: 'Jul 10, 2026 07:40 AM', status: 'Uploaded', user: 'Juan Dela Cruz', remarks: 'Resubmitted clearer.' },
+            { id: 23, thumbnail: '🪪', fileName: 'PRC.jpg', dateTime: 'Jul 7, 2026 11:22 AM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Expired document.' }
           ]
         },
         {
-          requirementId: 3,
-          requirementCode: 'PROOF_OF_ADDRESS',
-          label: 'Proof of Address',
-          description: 'Utility bill, billing statement, barangay certificate, or bank statement.',
+          id: 3,
+          title: 'Proof of Address',
           icon: '🏠',
-          acceptedDocumentTypeCodes: [
-            'UTILITY_BILL',
-            'BILLING_STATEMENT',
-            'BARANGAY_CERTIFICATE',
-            'BANK_STATEMENT'
-          ],
-          uploads: [
-            {
-              id: 301,
-              documentTypeId: 3,
-              documentTypeCode: 'UTILITY_BILL',
-              documentLabel: 'Utility Bill',
-              status: 'Submitted',
-              uploadedAt: 'Jul 18, 2026 08:33 AM',
-              uploadedBy: 'Juan Dela Cruz',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Utility bill uploaded.'
-            }
+          description: 'Utility bill, bank statement, barangay certificate, or rent agreement.',
+          acceptedTypes: ['UTILITY_BILL', 'BANK_STATEMENT', 'BARANGAY_CERTIFICATE', 'RENT_AGREEMENT'],
+          status: 'Submitted',
+          latestFileName: 'Utility Bill.jpg',
+          latestUploadedAt: 'Jul 10, 2026 08:15 AM',
+          latestRemarks: 'Latest utility bill.',
+          latestThumbnail: '📄',
+          history: [
+            { id: 31, thumbnail: '📄', fileName: 'Utility Bill.jpg', dateTime: 'Jul 10, 2026 08:15 AM', status: 'Verified', user: 'Juan Dela Cruz', remarks: 'Latest utility bill.' },
+            { id: 32, thumbnail: '📄', fileName: 'Rent Agreement.pdf', dateTime: 'Jul 7, 2026 10:05 AM', status: 'Uploaded', user: 'Juan Dela Cruz', remarks: 'Initial upload.' }
           ]
         },
         {
-          requirementId: 4,
-          requirementCode: 'SELFIE_VERIFICATION',
-          label: 'Selfie Verification',
+          id: 4,
+          title: 'Selfie Verification',
+          icon: '📷',
           description: 'Selfie photo used to match submitted documents.',
-          icon: '🤳',
-          acceptedDocumentTypeCodes: ['SELFIE_VERIFICATION'],
-          uploads: [
-            {
-              id: 401,
-              documentTypeId: 4,
-              documentTypeCode: 'SELFIE_VERIFICATION',
-              documentLabel: 'Selfie Verification',
-              status: 'Submitted',
-              uploadedAt: 'Jul 18, 2026 08:35 AM',
-              uploadedBy: 'Juan Dela Cruz',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Face is visible.'
-            }
+          acceptedTypes: ['SELFIE_VERIFICATION'],
+          status: 'Submitted',
+          latestFileName: 'Selfie Verification.jpg',
+          latestUploadedAt: 'Jul 10, 2026 08:31 AM',
+          latestRemarks: 'Face is visible.',
+          latestThumbnail: '🙂',
+          history: [
+            { id: 41, thumbnail: '🙂', fileName: 'Selfie Verification.jpg', dateTime: 'Jul 10, 2026 08:31 AM', status: 'Verified', user: 'Juan Dela Cruz', remarks: 'Face is visible.' },
+            { id: 42, thumbnail: '🙂', fileName: 'Selfie Verification - old.jpg', dateTime: 'Jul 7, 2026 09:10 AM', status: 'Uploaded', user: 'Lessor Admin', remarks: 'Face is visible.' }
           ]
         }
       ],
-      references: [
-        {
-          companyName: 'Palawan Wheels Rental',
-          platform: 'Facebook',
-          url: 'https://facebook.com/sample-rental',
-          status: 'Provided'
-        },
-        {
-          companyName: 'Island Ride PH',
-          platform: 'Instagram',
-          url: 'https://instagram.com/sample-rental',
-          status: 'Needs Review'
-        }
+      bookingHistory: [
+        { bookingNo: 'BK-2025-00012', vehicle: 'Toyota Vios', rentalDates: 'Jun 01 - Jun 03, 2025', rentalForm: 'Self Drive', status: 'Completed', feeStatus: 'Paid', lessor: 'Juan Dela Cruz Car Rental', remarks: 'Thanks!' },
+        { bookingNo: 'BK-2025-00011', vehicle: 'Mitsubishi Xpander', rentalDates: 'May 10 - May 12, 2025', rentalForm: 'With Driver', status: 'Completed', feeStatus: 'Paid', lessor: 'West Drive', remarks: 'Recommended driver.' },
+        { bookingNo: 'BK-2025-00010', vehicle: 'Toyota Innova', rentalDates: 'May 10 - May 12, 2025', rentalForm: 'Self Drive', status: 'Completed', feeStatus: 'Paid', lessor: 'Palawan Wheels Rental', remarks: 'Good renter.' }
+      ],
+      reviews: [
+        { lessor: 'Juan Dela Cruz Car Rental', rating: 5, date: 'Jun 03, 2025', vehicle: 'Toyota Vios', comment: 'Returned the vehicle on time. Very responsible renter.' },
+        { lessor: 'Island Ride PH', rating: 4, date: 'May 22, 2025', vehicle: 'Mitsubishi Xpander', comment: 'Good communication and easy to coordinate with.' },
+        { lessor: 'Palawan Wheels Rental', rating: 5, date: 'May 12, 2025', vehicle: 'Toyota Innova', comment: 'Vehicle returned clean. Recommended.' }
       ],
       notes: [
-        {
-          source: 'Renter',
-          createdBy: 'Juan Dela Cruz',
-          createdAt: 'Jul 18, 2026 08:42 AM',
-          message: 'I uploaded my documents and previous rental references.'
-        },
-        {
-          source: 'System',
-          createdBy: 'FamBridge API',
-          createdAt: 'Jul 18, 2026 08:43 AM',
-          message: 'Renter approval request was submitted for lessor review.'
-        }
+        { source: 'Renter', createdBy: 'Juan Dela Cruz', createdAt: 'Jul 10, 2026 08:41 AM', message: 'Uploaded new documents and previous rental references.' },
+        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 10, 2026 08:41 AM', message: 'Renter approval request was submitted for lessor review.' }
       ]
     },
     {
       id: 2,
-      trustId: 'TR-K81P2LM9',
       renterName: 'Maria Santos',
+      trustId: 'TR-K81P2LM9',
       email: 'maria.santos@email.com',
       mobile: '+63 918 555 2211',
       trustScore: 91,
+      uploadedDocuments: 11,
+      verifiedDocuments: 10,
+      requirementGroups: 4,
+      completedBookings: 18,
+      previousReferences: 5,
+      averageRating: 4.9,
+      reviewCount: 12,
       approvalStatus: 'Approved',
       submittedDate: 'Jul 16, 2026 10:12 AM',
-      approvedDate: 'Jul 16, 2026 11:05 AM',
-      approvedBy: 'Admin User',
-      successfulRentals: 18,
-      previousRentalCount: 5,
-      documentGroups: [
+      documents: [
         {
-          requirementId: 1,
-          requirementCode: 'DRIVER_LICENSE',
-          label: 'Driver License',
-          description: 'Required valid driver license.',
+          id: 1,
+          title: 'Driver License',
           icon: '🚗',
-          acceptedDocumentTypeCodes: ['DRIVER_LICENSE'],
-          uploads: [
-            {
-              id: 501,
-              documentTypeId: 1,
-              documentTypeCode: 'DRIVER_LICENSE',
-              documentLabel: 'Driver License',
-              status: 'Verified',
-              uploadedAt: 'Jul 16, 2026 10:00 AM',
-              uploadedBy: 'Maria Santos',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Verified by lessor.',
-              reviewedBy: 'Admin User',
-              reviewedAt: 'Jul 16, 2026 10:30 AM'
-            }
+          description: 'Required valid driver license.',
+          acceptedTypes: ['DRIVER_LICENSE'],
+          status: 'Verified',
+          latestFileName: 'Driver License.jpg',
+          latestUploadedAt: 'Jul 16, 2026 10:00 AM',
+          latestRemarks: 'Valid and readable.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 101, thumbnail: '🪪', fileName: 'Driver License.jpg', dateTime: 'Jul 16, 2026 10:00 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Valid license. Clear image.' },
+            { id: 102, thumbnail: '🪪', fileName: 'Driver License Old.jpg', dateTime: 'Jul 15, 2026 04:20 PM', status: 'Uploaded', user: 'Maria Santos', remarks: 'Initial upload.' }
           ]
         },
         {
-          requirementId: 2,
-          requirementCode: 'GOVERNMENT_ID_GROUP',
-          label: 'Any Government ID',
-          description: 'Accepts SSS, GSIS, UMID, National ID, PRC, Passport, PhilHealth, Voter ID, or Postal ID.',
+          id: 2,
+          title: 'Any Government ID',
           icon: '🪪',
-          acceptedDocumentTypeCodes: [
-            'SSS_ID',
-            'GSIS_ID',
-            'UMID_ID',
-            'NATIONAL_ID',
-            'PRC_ID',
-            'PASSPORT',
-            'PHILHEALTH_ID',
-            'VOTER_ID',
-            'POSTAL_ID'
-          ],
-          uploads: [
-            {
-              id: 601,
-              documentTypeId: 2,
-              documentTypeCode: 'UMID_ID',
-              documentLabel: 'UMID ID',
-              status: 'Verified',
-              uploadedAt: 'Jul 16, 2026 10:01 AM',
-              uploadedBy: 'Maria Santos',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Verified by lessor.',
-              reviewedBy: 'Admin User',
-              reviewedAt: 'Jul 16, 2026 10:34 AM'
-            }
+          description: 'Accepted: SSS, GSIS, UMID, National ID, PRC.',
+          acceptedTypes: ['SSS_ID', 'GSIS_ID', 'UMID_ID', 'NATIONAL_ID', 'PRC_ID', 'PASSPORT', 'PHILHEALTH_ID', 'VOTER_ID', 'POSTAL_ID'],
+          status: 'Verified',
+          latestFileName: 'Passport.jpg',
+          latestUploadedAt: 'Jul 16, 2026 10:03 AM',
+          latestRemarks: 'Passport verified.',
+          latestThumbnail: '🛂',
+          history: [
+            { id: 201, thumbnail: '🛂', fileName: 'Passport.jpg', dateTime: 'Jul 16, 2026 10:03 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Passport is valid and readable.' },
+            { id: 202, thumbnail: '🪪', fileName: 'National ID.jpg', dateTime: 'Jul 15, 2026 05:10 PM', status: 'Uploaded', user: 'Maria Santos', remarks: 'Backup ID uploaded.' }
           ]
         },
         {
-          requirementId: 3,
-          requirementCode: 'PROOF_OF_ADDRESS',
-          label: 'Proof of Address',
-          description: 'Utility bill, billing statement, barangay certificate, or bank statement.',
+          id: 3,
+          title: 'Proof of Address',
           icon: '🏠',
-          acceptedDocumentTypeCodes: [
-            'UTILITY_BILL',
-            'BILLING_STATEMENT',
-            'BARANGAY_CERTIFICATE',
-            'BANK_STATEMENT'
-          ],
-          uploads: [
-            {
-              id: 701,
-              documentTypeId: 3,
-              documentTypeCode: 'BANK_STATEMENT',
-              documentLabel: 'Bank Statement',
-              status: 'Verified',
-              uploadedAt: 'Jul 16, 2026 10:04 AM',
-              uploadedBy: 'Maria Santos',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Verified by lessor.',
-              reviewedBy: 'Admin User',
-              reviewedAt: 'Jul 16, 2026 10:38 AM'
-            }
+          description: 'Utility bill, bank statement, barangay certificate, or rent agreement.',
+          acceptedTypes: ['UTILITY_BILL', 'BANK_STATEMENT', 'BARANGAY_CERTIFICATE', 'RENT_AGREEMENT'],
+          status: 'Verified',
+          latestFileName: 'Barangay Certificate.pdf',
+          latestUploadedAt: 'Jul 16, 2026 10:05 AM',
+          latestRemarks: 'Address matches renter profile.',
+          latestThumbnail: '📄',
+          history: [
+            { id: 301, thumbnail: '📄', fileName: 'Barangay Certificate.pdf', dateTime: 'Jul 16, 2026 10:05 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Address verified.' }
+          ]
+        },
+        {
+          id: 4,
+          title: 'Selfie Verification',
+          icon: '📷',
+          description: 'Selfie photo used to match submitted documents.',
+          acceptedTypes: ['SELFIE_VERIFICATION'],
+          status: 'Verified',
+          latestFileName: 'Selfie Verification.jpg',
+          latestUploadedAt: 'Jul 16, 2026 10:08 AM',
+          latestRemarks: 'Face matches submitted ID.',
+          latestThumbnail: '🙂',
+          history: [
+            { id: 401, thumbnail: '🙂', fileName: 'Selfie Verification.jpg', dateTime: 'Jul 16, 2026 10:08 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Face matched with passport photo.' }
           ]
         }
       ],
-      references: [
-        {
-          companyName: 'Cebu City Car Rentals',
-          platform: 'Facebook',
-          url: 'https://facebook.com/sample',
-          status: 'Verified'
-        }
+      bookingHistory: [
+        { bookingNo: 'BK-2026-00122', vehicle: 'Toyota Vios', rentalDates: 'Jul 01 - Jul 02, 2026', rentalForm: 'Self Drive', status: 'Completed', feeStatus: 'Paid', lessor: 'JD Car Rental', remarks: 'Returned on time.' },
+        { bookingNo: 'BK-2026-00108', vehicle: 'Honda City', rentalDates: 'Jun 14 - Jun 16, 2026', rentalForm: 'Self Drive', status: 'Completed', feeStatus: 'Paid', lessor: 'Cebu City Car Rentals', remarks: 'Clean return.' },
+        { bookingNo: 'BK-2026-00091', vehicle: 'Toyota Innova', rentalDates: 'May 20 - May 22, 2026', rentalForm: 'With Driver', status: 'Completed', feeStatus: 'Paid', lessor: 'Island Ride PH', remarks: 'Good coordination.' }
+      ],
+      reviews: [
+        { lessor: 'JD Car Rental', rating: 5, date: 'Jul 02, 2026', vehicle: 'Toyota Vios', comment: 'Excellent renter. Returned the vehicle on time.' },
+        { lessor: 'Cebu City Car Rentals', rating: 5, date: 'Jun 16, 2026', vehicle: 'Honda City', comment: 'Very responsive and responsible.' },
+        { lessor: 'Island Ride PH', rating: 5, date: 'May 22, 2026', vehicle: 'Toyota Innova', comment: 'Smooth transaction.' }
       ],
       notes: [
-        {
-          source: 'System',
-          createdBy: 'FamBridge API',
-          createdAt: 'Jul 16, 2026 10:12 AM',
-          message: 'Renter approval request was submitted.'
-        },
-        {
-          source: 'Lessor',
-          createdBy: 'Admin User',
-          createdAt: 'Jul 16, 2026 11:05 AM',
-          message: 'Renter approved. Documents and rental references look valid.'
-        }
+        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 16, 2026 10:12 AM', message: 'Renter approval request was submitted.' },
+        { source: 'Lessor', createdBy: 'Lessor Admin', createdAt: 'Jul 16, 2026 11:05 AM', message: 'Renter approved. Documents are valid and previous rental records are good.' }
       ]
     },
     {
       id: 3,
-      trustId: 'TR-M22RTY8',
       renterName: 'Mark Reyes',
+      trustId: 'TR-M22RTY8',
       email: 'mark.reyes@email.com',
       mobile: '+63 919 222 8844',
       trustScore: 58,
+      uploadedDocuments: 6,
+      verifiedDocuments: 2,
+      requirementGroups: 4,
+      completedBookings: 1,
+      previousReferences: 0,
+      averageRating: 3.8,
+      reviewCount: 1,
       approvalStatus: 'Need More Documents',
       submittedDate: 'Jul 20, 2026 03:20 PM',
-      requestedMoreDocsDate: 'Jul 20, 2026 04:15 PM',
-      requestedMoreDocsBy: 'Admin User',
-      successfulRentals: 1,
-      previousRentalCount: 0,
-      documentGroups: [
+      documents: [
         {
-          requirementId: 1,
-          requirementCode: 'DRIVER_LICENSE',
-          label: 'Driver License',
-          description: 'Required valid driver license.',
+          id: 1,
+          title: 'Driver License',
           icon: '🚗',
-          acceptedDocumentTypeCodes: ['DRIVER_LICENSE'],
-          uploads: [
-            {
-              id: 801,
-              documentTypeId: 1,
-              documentTypeCode: 'DRIVER_LICENSE',
-              documentLabel: 'Driver License',
-              status: 'Submitted',
-              uploadedAt: 'Jul 20, 2026 03:10 PM',
-              uploadedBy: 'Mark Reyes',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Image is slightly blurry.'
-            }
+          description: 'Required valid driver license.',
+          acceptedTypes: ['DRIVER_LICENSE'],
+          status: 'Needs Review',
+          latestFileName: 'Driver License - Retry.jpg',
+          latestUploadedAt: 'Jul 20, 2026 03:10 PM',
+          latestRemarks: 'Image is still slightly blurry.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 111, thumbnail: '🪪', fileName: 'Driver License - Retry.jpg', dateTime: 'Jul 20, 2026 03:10 PM', status: 'Uploaded', user: 'Mark Reyes', remarks: 'Resubmitted license.' },
+            { id: 112, thumbnail: '🪪', fileName: 'Driver License.jpg', dateTime: 'Jul 20, 2026 02:45 PM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Text is unreadable.' }
           ]
         },
         {
-          requirementId: 2,
-          requirementCode: 'GOVERNMENT_ID_GROUP',
-          label: 'Any Government ID',
-          description: 'Accepts SSS, GSIS, UMID, National ID, PRC, Passport, PhilHealth, Voter ID, or Postal ID.',
+          id: 2,
+          title: 'Any Government ID',
           icon: '🪪',
-          acceptedDocumentTypeCodes: [
-            'SSS_ID',
-            'GSIS_ID',
-            'UMID_ID',
-            'NATIONAL_ID',
-            'PRC_ID',
-            'PASSPORT',
-            'PHILHEALTH_ID',
-            'VOTER_ID',
-            'POSTAL_ID'
-          ],
-          uploads: []
+          description: 'Accepted: SSS, GSIS, UMID, National ID, PRC.',
+          acceptedTypes: ['SSS_ID', 'GSIS_ID', 'UMID_ID', 'NATIONAL_ID', 'PRC_ID', 'PASSPORT', 'PHILHEALTH_ID', 'VOTER_ID', 'POSTAL_ID'],
+          status: 'Needs Review',
+          latestFileName: 'UMID ID.jpg',
+          latestUploadedAt: 'Jul 20, 2026 03:12 PM',
+          latestRemarks: 'Needs manual review.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 211, thumbnail: '🪪', fileName: 'UMID ID.jpg', dateTime: 'Jul 20, 2026 03:12 PM', status: 'Uploaded', user: 'Mark Reyes', remarks: 'Uploaded UMID.' }
+          ]
         },
         {
-          requirementId: 3,
-          requirementCode: 'PROOF_OF_ADDRESS',
-          label: 'Proof of Address',
-          description: 'Utility bill, billing statement, barangay certificate, or bank statement.',
+          id: 3,
+          title: 'Proof of Address',
           icon: '🏠',
-          acceptedDocumentTypeCodes: [
-            'UTILITY_BILL',
-            'BILLING_STATEMENT',
-            'BARANGAY_CERTIFICATE',
-            'BANK_STATEMENT'
-          ],
-          uploads: []
+          description: 'Utility bill, bank statement, barangay certificate, or rent agreement.',
+          acceptedTypes: ['UTILITY_BILL', 'BANK_STATEMENT', 'BARANGAY_CERTIFICATE', 'RENT_AGREEMENT'],
+          status: 'Needs Review',
+          latestFileName: 'Bank Statement.pdf',
+          latestUploadedAt: 'Jul 20, 2026 03:15 PM',
+          latestRemarks: 'Address is partially visible.',
+          latestThumbnail: '📄',
+          history: [
+            { id: 311, thumbnail: '📄', fileName: 'Bank Statement.pdf', dateTime: 'Jul 20, 2026 03:15 PM', status: 'Uploaded', user: 'Mark Reyes', remarks: 'New proof of address uploaded.' }
+          ]
+        },
+        {
+          id: 4,
+          title: 'Selfie Verification',
+          icon: '📷',
+          description: 'Selfie photo used to match submitted documents.',
+          acceptedTypes: ['SELFIE_VERIFICATION'],
+          status: 'Verified',
+          latestFileName: 'Selfie.jpg',
+          latestUploadedAt: 'Jul 20, 2026 03:17 PM',
+          latestRemarks: 'Face is visible.',
+          latestThumbnail: '🙂',
+          history: [
+            { id: 411, thumbnail: '🙂', fileName: 'Selfie.jpg', dateTime: 'Jul 20, 2026 03:17 PM', status: 'Verified', user: 'Lessor Admin', remarks: 'Selfie is clear.' }
+          ]
         }
       ],
-      references: [],
+      bookingHistory: [
+        { bookingNo: 'BK-2026-00041', vehicle: 'Toyota Hiace', rentalDates: 'Apr 02 - Apr 04, 2026', rentalForm: 'With Driver', status: 'Completed', feeStatus: 'Paid', lessor: 'Palawan Wheels Rental', remarks: 'First rental completed.' }
+      ],
+      reviews: [
+        { lessor: 'Palawan Wheels Rental', rating: 4, date: 'Apr 04, 2026', vehicle: 'Toyota Hiace', comment: 'Okay renter, but document submission needs improvement.' }
+      ],
       notes: [
-        {
-          source: 'System',
-          createdBy: 'FamBridge API',
-          createdAt: 'Jul 20, 2026 03:20 PM',
-          message: 'Renter approval request was submitted with incomplete documents.'
-        },
-        {
-          source: 'Lessor',
-          createdBy: 'Admin User',
-          createdAt: 'Jul 20, 2026 04:15 PM',
-          message: 'More documents requested: Government ID and proof of address are missing.'
-        }
+        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 20, 2026 03:20 PM', message: 'Renter approval request was submitted with documents needing review.' },
+        { source: 'Lessor', createdBy: 'Lessor Admin', createdAt: 'Jul 20, 2026 04:15 PM', message: 'Requested clearer driver license and complete proof of address.' }
       ]
     },
     {
       id: 4,
-      trustId: 'TR-X70LPA2',
       renterName: 'Ana Lim',
+      trustId: 'TR-X70LPA2',
       email: 'ana.lim@email.com',
       mobile: '+63 916 777 3312',
       trustScore: 42,
+      uploadedDocuments: 4,
+      verifiedDocuments: 0,
+      requirementGroups: 4,
+      completedBookings: 0,
+      previousReferences: 0,
+      averageRating: 0,
+      reviewCount: 0,
       approvalStatus: 'Rejected',
       submittedDate: 'Jul 22, 2026 01:15 PM',
-      rejectedDate: 'Jul 22, 2026 02:10 PM',
-      rejectedBy: 'Admin User',
-      successfulRentals: 0,
-      previousRentalCount: 0,
-      documentGroups: [
+      documents: [
         {
-          requirementId: 1,
-          requirementCode: 'DRIVER_LICENSE',
-          label: 'Driver License',
-          description: 'Required valid driver license.',
+          id: 1,
+          title: 'Driver License',
           icon: '🚗',
-          acceptedDocumentTypeCodes: ['DRIVER_LICENSE'],
-          uploads: [
-            {
-              id: 901,
-              documentTypeId: 1,
-              documentTypeCode: 'DRIVER_LICENSE',
-              documentLabel: 'Driver License',
-              status: 'Rejected',
-              uploadedAt: 'Jul 22, 2026 01:10 PM',
-              uploadedBy: 'Ana Lim',
-              fileUrl: '',
-              thumbnailUrl: '',
-              remarks: 'Document does not match renter information.',
-              reviewedBy: 'Admin User',
-              reviewedAt: 'Jul 22, 2026 02:10 PM'
-            }
+          description: 'Required valid driver license.',
+          acceptedTypes: ['DRIVER_LICENSE'],
+          status: 'Needs Review',
+          latestFileName: 'Driver License.jpg',
+          latestUploadedAt: 'Jul 22, 2026 01:10 PM',
+          latestRemarks: 'Document does not match renter information.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 121, thumbnail: '🪪', fileName: 'Driver License.jpg', dateTime: 'Jul 22, 2026 01:10 PM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Name does not match renter profile.' }
+          ]
+        },
+        {
+          id: 2,
+          title: 'Any Government ID',
+          icon: '🪪',
+          description: 'Accepted: SSS, GSIS, UMID, National ID, PRC.',
+          acceptedTypes: ['SSS_ID', 'GSIS_ID', 'UMID_ID', 'NATIONAL_ID', 'PRC_ID', 'PASSPORT', 'PHILHEALTH_ID', 'VOTER_ID', 'POSTAL_ID'],
+          status: 'Needs Review',
+          latestFileName: 'Postal ID.jpg',
+          latestUploadedAt: 'Jul 22, 2026 01:11 PM',
+          latestRemarks: 'Document is expired.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 221, thumbnail: '🪪', fileName: 'Postal ID.jpg', dateTime: 'Jul 22, 2026 01:11 PM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Expired Postal ID.' }
+          ]
+        },
+        {
+          id: 3,
+          title: 'Proof of Address',
+          icon: '🏠',
+          description: 'Utility bill, bank statement, barangay certificate, or rent agreement.',
+          acceptedTypes: ['UTILITY_BILL', 'BANK_STATEMENT', 'BARANGAY_CERTIFICATE', 'RENT_AGREEMENT'],
+          status: 'Needs Review',
+          latestFileName: 'Proof of Address.jpg',
+          latestUploadedAt: 'Jul 22, 2026 01:12 PM',
+          latestRemarks: 'Address does not match profile.',
+          latestThumbnail: '📄',
+          history: [
+            { id: 321, thumbnail: '📄', fileName: 'Proof of Address.jpg', dateTime: 'Jul 22, 2026 01:12 PM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Address mismatch.' }
+          ]
+        },
+        {
+          id: 4,
+          title: 'Selfie Verification',
+          icon: '📷',
+          description: 'Selfie photo used to match submitted documents.',
+          acceptedTypes: ['SELFIE_VERIFICATION'],
+          status: 'Needs Review',
+          latestFileName: 'Selfie.jpg',
+          latestUploadedAt: 'Jul 22, 2026 01:13 PM',
+          latestRemarks: 'Face does not clearly match ID.',
+          latestThumbnail: '🙂',
+          history: [
+            { id: 421, thumbnail: '🙂', fileName: 'Selfie.jpg', dateTime: 'Jul 22, 2026 01:13 PM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Face mismatch concern.' }
           ]
         }
       ],
-      references: [],
+      bookingHistory: [],
+      reviews: [],
       notes: [
+        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 22, 2026 01:15 PM', message: 'Renter approval request was submitted.' },
+        { source: 'Lessor', createdBy: 'Lessor Admin', createdAt: 'Jul 22, 2026 02:10 PM', message: 'Renter rejected due to document mismatch and expired ID.' }
+      ]
+    },
+    {
+      id: 5,
+      renterName: 'Carlo Mendoza',
+      trustId: 'TR-C55MNQ1',
+      email: 'carlo.mendoza@email.com',
+      mobile: '+63 920 345 7789',
+      trustScore: 74,
+      uploadedDocuments: 9,
+      verifiedDocuments: 6,
+      requirementGroups: 4,
+      completedBookings: 6,
+      previousReferences: 2,
+      averageRating: 4.3,
+      reviewCount: 4,
+      approvalStatus: 'Pending Approval',
+      submittedDate: 'Jul 24, 2026 09:30 AM',
+      documents: [
         {
-          source: 'System',
-          createdBy: 'FamBridge API',
-          createdAt: 'Jul 22, 2026 01:15 PM',
-          message: 'Renter approval request was submitted.'
+          id: 1,
+          title: 'Driver License',
+          icon: '🚗',
+          description: 'Required valid driver license.',
+          acceptedTypes: ['DRIVER_LICENSE'],
+          status: 'Verified',
+          latestFileName: 'Driver License.jpg',
+          latestUploadedAt: 'Jul 24, 2026 09:10 AM',
+          latestRemarks: 'License verified.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 131, thumbnail: '🪪', fileName: 'Driver License.jpg', dateTime: 'Jul 24, 2026 09:10 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'License verified.' },
+            { id: 132, thumbnail: '🪪', fileName: 'Driver License blurred.jpg', dateTime: 'Jul 24, 2026 08:58 AM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Photo was too dark.' }
+          ]
         },
         {
-          source: 'Lessor',
-          createdBy: 'Admin User',
-          createdAt: 'Jul 22, 2026 02:10 PM',
-          message: 'Renter rejected: Submitted document does not match the renter profile.'
+          id: 2,
+          title: 'Any Government ID',
+          icon: '🪪',
+          description: 'Accepted: SSS, GSIS, UMID, National ID, PRC.',
+          acceptedTypes: ['SSS_ID', 'GSIS_ID', 'UMID_ID', 'NATIONAL_ID', 'PRC_ID', 'PASSPORT', 'PHILHEALTH_ID', 'VOTER_ID', 'POSTAL_ID'],
+          status: 'Verified',
+          latestFileName: 'SSS ID.jpg',
+          latestUploadedAt: 'Jul 24, 2026 09:12 AM',
+          latestRemarks: 'Readable SSS ID.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 231, thumbnail: '🪪', fileName: 'SSS ID.jpg', dateTime: 'Jul 24, 2026 09:12 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'SSS ID verified.' }
+          ]
+        },
+        {
+          id: 3,
+          title: 'Proof of Address',
+          icon: '🏠',
+          description: 'Utility bill, bank statement, barangay certificate, or rent agreement.',
+          acceptedTypes: ['UTILITY_BILL', 'BANK_STATEMENT', 'BARANGAY_CERTIFICATE', 'RENT_AGREEMENT'],
+          status: 'Needs Review',
+          latestFileName: 'Meralco Bill.jpg',
+          latestUploadedAt: 'Jul 24, 2026 09:14 AM',
+          latestRemarks: 'Needs manual checking.',
+          latestThumbnail: '📄',
+          history: [
+            { id: 331, thumbnail: '📄', fileName: 'Meralco Bill.jpg', dateTime: 'Jul 24, 2026 09:14 AM', status: 'Uploaded', user: 'Carlo Mendoza', remarks: 'Uploaded utility bill.' }
+          ]
+        },
+        {
+          id: 4,
+          title: 'Selfie Verification',
+          icon: '📷',
+          description: 'Selfie photo used to match submitted documents.',
+          acceptedTypes: ['SELFIE_VERIFICATION'],
+          status: 'Verified',
+          latestFileName: 'Selfie Verification.jpg',
+          latestUploadedAt: 'Jul 24, 2026 09:16 AM',
+          latestRemarks: 'Selfie is clear.',
+          latestThumbnail: '🙂',
+          history: [
+            { id: 431, thumbnail: '🙂', fileName: 'Selfie Verification.jpg', dateTime: 'Jul 24, 2026 09:16 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Selfie verified.' }
+          ]
         }
+      ],
+      bookingHistory: [
+        { bookingNo: 'BK-2026-00150', vehicle: 'Toyota Fortuner', rentalDates: 'Jul 05 - Jul 07, 2026', rentalForm: 'Self Drive', status: 'Completed', feeStatus: 'Paid', lessor: 'North Drive PH', remarks: 'Good renter.' },
+        { bookingNo: 'BK-2026-00112', vehicle: 'Mitsubishi Mirage', rentalDates: 'Jun 11 - Jun 12, 2026', rentalForm: 'Self Drive', status: 'Cancelled', feeStatus: 'Refunded', lessor: 'City Wheels', remarks: 'Cancelled early but informed ahead.' }
+      ],
+      reviews: [
+        { lessor: 'North Drive PH', rating: 4, date: 'Jul 07, 2026', vehicle: 'Toyota Fortuner', comment: 'Returned on time, minor interior cleaning needed.' },
+        { lessor: 'City Wheels', rating: 4, date: 'Jun 12, 2026', vehicle: 'Mitsubishi Mirage', comment: 'Good communication despite cancellation.' }
+      ],
+      notes: [
+        { source: 'Renter', createdBy: 'Carlo Mendoza', createdAt: 'Jul 24, 2026 09:30 AM', message: 'Submitted updated documents for approval.' },
+        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 24, 2026 09:31 AM', message: 'Renter approval request is pending lessor review.' }
+      ]
+    },
+    {
+      id: 6,
+      renterName: 'Rhea Gonzales',
+      trustId: 'TR-R88GZN7',
+      email: 'rhea.gonzales@email.com',
+      mobile: '+63 921 456 9900',
+      trustScore: 88,
+      uploadedDocuments: 13,
+      verifiedDocuments: 11,
+      requirementGroups: 4,
+      completedBookings: 9,
+      previousReferences: 4,
+      averageRating: 4.8,
+      reviewCount: 6,
+      approvalStatus: 'Pending Approval',
+      submittedDate: 'Jul 25, 2026 11:05 AM',
+      documents: [
+        {
+          id: 1,
+          title: 'Driver License',
+          icon: '🚗',
+          description: 'Required valid driver license.',
+          acceptedTypes: ['DRIVER_LICENSE'],
+          status: 'Verified',
+          latestFileName: 'Driver License 2026.jpg',
+          latestUploadedAt: 'Jul 25, 2026 10:40 AM',
+          latestRemarks: 'Valid non-professional license.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 141, thumbnail: '🪪', fileName: 'Driver License 2026.jpg', dateTime: 'Jul 25, 2026 10:40 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Valid non-professional license.' }
+          ]
+        },
+        {
+          id: 2,
+          title: 'Any Government ID',
+          icon: '🪪',
+          description: 'Accepted: SSS, GSIS, UMID, National ID, PRC.',
+          acceptedTypes: ['SSS_ID', 'GSIS_ID', 'UMID_ID', 'NATIONAL_ID', 'PRC_ID', 'PASSPORT', 'PHILHEALTH_ID', 'VOTER_ID', 'POSTAL_ID'],
+          status: 'Verified',
+          latestFileName: 'National ID.jpg',
+          latestUploadedAt: 'Jul 25, 2026 10:43 AM',
+          latestRemarks: 'National ID verified.',
+          latestThumbnail: '🪪',
+          history: [
+            { id: 241, thumbnail: '🪪', fileName: 'National ID.jpg', dateTime: 'Jul 25, 2026 10:43 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'National ID verified.' },
+            { id: 242, thumbnail: '🪪', fileName: 'Passport.jpg', dateTime: 'Jul 25, 2026 10:38 AM', status: 'Uploaded', user: 'Rhea Gonzales', remarks: 'Additional backup ID.' }
+          ]
+        },
+        {
+          id: 3,
+          title: 'Proof of Address',
+          icon: '🏠',
+          description: 'Utility bill, bank statement, barangay certificate, or rent agreement.',
+          acceptedTypes: ['UTILITY_BILL', 'BANK_STATEMENT', 'BARANGAY_CERTIFICATE', 'RENT_AGREEMENT'],
+          status: 'Verified',
+          latestFileName: 'Bank Statement.pdf',
+          latestUploadedAt: 'Jul 25, 2026 10:45 AM',
+          latestRemarks: 'Address confirmed.',
+          latestThumbnail: '📄',
+          history: [
+            { id: 341, thumbnail: '📄', fileName: 'Bank Statement.pdf', dateTime: 'Jul 25, 2026 10:45 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Address confirmed.' },
+            { id: 342, thumbnail: '📄', fileName: 'Utility Bill.jpg', dateTime: 'Jul 24, 2026 04:25 PM', status: 'Rejected', user: 'Lessor Admin', remarks: 'Bill is more than 3 months old.' }
+          ]
+        },
+        {
+          id: 4,
+          title: 'Selfie Verification',
+          icon: '📷',
+          description: 'Selfie photo used to match submitted documents.',
+          acceptedTypes: ['SELFIE_VERIFICATION'],
+          status: 'Verified',
+          latestFileName: 'Selfie Verification.jpg',
+          latestUploadedAt: 'Jul 25, 2026 10:48 AM',
+          latestRemarks: 'Face matches submitted IDs.',
+          latestThumbnail: '🙂',
+          history: [
+            { id: 441, thumbnail: '🙂', fileName: 'Selfie Verification.jpg', dateTime: 'Jul 25, 2026 10:48 AM', status: 'Verified', user: 'Lessor Admin', remarks: 'Face matches submitted IDs.' }
+          ]
+        }
+      ],
+      bookingHistory: [
+        { bookingNo: 'BK-2026-00171', vehicle: 'Honda BR-V', rentalDates: 'Jul 12 - Jul 15, 2026', rentalForm: 'Self Drive', status: 'Completed', feeStatus: 'Paid', lessor: 'Palawan Wheels Rental', remarks: 'Excellent renter.' },
+        { bookingNo: 'BK-2026-00138', vehicle: 'Toyota Wigo', rentalDates: 'Jun 22 - Jun 23, 2026', rentalForm: 'Self Drive', status: 'Completed', feeStatus: 'Paid', lessor: 'Island Ride PH', remarks: 'Returned clean.' }
+      ],
+      reviews: [
+        { lessor: 'Palawan Wheels Rental', rating: 5, date: 'Jul 15, 2026', vehicle: 'Honda BR-V', comment: 'Very careful driver and responsive.' },
+        { lessor: 'Island Ride PH', rating: 5, date: 'Jun 23, 2026', vehicle: 'Toyota Wigo', comment: 'Smooth transaction and clean return.' }
+      ],
+      notes: [
+        { source: 'Renter', createdBy: 'Rhea Gonzales', createdAt: 'Jul 25, 2026 11:05 AM', message: 'Submitted complete documents and rental references.' },
+        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 25, 2026 11:06 AM', message: 'Renter approval request submitted with high trust profile.' }
       ]
     }
   ];
 
-  get filteredRenters(): RenterApprovalRecord[] {
+  selectedRecord: RenterApprovalRecord | null = null;
+  lastViewedRenterId: number | null = null;
+  returningRenterId: number | null = null;
+
+  selectedDocumentGroup: DocumentGroup | null = null;
+  selectedUploadHistory: UploadHistoryItem | null = null;
+  documentZoom = 1;
+  documentPanX = 0;
+  documentPanY = 0;
+  isDocumentPanning = false;
+  documentPanStartX = 0;
+  documentPanStartY = 0;
+  showDocumentRejectBox = false;
+  documentRejectRemarks = '';
+
+  get filteredRecords(): RenterApprovalRecord[] {
     const keyword = this.searchText.toLowerCase().trim();
 
-    return this.renters.filter(renter => {
+    return this.records.filter(record => {
       const matchSearch =
         !keyword ||
-        renter.renterName.toLowerCase().includes(keyword) ||
-        renter.trustId.toLowerCase().includes(keyword) ||
-        renter.email.toLowerCase().includes(keyword) ||
-        renter.mobile.toLowerCase().includes(keyword);
+        record.renterName.toLowerCase().includes(keyword) ||
+        record.trustId.toLowerCase().includes(keyword) ||
+        record.email.toLowerCase().includes(keyword) ||
+        record.mobile.toLowerCase().includes(keyword);
 
-      const matchStatus =
-        this.selectedStatus === 'All' ||
-        renter.approvalStatus === this.selectedStatus;
-
+      const matchStatus = this.selectedStatus === 'All' || record.approvalStatus === this.selectedStatus;
       return matchSearch && matchStatus;
     });
   }
 
-  get visibleRenters(): RenterApprovalRecord[] {
-    if (this.selectedRenter) {
-      return [this.selectedRenter];
-    }
-
-    return this.filteredRenters;
-  }
-
   get pendingCount(): number {
-    return this.renters.filter(item => item.approvalStatus === 'Pending Approval').length;
+    return this.records.filter(item => item.approvalStatus === 'Pending Approval').length;
   }
 
   get approvedCount(): number {
-    return this.renters.filter(item => item.approvalStatus === 'Approved').length;
+    return this.records.filter(item => item.approvalStatus === 'Approved').length;
   }
 
   get needMoreDocsCount(): number {
-    return this.renters.filter(item => item.approvalStatus === 'Need More Documents').length;
+    return this.records.filter(item => item.approvalStatus === 'Need More Documents').length;
   }
 
   get rejectedCount(): number {
-    return this.renters.filter(item => item.approvalStatus === 'Rejected').length;
+    return this.records.filter(item => item.approvalStatus === 'Rejected').length;
   }
 
-  get documentRejectCharacters(): number {
-    return this.documentRejectReason.trim().length;
+  get documentRejectCharacterCount(): number {
+    return this.documentRejectRemarks.trim().length;
   }
 
   get canProceedDocumentReject(): boolean {
-    return this.documentRejectCharacters >= 50;
+    return this.documentRejectCharacterCount >= 50;
   }
 
-  getUploadedDocumentCount(renter: RenterApprovalRecord): number {
-    return renter.documentGroups.reduce((total, group) => total + group.uploads.length, 0);
+  get averageRatingBreakdown() {
+    return {
+      cleanliness: 4.8,
+      communication: 4.6,
+      paymentReliability: 5.0,
+      vehicleCare: 4.5,
+      punctuality: 4.8
+    };
   }
 
-  getVerifiedDocumentCount(renter: RenterApprovalRecord): number {
-    return renter.documentGroups.reduce((total, group) => {
-      return total + group.uploads.filter(upload => upload.status === 'Verified').length;
-    }, 0);
-  }
-
-  getLatestDocument(group: DocumentRequirementGroup): RenterDocumentUpload | null {
-    if (!group.uploads || group.uploads.length === 0) {
-      return null;
-    }
-
-    return group.uploads[group.uploads.length - 1];
-  }
-
-  getGroupStatus(group: DocumentRequirementGroup): DocumentStatus {
-    const latestDocument = this.getLatestDocument(group);
-    return latestDocument?.status || 'Missing';
-  }
-
-  getGroupRemarks(group: DocumentRequirementGroup): string {
-    const latestDocument = this.getLatestDocument(group);
-
-    if (!latestDocument) {
-      return 'No uploaded document yet.';
-    }
-
-    return latestDocument.remarks || 'No remarks.';
-  }
-
-  openRenter(renter: RenterApprovalRecord): void {
-    this.selectedRenter = renter;
-    this.resetActionBoxes();
+  selectRecord(record: RenterApprovalRecord): void {
+    this.selectedRecord = record;
+    this.lastViewedRenterId = record.id;
+    this.returningRenterId = null;
+    this.activeTab = 'documents';
 
     setTimeout(() => {
       document
@@ -718,211 +732,56 @@ export class RenterApprovalComponent {
     }, 100);
   }
 
-  backToList(): void {
-    this.selectedRenter = null;
-    this.resetActionBoxes();
-    this.closeDocumentViewer();
+  backToRenterList(): void {
+    const renterId = this.lastViewedRenterId;
+
+    this.selectedRecord = null;
+    this.returningRenterId = renterId;
 
     setTimeout(() => {
       document
-        .getElementById('renterApprovalList')
-        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }, 100);
+        .getElementById(renterId ? `renter-card-${renterId}` : 'renterApprovalList')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 120);
+
+    setTimeout(() => {
+      this.returningRenterId = null;
+    }, 1800);
   }
 
-  approveRenter(renter: RenterApprovalRecord): void {
-    const record = this.renters.find(item => item.id === renter.id);
-
-    if (!record) {
-      return;
-    }
-
-    record.approvalStatus = 'Approved';
-    record.approvedDate = 'Today';
-    record.approvedBy = 'Current User';
-
-    record.notes = [
-      ...record.notes,
-      {
-        source: 'Lessor',
-        createdBy: 'Current User',
-        createdAt: 'Today',
-        message: 'Renter approved by lessor.'
-      },
-      {
-        source: 'System',
-        createdBy: 'FamBridge API',
-        createdAt: 'Today',
-        message: 'Renter approval status changed to Approved.'
-      }
-    ];
-
-    this.selectedRenter = record;
-    this.resetActionBoxes();
+  selectTab(tab: DetailTab): void {
+    this.activeTab = tab;
   }
 
-  startRejectRenter(renter: RenterApprovalRecord): void {
-    this.selectedRenter = renter;
-    this.showRejectBox = true;
-    this.showRequestDocsBox = false;
-    this.rejectReason = '';
+  getStars(rating: number): string {
+    return '★'.repeat(Math.round(rating));
   }
 
-  proceedRejectRenter(): void {
-    if (!this.selectedRenter || !this.rejectReason.trim()) {
-      return;
-    }
-
-    const record = this.renters.find(item => item.id === this.selectedRenter?.id);
-
-    if (!record) {
-      return;
-    }
-
-    record.approvalStatus = 'Rejected';
-    record.rejectedDate = 'Today';
-    record.rejectedBy = 'Current User';
-
-    record.notes = [
-      ...record.notes,
-      {
-        source: 'Lessor',
-        createdBy: 'Current User',
-        createdAt: 'Today',
-        message: `Renter rejected: ${this.rejectReason.trim()}`
-      },
-      {
-        source: 'System',
-        createdBy: 'FamBridge API',
-        createdAt: 'Today',
-        message: 'Renter approval request was rejected by the lessor.'
-      }
-    ];
-
-    this.selectedRenter = record;
-    this.rejectReason = '';
-    this.showRejectBox = false;
+  approveRenter(): void {
+    if (!this.selectedRecord) return;
+    this.selectedRecord.approvalStatus = 'Approved';
   }
 
-  startRequestMoreDocuments(renter: RenterApprovalRecord): void {
-    this.selectedRenter = renter;
-    this.showRequestDocsBox = true;
-    this.showRejectBox = false;
-    this.requestDocsReason = '';
-    this.selectedRequestDocuments = [];
+  requestMoreDocuments(): void {
+    if (!this.selectedRecord) return;
+    this.selectedRecord.approvalStatus = 'Need More Documents';
   }
 
-  toggleRequestDocument(option: RequestDocumentOption): void {
-    const exists = this.selectedRequestDocuments.some(
-      item => item.requirementCode === option.requirementCode
-    );
-
-    if (exists) {
-      this.removeRequestDocument(option.requirementCode);
-      return;
-    }
-
-    this.selectedRequestDocuments = [
-      ...this.selectedRequestDocuments,
-      option
-    ];
+  rejectRenter(): void {
+    if (!this.selectedRecord) return;
+    this.selectedRecord.approvalStatus = 'Rejected';
   }
 
-  isRequestDocumentSelected(requirementCode: string): boolean {
-    return this.selectedRequestDocuments.some(
-      item => item.requirementCode === requirementCode
-    );
-  }
-
-  removeRequestDocument(requirementCode: string): void {
-    this.selectedRequestDocuments = this.selectedRequestDocuments.filter(
-      item => item.requirementCode !== requirementCode
-    );
-  }
-
-  proceedRequestMoreDocuments(): void {
-    if (
-      !this.selectedRenter ||
-      !this.requestDocsReason.trim() ||
-      this.selectedRequestDocuments.length === 0
-    ) {
-      return;
-    }
-
-    const record = this.renters.find(item => item.id === this.selectedRenter?.id);
-
-    if (!record) {
-      return;
-    }
-
-    const selectedLabels = this.selectedRequestDocuments
-      .map(item => item.label)
-      .join(', ');
-
-    const selectedCodes = this.selectedRequestDocuments
-      .map(item => `${item.requirementCode} [${item.acceptedDocumentTypeCodes.join('|')}]`)
-      .join(', ');
-
-    record.approvalStatus = 'Need More Documents';
-    record.requestedMoreDocsDate = 'Today';
-    record.requestedMoreDocsBy = 'Current User';
-
-    record.notes = [
-      ...record.notes,
-      {
-        source: 'Lessor',
-        createdBy: 'Current User',
-        createdAt: 'Today',
-        message: `More documents requested: ${selectedLabels}. ${this.requestDocsReason.trim()}`
-      },
-      {
-        source: 'System',
-        createdBy: 'FamBridge API',
-        createdAt: 'Today',
-        message: `Document request created using requirement groups and accepted document type codes: ${selectedCodes}.`
-      }
-    ];
-
-    this.selectedRenter = record;
-    this.requestDocsReason = '';
-    this.selectedRequestDocuments = [];
-    this.showRequestDocsBox = false;
-  }
-
-  toggleDocumentGroup(group: DocumentRequirementGroup): void {
-    group.isExpanded = !group.isExpanded;
-  }
-
-  openLatestDocumentViewer(group: DocumentRequirementGroup): void {
-    const latestDocument = this.getLatestDocument(group);
-
-    if (!latestDocument) {
-      return;
-    }
-
-    this.openDocumentViewer(group, latestDocument);
-  }
-
-  openDocumentViewer(group: DocumentRequirementGroup, doc: RenterDocumentUpload): void {
+  openDocumentViewer(group: DocumentGroup, upload?: UploadHistoryItem): void {
     this.selectedDocumentGroup = group;
-    this.selectedDocument = doc;
-    this.documentZoom = 1;
-    this.documentPanX = 0;
-    this.documentPanY = 0;
-    this.isPanning = false;
-    this.showDocumentRejectBox = false;
-    this.documentRejectReason = '';
+    this.selectedUploadHistory = upload || group.history[0] || null;
+    this.resetDocumentViewerState();
   }
 
   closeDocumentViewer(): void {
     this.selectedDocumentGroup = null;
-    this.selectedDocument = null;
-    this.documentZoom = 1;
-    this.documentPanX = 0;
-    this.documentPanY = 0;
-    this.isPanning = false;
-    this.showDocumentRejectBox = false;
-    this.documentRejectReason = '';
+    this.selectedUploadHistory = null;
+    this.resetDocumentViewerState();
   }
 
   zoomInDocument(): void {
@@ -933,34 +792,30 @@ export class RenterApprovalComponent {
     this.documentZoom = Math.max(this.documentZoom - 0.2, 0.6);
   }
 
-  resetDocumentView(): void {
+  resetDocumentZoomAndPan(): void {
     this.documentZoom = 1;
     this.documentPanX = 0;
     this.documentPanY = 0;
   }
 
   startDocumentPan(event: MouseEvent): void {
-    if (!this.selectedDocument) {
-      return;
-    }
+    if (!this.selectedUploadHistory) return;
 
     event.preventDefault();
-    this.isPanning = true;
-    this.panStartX = event.clientX - this.documentPanX;
-    this.panStartY = event.clientY - this.documentPanY;
+    this.isDocumentPanning = true;
+    this.documentPanStartX = event.clientX - this.documentPanX;
+    this.documentPanStartY = event.clientY - this.documentPanY;
   }
 
   moveDocumentPan(event: MouseEvent): void {
-    if (!this.isPanning) {
-      return;
-    }
+    if (!this.isDocumentPanning) return;
 
-    this.documentPanX = event.clientX - this.panStartX;
-    this.documentPanY = event.clientY - this.panStartY;
+    this.documentPanX = event.clientX - this.documentPanStartX;
+    this.documentPanY = event.clientY - this.documentPanStartY;
   }
 
   stopDocumentPan(): void {
-    this.isPanning = false;
+    this.isDocumentPanning = false;
   }
 
   onDocumentWheel(event: WheelEvent): void {
@@ -975,98 +830,108 @@ export class RenterApprovalComponent {
   }
 
   verifySelectedDocument(): void {
-    if (!this.selectedDocument || !this.selectedRenter) {
-      return;
-    }
+    if (!this.selectedRecord || !this.selectedDocumentGroup || !this.selectedUploadHistory) return;
 
-    if (this.selectedDocument.status === 'Missing') {
-      return;
-    }
+    this.selectedUploadHistory.status = 'Verified';
+    this.selectedUploadHistory.user = 'Current User';
+    this.selectedUploadHistory.remarks = 'Document verified by lessor.';
 
-    this.selectedDocument.status = 'Verified';
-    this.selectedDocument.reviewedBy = 'Current User';
-    this.selectedDocument.reviewedAt = 'Today';
-    this.selectedDocument.remarks = 'Document verified by lessor.';
+    this.selectedDocumentGroup.status = 'Verified';
+    this.selectedDocumentGroup.latestRemarks = this.selectedUploadHistory.remarks;
+    this.selectedDocumentGroup.latestFileName = this.selectedUploadHistory.fileName;
+    this.selectedDocumentGroup.latestUploadedAt = this.selectedUploadHistory.dateTime;
+    this.selectedDocumentGroup.latestThumbnail = this.selectedUploadHistory.thumbnail;
 
-    this.selectedRenter.notes = [
-      ...this.selectedRenter.notes,
+    this.selectedRecord.notes = [
+      ...this.selectedRecord.notes,
       {
         source: 'Lessor',
         createdBy: 'Current User',
         createdAt: 'Today',
-        message: `Document verified: ${this.selectedDocument.documentLabel} (${this.selectedDocument.documentTypeCode}).`
+        message: `Document verified: ${this.selectedDocumentGroup.title} - ${this.selectedUploadHistory.fileName}.`
       },
       {
         source: 'System',
         createdBy: 'FamBridge API',
         createdAt: 'Today',
-        message: `Document upload ${this.selectedDocument.id} status changed to Verified for ${this.selectedDocument.documentTypeCode}.`
+        message: `Document group status changed to Verified for ${this.selectedDocumentGroup.title}.`
       }
     ];
 
+    this.refreshDocumentCounts(this.selectedRecord);
     this.showDocumentRejectBox = false;
-    this.documentRejectReason = '';
+    this.documentRejectRemarks = '';
   }
 
   startRejectSelectedDocument(): void {
-    if (!this.selectedDocument || this.selectedDocument.status === 'Missing') {
-      return;
-    }
+    if (!this.selectedDocumentGroup || !this.selectedUploadHistory) return;
 
     this.showDocumentRejectBox = true;
-    this.documentRejectReason = '';
+    this.documentRejectRemarks = '';
   }
 
   proceedRejectSelectedDocument(): void {
     if (
-      !this.selectedDocument ||
-      !this.selectedRenter ||
+      !this.selectedRecord ||
+      !this.selectedDocumentGroup ||
+      !this.selectedUploadHistory ||
       !this.canProceedDocumentReject
     ) {
       return;
     }
 
-    const reason = this.documentRejectReason.trim();
+    const remarks = this.documentRejectRemarks.trim();
 
-    this.selectedDocument.status = 'Rejected';
-    this.selectedDocument.reviewedBy = 'Current User';
-    this.selectedDocument.reviewedAt = 'Today';
-    this.selectedDocument.remarks = reason;
+    this.selectedUploadHistory.status = 'Rejected';
+    this.selectedUploadHistory.user = 'Current User';
+    this.selectedUploadHistory.remarks = remarks;
 
-    this.selectedRenter.notes = [
-      ...this.selectedRenter.notes,
+    this.selectedDocumentGroup.status = 'Rejected';
+    this.selectedDocumentGroup.latestRemarks = remarks;
+    this.selectedDocumentGroup.latestFileName = this.selectedUploadHistory.fileName;
+    this.selectedDocumentGroup.latestUploadedAt = this.selectedUploadHistory.dateTime;
+    this.selectedDocumentGroup.latestThumbnail = this.selectedUploadHistory.thumbnail;
+
+    this.selectedRecord.notes = [
+      ...this.selectedRecord.notes,
       {
         source: 'Lessor',
         createdBy: 'Current User',
         createdAt: 'Today',
-        message: `Document rejected: ${this.selectedDocument.documentLabel} (${this.selectedDocument.documentTypeCode}). Reason: ${reason}`
+        message: `Document rejected: ${this.selectedDocumentGroup.title} - ${this.selectedUploadHistory.fileName}. Reason: ${remarks}`
       },
       {
         source: 'System',
         createdBy: 'FamBridge API',
         createdAt: 'Today',
-        message: `Document upload ${this.selectedDocument.id} status changed to Rejected. Rejection reason met the minimum 50-character requirement.`
+        message: `Document group status changed to Rejected for ${this.selectedDocumentGroup.title}. Rejection remarks met the minimum 50-character requirement.`
       }
     ];
 
+    this.refreshDocumentCounts(this.selectedRecord);
     this.showDocumentRejectBox = false;
-    this.documentRejectReason = '';
+    this.documentRejectRemarks = '';
   }
 
   cancelDocumentReject(): void {
     this.showDocumentRejectBox = false;
-    this.documentRejectReason = '';
+    this.documentRejectRemarks = '';
   }
 
-  cancelAction(): void {
-    this.resetActionBoxes();
+  private resetDocumentViewerState(): void {
+    this.documentZoom = 1;
+    this.documentPanX = 0;
+    this.documentPanY = 0;
+    this.isDocumentPanning = false;
+    this.showDocumentRejectBox = false;
+    this.documentRejectRemarks = '';
   }
 
-  private resetActionBoxes(): void {
-    this.showRejectBox = false;
-    this.showRequestDocsBox = false;
-    this.rejectReason = '';
-    this.requestDocsReason = '';
-    this.selectedRequestDocuments = [];
+  private refreshDocumentCounts(record: RenterApprovalRecord): void {
+    record.uploadedDocuments = record.documents.reduce((total, group) => total + group.history.length, 0);
+    record.verifiedDocuments = record.documents.reduce(
+      (total, group) => total + group.history.filter(item => item.status === 'Verified').length,
+      0
+    );
   }
 }
