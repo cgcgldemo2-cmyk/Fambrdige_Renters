@@ -1,1 +1,325 @@
-<p>vehicle-form works!</p>
+<app-lessor-sidebar>
+  <section class="vehicle-form-page">
+
+    <!-- HERO -->
+    <section class="page-hero">
+      <div>
+        <p>Vehicle Management</p>
+        <h1>{{ isEditMode ? 'Edit Vehicle' : 'Add New Vehicle' }}</h1>
+        <span>
+          Add vehicle details, rental pricing, insurance coverage, and document information.
+        </span>
+      </div>
+
+      <a routerLink="/vehicles" class="back-btn">
+        Back to Vehicles
+      </a>
+    </section>
+
+    <form class="vehicle-form" (ngSubmit)="saveVehicle()">
+
+      <!-- LEFT COLUMN -->
+      <div class="form-main">
+
+        <!-- BASIC INFO -->
+        <section class="form-card">
+          <div class="card-header">
+            <p>Basic Information</p>
+            <h2>Vehicle Details</h2>
+          </div>
+
+          <div class="form-grid">
+            <label class="form-field full">
+              <span>Vehicle Name</span>
+              <input
+                type="text"
+                name="name"
+                [(ngModel)]="vehicle.name"
+                placeholder="Example: Ford Everest Titanium"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>Car Type</span>
+              <select name="carType" [(ngModel)]="vehicle.carType">
+                <option value="">Select car type</option>
+                <option *ngFor="let type of carTypes" [value]="type">
+                  {{ type }}
+                </option>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>Rental Type</span>
+              <select name="rentalType" [(ngModel)]="vehicle.rentalType">
+                <option value="with_driver">With Driver</option>
+                <option value="without_driver">Without Driver</option>
+                <option value="both">Both</option>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>Seats</span>
+              <input
+                type="number"
+                name="seats"
+                [(ngModel)]="vehicle.seats"
+                placeholder="Example: 7"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>Transmission</span>
+              <select name="transmission" [(ngModel)]="vehicle.transmission">
+                <option value="">Select transmission</option>
+                <option *ngFor="let item of transmissionOptions" [value]="item">
+                  {{ item }}
+                </option>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>Fuel Type</span>
+              <select name="fuelType" [(ngModel)]="vehicle.fuelType">
+                <option value="">Select fuel type</option>
+                <option *ngFor="let fuel of fuelTypes" [value]="fuel">
+                  {{ fuel }}
+                </option>
+              </select>
+            </label>
+
+            <label class="form-field">
+              <span>Color</span>
+              <input
+                type="text"
+                name="color"
+                [(ngModel)]="vehicle.color"
+                placeholder="Example: White"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- REGISTRATION INFO -->
+        <section class="form-card">
+          <div class="card-header">
+            <p>Registration</p>
+            <h2>Vehicle Registration Details</h2>
+          </div>
+
+          <div class="form-grid">
+            <label class="form-field">
+              <span>Plate Number</span>
+              <input
+                type="text"
+                name="plateNumber"
+                [(ngModel)]="vehicle.plateNumber"
+                placeholder="Example: ABC 1234"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>MV File Number</span>
+              <input
+                type="text"
+                name="motorVehicleFileNumber"
+                [(ngModel)]="vehicle.motorVehicleFileNumber"
+                placeholder="Motor Vehicle File Number"
+              />
+            </label>
+
+            <label class="form-field full">
+              <span>Pickup Address</span>
+              <input
+                type="text"
+                name="pickupAddress"
+                [(ngModel)]="vehicle.pickupAddress"
+                placeholder="Example: Puerto Princesa Airport"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- PRICING -->
+        <section class="form-card">
+          <div class="card-header">
+            <p>Pricing</p>
+            <h2>Rental Rates</h2>
+          </div>
+
+          <div class="form-grid">
+            <label class="form-field">
+              <span>12-Hour Rate</span>
+              <input
+                type="number"
+                name="twelveHourRate"
+                [(ngModel)]="vehicle.twelveHourRate"
+                placeholder="0.00"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>24-Hour / Daily Rate</span>
+              <input
+                type="number"
+                name="dailyRate"
+                [(ngModel)]="vehicle.dailyRate"
+                placeholder="0.00"
+              />
+            </label>
+
+            <label class="form-field">
+              <span>With Driver Add-on</span>
+              <input
+                type="number"
+                name="withDriverAddOn"
+                [(ngModel)]="vehicle.withDriverAddOn"
+                placeholder="0.00"
+              />
+            </label>
+          </div>
+        </section>
+
+        <!-- INSURANCE -->
+        <section class="form-card">
+          <div class="card-header">
+            <p>Insurance</p>
+            <h2>Coverage Information</h2>
+          </div>
+
+          <div class="coverage-list">
+            <label
+              class="coverage-item"
+              *ngFor="let coverage of insuranceCoverages"
+            >
+              <input
+                type="checkbox"
+                [(ngModel)]="coverage.selected"
+                [name]="coverage.value"
+              />
+
+              <span class="check-box">✓</span>
+
+              <strong>{{ coverage.label }}</strong>
+            </label>
+          </div>
+        </section>
+
+        <!-- DESCRIPTION -->
+        <section class="form-card">
+          <div class="card-header">
+            <p>Description</p>
+            <h2>Vehicle Notes</h2>
+          </div>
+
+          <label class="form-field full">
+            <span>Description</span>
+            <textarea
+              name="description"
+              [(ngModel)]="vehicle.description"
+              rows="5"
+              placeholder="Add important vehicle notes, allowed usage, restrictions, or pickup reminders."
+            ></textarea>
+          </label>
+        </section>
+
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <aside class="form-side">
+
+        <!-- IMAGE -->
+        <section class="side-card">
+          <div class="card-header">
+            <p>Vehicle Image</p>
+            <h2>Photo</h2>
+          </div>
+
+          <div class="image-preview">
+            <img
+              *ngIf="selectedImagePreview"
+              [src]="selectedImagePreview"
+              alt="Vehicle preview"
+            />
+
+            <div *ngIf="!selectedImagePreview" class="image-placeholder">
+              🚘
+              <span>Upload vehicle photo</span>
+            </div>
+          </div>
+
+          <label class="upload-btn">
+            Upload Image
+            <input type="file" accept="image/*" (change)="onImageSelected($event)" />
+          </label>
+        </section>
+
+        <!-- DOCUMENTS -->
+        <section class="side-card">
+          <div class="card-header">
+            <p>Documents</p>
+            <h2>Vehicle Files</h2>
+          </div>
+
+          <label class="document-upload">
+            <span>OR/CR Document</span>
+            <strong>{{ orcrFileName || 'No file selected' }}</strong>
+            <input type="file" (change)="onOrCrSelected($event)" />
+          </label>
+
+          <label class="document-upload">
+            <span>Insurance Policy</span>
+            <strong>{{ insuranceFileName || 'No file selected' }}</strong>
+            <input type="file" (change)="onInsuranceSelected($event)" />
+          </label>
+        </section>
+
+        <!-- STATUS -->
+        <section class="side-card">
+          <div class="card-header">
+            <p>Status</p>
+            <h2>Availability</h2>
+          </div>
+
+          <label class="form-field full">
+            <span>Vehicle Status</span>
+            <select name="status" [(ngModel)]="vehicle.status">
+              <option
+                *ngFor="let status of statusOptions"
+                [value]="status.value"
+              >
+                {{ status.label }}
+              </option>
+            </select>
+          </label>
+
+          <label class="toggle-row">
+            <input
+              type="checkbox"
+              name="isAvailable"
+              [(ngModel)]="vehicle.isAvailable"
+            />
+
+            <span></span>
+
+            <strong>Available for booking</strong>
+          </label>
+        </section>
+
+        <!-- ACTIONS -->
+        <section class="side-card action-card">
+          <button type="submit" class="save-btn" [disabled]="isSaving">
+            {{ isSaving ? 'Saving...' : 'Save Vehicle' }}
+          </button>
+
+          <a routerLink="/vehicles" class="cancel-btn">
+            Cancel
+          </a>
+        </section>
+
+      </aside>
+
+    </form>
+
+  </section>
+</app-lessor-sidebar>
