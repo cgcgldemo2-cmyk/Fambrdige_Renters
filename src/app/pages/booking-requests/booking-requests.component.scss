@@ -277,20 +277,28 @@ $danger: #dc2626;
 
 .approve-btn,
 .reject-btn,
-.view-btn {
+.view-btn,
+.payment-btn {
   height: 40px;
   border-radius: 12px;
   padding: 0 14px;
   font-weight: 900;
   cursor: pointer;
   border: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
 
   &:disabled {
     opacity: 0.55;
     cursor: not-allowed;
   }
 }
-
+.payment-btn {
+  background: $primary;
+  color: #ffffff;
+}
 .approve-btn {
   background: $green;
   color: #ffffff;

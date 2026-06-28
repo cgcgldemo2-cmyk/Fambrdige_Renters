@@ -2,6 +2,7 @@ import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LessorSidebarComponent } from '../../shared/components/lessor-sidebar/lessor-sidebar.component';
+import { Router } from '@angular/router';
 
 type BookingStatus =
   | 'Pending Lessor Approval'
@@ -174,6 +175,14 @@ export class BookingRequestsComponent {
     ).length;
   }
 
+  constructor(private router: Router) {}
+  viewReservationFee(item: BookingRequest): void {
+    this.router.navigate(['/reservation-fees'], {
+      queryParams: {
+        refno: item.requestNo
+      }
+    });
+  }
   openRequest(item: BookingRequest): void {
     this.selectedRequest = item;
   }

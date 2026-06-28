@@ -1,7 +1,8 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LessorSidebarComponent } from '../../shared/components/lessor-sidebar/lessor-sidebar.component';
+import { ActivatedRoute } from '@angular/router';
 
 type PaymentStatus =
   | 'Pending Payment'
@@ -71,7 +72,7 @@ interface ReservationFeeRecord {
   templateUrl: './reservation-fees.component.html',
   styleUrls: ['./reservation-fees.component.scss']
 })
-export class ReservationFeesComponent {
+export class ReservationFeesComponent implements OnInit {
   searchText = '';
   selectedStatus = 'All';
 
@@ -357,7 +358,28 @@ export class ReservationFeesComponent {
       .filter(record => record.paymentStatus === 'Reservation Fee Confirmed')
       .reduce((total, record) => total + record.reservationFee, 0);
   }
+  constructor(private route: ActivatedRoute) {}
+  ngOnInit(): void {
+    this.route.queryParamMap.subscribe(params => {
+      const refno = params.get('refno');
 
+      if (!refno) {
+        return;
+      }
+
+      this.searchText = refno;
+
+      setTimeout(() => {
+        const record = this.records.find(item =>
+          item.bookingNo.toLowerCase() === refno.toLowerCase()
+        );
+
+        if (record) {
+          this.openRecord(record);
+        }
+      }, 100);
+    });
+  }
   openRecord(record: ReservationFeeRecord): void {
     const latestAttempt = this.getLatestAttempt(record);
     record.selectedPaymentAttemptId = record.selectedPaymentAttemptId || latestAttempt?.id;

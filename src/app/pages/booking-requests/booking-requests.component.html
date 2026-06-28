@@ -171,8 +171,20 @@
               Reject
             </button>
 
-            <button type="button" class="view-btn" (click)="openRequest(item)">
+            <button
+              type="button"
+              class="view-btn"
+              (click)="openRequest(item)"
+            >
               View Details
+            </button>
+
+            <button
+              type="button"
+              class="payment-btn"
+              (click)="viewReservationFee(item)"
+            >
+              View Payment
             </button>
           </div>
         </article>
@@ -224,7 +236,13 @@
 
           <div>
             <span>Reservation Status</span>
-            <strong>{{ request.reservationStatus }}</strong>
+            <strong
+              [class.good]="request.reservationStatus === 'Paid'"
+              [class.warning]="request.reservationStatus === 'Unpaid'"
+              [class.danger]="request.reservationStatus === 'Failed'"
+            >
+              {{ request.reservationStatus }}
+            </strong>
           </div>
 
           <div>
@@ -236,13 +254,41 @@
             <span>Car Type</span>
             <strong>{{ request.carType }}</strong>
           </div>
+
+          <div>
+            <span>Pickup Date</span>
+            <strong>{{ request.pickupDate }}</strong>
+          </div>
+
+          <div>
+            <span>Return Date</span>
+            <strong>{{ request.returnDate }}</strong>
+          </div>
+
+          <div>
+            <span>Rental Type</span>
+            <strong>{{ request.rentalType }}</strong>
+          </div>
+
+          <div>
+            <span>Booking Status</span>
+            <strong
+              [class.good]="request.bookingStatus === 'Approved'"
+              [class.warning]="request.bookingStatus === 'Pending Lessor Approval'"
+              [class.danger]="request.bookingStatus === 'Rejected' || request.bookingStatus === 'Cancelled'"
+            >
+              {{ request.bookingStatus }}
+            </strong>
+          </div>
         </div>
 
         <div class="document-preview">
           <p>Document Review</p>
           <div>
             <strong>Watermarked documents</strong>
-            <span>Driver license, government ID, and proof of address placeholder.</span>
+            <span>
+              Driver license, government ID, and proof of address placeholder.
+            </span>
           </div>
         </div>
 
@@ -268,6 +314,14 @@
             (click)="rejectRequest(request)"
           >
             Reject Booking
+          </button>
+
+          <button
+            type="button"
+            class="payment-btn"
+            (click)="viewReservationFee(request)"
+          >
+            View Reservation Fee
           </button>
         </div>
       </aside>
