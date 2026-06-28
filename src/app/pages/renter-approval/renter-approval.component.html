@@ -133,7 +133,6 @@
           <div class="detail-actions-top">
             <button type="button" class="btn back" (click)="backToRenterList()">Back to List</button>
             <button type="button" class="btn approve" (click)="approveRenter()">Approve Renter</button>
-            <button type="button" class="btn request" (click)="requestMoreDocuments()">Request More Documents</button>
             <button type="button" class="btn reject" (click)="rejectRenter()">Reject Renter</button>
           </div>
         </header>
@@ -272,6 +271,98 @@
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+
+              <div class="documents-bottom-actions">
+                <button
+                  type="button"
+                  class="btn request"
+                  (click)="requestMoreDocuments()"
+                >
+                  Request More Documents
+                </button>
+              </div>
+
+              <div
+                id="requestMoreDocumentsBox"
+                class="request-more-documents-box"
+                *ngIf="showRequestDocsBox"
+              >
+                <div class="request-box-header">
+                  <div>
+                    <p>Request More Documents</p>
+                    <h4>Select additional requirements</h4>
+                    <span>Only document requirements that do not already exist in the renter document list are shown.</span>
+                  </div>
+
+                  <button type="button" class="box-close-btn" (click)="cancelRequestMoreDocuments()">×</button>
+                </div>
+
+                <div class="request-empty-state" *ngIf="availableRequestDocumentOptions.length === 0">
+                  All configured document requirements are already listed for this renter.
+                </div>
+
+                <div class="request-document-options" *ngIf="availableRequestDocumentOptions.length > 0">
+                  <button
+                    type="button"
+                    class="request-document-option"
+                    *ngFor="let option of availableRequestDocumentOptions"
+                    [class.selected]="isRequestDocumentSelected(option.id)"
+                    (click)="toggleRequestDocument(option)"
+                  >
+                    <div class="request-doc-icon">{{ option.icon }}</div>
+
+                    <div>
+                      <strong>{{ option.title }}</strong>
+                      <span>{{ option.description }}</span>
+
+                      <div class="request-doc-tags">
+                        <small *ngFor="let type of option.acceptedTypes">{{ type }}</small>
+                      </div>
+                    </div>
+
+                    <i>{{ isRequestDocumentSelected(option.id) ? '✓' : '+' }}</i>
+                  </button>
+                </div>
+
+                <div class="selected-request-documents" *ngIf="selectedRequestDocumentOptions.length > 0">
+                  <strong>Selected document requirement(s)</strong>
+
+                  <div class="selected-request-chips">
+                    <button
+                      type="button"
+                      *ngFor="let item of selectedRequestDocumentOptions"
+                      (click)="removeRequestDocument(item.id)"
+                    >
+                      {{ item.title }}
+                      <span>×</span>
+                    </button>
+                  </div>
+                </div>
+
+                <label class="request-reason-field">
+                  <span>Instructions / reason</span>
+                  <textarea
+                    rows="4"
+                    [(ngModel)]="requestDocsReason"
+                    placeholder="Example: Please upload an employment certificate because this booking requires additional verification."
+                  ></textarea>
+                </label>
+
+                <div class="request-doc-actions">
+                  <button
+                    type="button"
+                    class="proceed-request-btn"
+                    [disabled]="!canProceedRequestMoreDocuments"
+                    (click)="proceedRequestMoreDocuments()"
+                  >
+                    Proceed Request Documents
+                  </button>
+
+                  <button type="button" class="cancel-request-btn" (click)="cancelRequestMoreDocuments()">
+                    Cancel
+                  </button>
                 </div>
               </div>
             </section>
@@ -556,7 +647,7 @@
             <p>Document Viewer</p>
             <h2>{{ group.title }}</h2>
             <span>
-              {{ selectedUploadHistory?.fileName }} · {{ selectedUploadHistory?.status }}
+              {{ selectedUploadHistory ? (selectedUploadHistory.fileName + ' · ' + selectedUploadHistory.status) : group.title }}
             </span>
           </div>
 
@@ -585,19 +676,23 @@
             class="document-viewer-image-wrap"
             [style.transform]="'translate(' + documentPanX + 'px, ' + documentPanY + 'px) scale(' + documentZoom + ')'"
           >
-            <img
-              *ngIf="selectedUploadHistory?.fileUrl"
-              [src]="selectedUploadHistory?.fileUrl"
-              [alt]="selectedUploadHistory?.fileName"
-              draggable="false"
-            />
+            <ng-container *ngIf="selectedUploadHistory as upload">
+              <img
+                *ngIf="upload.fileUrl; else uploadPlaceholder"
+                [src]="upload.fileUrl"
+                [alt]="upload.fileName"
+                draggable="false"
+              />
 
-            <div class="document-viewer-placeholder" *ngIf="!selectedUploadHistory?.fileUrl">
-              <div>{{ selectedUploadHistory?.thumbnail || group.icon }}</div>
-              <strong>{{ selectedUploadHistory?.fileName || group.title }}</strong>
-              <span>Document preview placeholder</span>
-              <small>{{ group.acceptedTypes.join(', ') }}</small>
-            </div>
+              <ng-template #uploadPlaceholder>
+                <div class="document-viewer-placeholder">
+                  <div>{{ upload.thumbnail || group.icon }}</div>
+                  <strong>{{ upload.fileName || group.title }}</strong>
+                  <span>Document preview placeholder</span>
+                  <small>{{ group.acceptedTypes.join(', ') }}</small>
+                </div>
+              </ng-template>
+            </ng-container>
 
             <div class="viewer-watermark">
               FamBridge Protected · {{ selectedRecord?.trustId }}
@@ -634,21 +729,21 @@
         </div>
 
         <div class="document-viewer-actions">
-          <button
-            type="button"
-            class="verify-document-btn"
-            [disabled]="selectedUploadHistory?.status === 'Verified'"
-            (click)="verifySelectedDocument()"
-          >
+            <button
+              type="button"
+              class="verify-document-btn"
+              [disabled]="!selectedUploadHistory || selectedUploadHistory.status === 'Verified'"
+              (click)="verifySelectedDocument()"
+            >
             Verify
           </button>
 
-          <button
-            type="button"
-            class="reject-document-btn"
-            [disabled]="selectedUploadHistory?.status === 'Rejected'"
-            (click)="startRejectSelectedDocument()"
-          >
+            <button
+              type="button"
+              class="reject-document-btn"
+              [disabled]="!selectedUploadHistory || selectedUploadHistory.status === 'Rejected'"
+              (click)="startRejectSelectedDocument()"
+            >
             Reject
           </button>
         </div>

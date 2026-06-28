@@ -35,6 +35,14 @@ interface DocumentGroup {
   history: UploadHistoryItem[];
 }
 
+interface RequestDocumentOption {
+  id: number;
+  title: string;
+  icon: string;
+  description: string;
+  acceptedTypes: string[];
+}
+
 interface BookingHistoryItem {
   bookingNo: string;
   vehicle: string;
@@ -95,7 +103,70 @@ export class RenterApprovalComponent {
   selectedStatus = 'All';
   activeTab: DetailTab = 'documents';
 
+  showRequestDocsBox = false;
+  requestDocsReason = '';
+  selectedRequestDocumentOptions: RequestDocumentOption[] = [];
+
   approvalStatuses = ['All', 'Pending Approval', 'Approved', 'Need More Documents', 'Rejected'];
+
+  requestDocumentOptions: RequestDocumentOption[] = [
+    {
+      id: 1,
+      title: 'Driver License',
+      icon: '🚗',
+      description: 'Required valid driver license.',
+      acceptedTypes: ['DRIVER_LICENSE']
+    },
+    {
+      id: 2,
+      title: 'Any Government ID',
+      icon: '🪪',
+      description: 'SSS, GSIS, UMID, National ID, PRC, Passport, PhilHealth, Voter ID, or Postal ID.',
+      acceptedTypes: ['SSS_ID', 'GSIS_ID', 'UMID_ID', 'NATIONAL_ID', 'PRC_ID', 'PASSPORT', 'PHILHEALTH_ID', 'VOTER_ID', 'POSTAL_ID']
+    },
+    {
+      id: 3,
+      title: 'Proof of Address',
+      icon: '🏠',
+      description: 'Utility bill, bank statement, barangay certificate, or rent agreement.',
+      acceptedTypes: ['UTILITY_BILL', 'BANK_STATEMENT', 'BARANGAY_CERTIFICATE', 'RENT_AGREEMENT']
+    },
+    {
+      id: 4,
+      title: 'Selfie Verification',
+      icon: '📷',
+      description: 'Selfie photo used to match submitted documents.',
+      acceptedTypes: ['SELFIE_VERIFICATION']
+    },
+    {
+      id: 5,
+      title: 'Previous Rental Reference',
+      icon: '📌',
+      description: 'Reference from a previous rental company or lessor.',
+      acceptedTypes: ['PREVIOUS_RENTAL_REFERENCE']
+    },
+    {
+      id: 6,
+      title: 'Employment or Business Proof',
+      icon: '💼',
+      description: 'Employment certificate, company ID, DTI/SEC permit, or business proof.',
+      acceptedTypes: ['EMPLOYMENT_CERTIFICATE', 'COMPANY_ID', 'BUSINESS_PERMIT', 'DTI_PERMIT', 'SEC_REGISTRATION']
+    },
+    {
+      id: 7,
+      title: 'Emergency Contact ID',
+      icon: '☎️',
+      description: 'Valid ID of emergency contact or co-renter if required by the lessor.',
+      acceptedTypes: ['EMERGENCY_CONTACT_ID', 'CO_RENTER_ID']
+    },
+    {
+      id: 8,
+      title: 'Authorization Letter',
+      icon: '📝',
+      description: 'Authorization letter for company, representative, or family-use booking.',
+      acceptedTypes: ['AUTHORIZATION_LETTER']
+    }
+  ];
 
   records: RenterApprovalRecord[] = [
     {
@@ -709,6 +780,25 @@ export class RenterApprovalComponent {
     return this.documentRejectCharacterCount >= 50;
   }
 
+  get availableRequestDocumentOptions(): RequestDocumentOption[] {
+    if (!this.selectedRecord) {
+      return [];
+    }
+
+    const existingTitles = this.selectedRecord.documents.map(item =>
+      this.normalizeDocumentTitle(item.title)
+    );
+
+    return this.requestDocumentOptions.filter(option =>
+      !existingTitles.includes(this.normalizeDocumentTitle(option.title))
+    );
+  }
+
+  get canProceedRequestMoreDocuments(): boolean {
+    return this.selectedRequestDocumentOptions.length > 0 &&
+      this.requestDocsReason.trim().length > 0;
+  }
+
   get averageRatingBreakdown() {
     return {
       cleanliness: 4.8,
@@ -724,6 +814,7 @@ export class RenterApprovalComponent {
     this.lastViewedRenterId = record.id;
     this.returningRenterId = null;
     this.activeTab = 'documents';
+    this.resetRequestMoreDocumentsBox();
 
     setTimeout(() => {
       document
@@ -737,6 +828,7 @@ export class RenterApprovalComponent {
 
     this.selectedRecord = null;
     this.returningRenterId = renterId;
+    this.resetRequestMoreDocumentsBox();
 
     setTimeout(() => {
       document
@@ -764,7 +856,101 @@ export class RenterApprovalComponent {
 
   requestMoreDocuments(): void {
     if (!this.selectedRecord) return;
+
+    this.activeTab = 'documents';
+    this.showRequestDocsBox = true;
+    this.selectedRequestDocumentOptions = [];
+    this.requestDocsReason = '';
+
+    setTimeout(() => {
+      document
+        .getElementById('requestMoreDocumentsBox')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
+  }
+
+  toggleRequestDocument(option: RequestDocumentOption): void {
+    const exists = this.selectedRequestDocumentOptions.some(item => item.id === option.id);
+
+    if (exists) {
+      this.removeRequestDocument(option.id);
+      return;
+    }
+
+    this.selectedRequestDocumentOptions = [
+      ...this.selectedRequestDocumentOptions,
+      option
+    ];
+  }
+
+  isRequestDocumentSelected(optionId: number): boolean {
+    return this.selectedRequestDocumentOptions.some(item => item.id === optionId);
+  }
+
+  removeRequestDocument(optionId: number): void {
+    this.selectedRequestDocumentOptions = this.selectedRequestDocumentOptions.filter(
+      item => item.id !== optionId
+    );
+  }
+
+  cancelRequestMoreDocuments(): void {
+    this.resetRequestMoreDocumentsBox();
+  }
+
+  proceedRequestMoreDocuments(): void {
+    if (!this.selectedRecord || !this.canProceedRequestMoreDocuments) {
+      return;
+    }
+
+    const selectedTitles = this.selectedRequestDocumentOptions
+      .map(item => item.title)
+      .join(', ');
+
+    const selectedCodes = this.selectedRequestDocumentOptions
+      .flatMap(item => item.acceptedTypes)
+      .join(', ');
+
+    const nextDocumentId = this.getNextDocumentGroupId(this.selectedRecord);
+
+    const newDocumentGroups: DocumentGroup[] = this.selectedRequestDocumentOptions.map((option, index) => ({
+      id: nextDocumentId + index,
+      title: option.title,
+      icon: option.icon,
+      description: option.description,
+      acceptedTypes: [...option.acceptedTypes],
+      status: 'Needs Review',
+      latestFileName: 'Waiting for renter upload',
+      latestUploadedAt: 'Not uploaded yet',
+      latestRemarks: this.requestDocsReason.trim(),
+      latestThumbnail: '📄',
+      history: []
+    }));
+
+    this.selectedRecord.documents = [
+      ...this.selectedRecord.documents,
+      ...newDocumentGroups
+    ];
+
+    this.selectedRecord.requirementGroups = this.selectedRecord.documents.length;
     this.selectedRecord.approvalStatus = 'Need More Documents';
+    this.selectedRecord.notes = [
+      ...this.selectedRecord.notes,
+      {
+        source: 'Lessor',
+        createdBy: 'Current User',
+        createdAt: 'Today',
+        message: `Requested additional document(s): ${selectedTitles}. Reason: ${this.requestDocsReason.trim()}`
+      },
+      {
+        source: 'System',
+        createdBy: 'FamBridge API',
+        createdAt: 'Today',
+        message: `Additional document request created with accepted document type codes: ${selectedCodes}.`
+      }
+    ];
+
+    this.resetRequestMoreDocumentsBox();
+    this.refreshDocumentCounts(this.selectedRecord);
   }
 
   rejectRenter(): void {
@@ -925,6 +1111,24 @@ export class RenterApprovalComponent {
     this.isDocumentPanning = false;
     this.showDocumentRejectBox = false;
     this.documentRejectRemarks = '';
+  }
+
+  private resetRequestMoreDocumentsBox(): void {
+    this.showRequestDocsBox = false;
+    this.requestDocsReason = '';
+    this.selectedRequestDocumentOptions = [];
+  }
+
+  private getNextDocumentGroupId(record: RenterApprovalRecord): number {
+    if (record.documents.length === 0) {
+      return 1;
+    }
+
+    return Math.max(...record.documents.map(item => item.id)) + 1;
+  }
+
+  private normalizeDocumentTitle(value: string): string {
+    return value.trim().toLowerCase().replace(/\s+/g, ' ');
   }
 
   private refreshDocumentCounts(record: RenterApprovalRecord): void {
