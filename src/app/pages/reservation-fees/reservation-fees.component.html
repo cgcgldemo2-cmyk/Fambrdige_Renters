@@ -1,0 +1,461 @@
+<app-lessor-sidebar>
+  <section class="reservation-fees-page">
+
+    <section class="page-hero">
+      <div>
+        <p>Reservation Fees</p>
+        <h1>Confirm renter reservation payments</h1>
+        <span>
+          Renters pay directly to your QR/account. Review payment proof and reference numbers before confirming.
+        </span>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article>
+        <span>Pending Confirmation</span>
+        <strong>{{ pendingConfirmationCount }}</strong>
+        <p>Needs lessor payment checking</p>
+      </article>
+
+      <article>
+        <span>Confirmed Payments</span>
+        <strong>{{ confirmedCount }}</strong>
+        <p>Reservation fees confirmed</p>
+      </article>
+
+      <article>
+        <span>Rejected Payments</span>
+        <strong>{{ rejectedCount }}</strong>
+        <p>Invalid or not found references</p>
+      </article>
+
+      <article>
+        <span>Confirmed Amount</span>
+        <strong>₱{{ confirmedReservationFees | number }}</strong>
+        <p>Paid directly to lessor account</p>
+      </article>
+    </section>
+
+    <section class="payment-note">
+      <div class="note-icon">ℹ️</div>
+
+      <div>
+        <strong>Phase 1 Payment Rule</strong>
+        <span>
+          FamBridge does not hold renter payments. Renters pay directly to the lessor-owned QR/account.
+          Rejecting a payment does not cancel the booking request. Booking cancellation is a separate action.
+        </span>
+      </div>
+    </section>
+
+    <section class="filter-card">
+      <div class="search-field">
+        <label>Search Payment</label>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          placeholder="Search by booking no, renter, vehicle, reference, or account"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label>Payment Status</label>
+        <select [(ngModel)]="selectedStatus">
+          <option *ngFor="let status of paymentStatuses" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+    </section>
+
+    <section class="empty-state" *ngIf="filteredRecords.length === 0">
+      <div class="empty-icon">💳</div>
+      <h2>No reservation fee records found</h2>
+      <p>Try changing your search or payment status filter.</p>
+    </section>
+
+    <section
+      id="reservationRecordsList"
+      class="records-layout single-column"
+      *ngIf="filteredRecords.length > 0"
+    >
+      <div class="records-list">
+        <article
+          class="payment-card"
+          *ngFor="let record of visibleRecords"
+          [class.selected]="selectedRecord?.id === record.id"
+          (click)="openRecord(record)"
+        >
+          <div class="payment-top">
+            <div>
+              <span class="booking-no">{{ record.bookingNo }}</span>
+              <h2>{{ record.renterName }}</h2>
+              <p>{{ record.vehicleName }}</p>
+            </div>
+
+            <div class="status-stack">
+              <div class="status-item">
+                <small>Payment Status</small>
+
+                <span
+                  class="status-badge"
+                  [class.pending]="record.paymentStatus === 'Pending Payment'"
+                  [class.review]="record.paymentStatus === 'Pending Payment Confirmation'"
+                  [class.confirmed]="record.paymentStatus === 'Reservation Fee Confirmed'"
+                  [class.rejected]="record.paymentStatus === 'Payment Rejected'"
+                  [class.failed]="record.paymentStatus === 'Payment Failed'"
+                >
+                  {{ record.paymentStatus }}
+                </span>
+              </div>
+
+              <div class="status-item">
+                <small>Booking Status</small>
+
+                <span
+                  class="booking-status"
+                  [class.pending]="record.bookingStatus === 'Pending Lessor Approval'"
+                  [class.approved]="record.bookingStatus === 'Approved'"
+                  [class.rejected]="record.bookingStatus === 'Rejected'"
+                  [class.cancelled]="record.bookingStatus === 'Cancelled'"
+                >
+                  {{ record.bookingStatus }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div class="payment-grid">
+            <div>
+              <span>Reservation Fee</span>
+              <strong>₱{{ record.reservationFee | number }}</strong>
+            </div>
+
+            <div>
+              <span>Remaining Balance</span>
+              <strong>₱{{ record.remainingBalance | number }}</strong>
+            </div>
+
+            <div>
+              <span>Payment Method</span>
+              <strong>{{ record.paymentMethod }}</strong>
+            </div>
+
+            <div>
+              <span>Payment Reference</span>
+              <strong>{{ record.paymentReference || 'Not submitted' }}</strong>
+            </div>
+          </div>
+
+          <div class="account-box">
+            <span>Lessor Payment Account</span>
+            <strong>{{ record.lessorPaymentAccount }}</strong>
+          </div>
+
+          <div class="open-detail-hint" *ngIf="!selectedRecord">
+            Click this payment record to view proof and details
+          </div>
+        </article>
+
+        <section
+          id="paymentDetailSection"
+          class="detail-panel full-width-detail"
+          *ngIf="selectedRecord as record"
+        >
+          <div class="detail-header">
+            <div>
+              <p>Payment Review</p>
+              <h2>{{ record.bookingNo }}</h2>
+              <span>{{ record.renterName }}</span>
+            </div>
+
+            <button type="button" (click)="backToList()">Back</button>
+          </div>
+
+          <div class="detail-actions top-actions">
+            <button
+              type="button"
+              class="confirm-btn"
+              [disabled]="record.paymentStatus === 'Reservation Fee Confirmed' || record.bookingStatus === 'Cancelled'"
+              (click)="confirmPayment(record)"
+            >
+              Confirm Payment
+            </button>
+
+            <button
+              type="button"
+              class="reject-btn"
+              [disabled]="record.paymentStatus === 'Payment Rejected' || record.bookingStatus === 'Cancelled'"
+              (click)="startRejectPayment(record)"
+            >
+              Reject Payment
+            </button>
+
+            <button
+              type="button"
+              class="cancel-booking-btn"
+              [disabled]="record.bookingStatus === 'Cancelled'"
+              (click)="startCancelBooking(record)"
+            >
+              Cancel Booking
+            </button>
+          </div>
+
+          <div
+            id="rejectPaymentBox"
+            class="action-box reject-action-box"
+            *ngIf="showRejectPaymentBox"
+          >
+            <p>Reject Payment Request</p>
+            <span>
+              Add a reason why this payment request is rejected. This will not cancel the booking request.
+            </span>
+
+            <textarea
+              [(ngModel)]="rejectPaymentReason"
+              rows="4"
+              placeholder="Example: Payment reference was not found in the lessor account."
+            ></textarea>
+
+            <div class="action-box-buttons">
+              <button
+                type="button"
+                class="proceed-reject-btn"
+                [disabled]="!rejectPaymentReason.trim()"
+                (click)="proceedRejectPayment()"
+              >
+                Proceed Reject Payment
+              </button>
+
+              <button type="button" class="cancel-action-btn" (click)="cancelAction()">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <div
+            id="cancelBookingBox"
+            class="action-box cancel-booking-action-box"
+            *ngIf="showCancelBookingBox"
+          >
+            <p>Cancel Booking Request</p>
+            <span>
+              Add a reason why this booking request is being cancelled. This is separate from payment rejection.
+            </span>
+
+            <textarea
+              [(ngModel)]="cancelBookingReason"
+              rows="4"
+              placeholder="Example: Vehicle is no longer available for the selected date."
+            ></textarea>
+
+            <div class="action-box-buttons">
+              <button
+                type="button"
+                class="proceed-cancel-btn"
+                [disabled]="!cancelBookingReason.trim()"
+                (click)="proceedCancelBooking()"
+              >
+                Proceed Cancel Booking
+              </button>
+
+              <button type="button" class="cancel-action-btn" (click)="cancelAction()">
+                Cancel
+              </button>
+            </div>
+          </div>
+
+          <div class="qr-card">
+            <p>Lessor Payment QR / Account</p>
+
+            <div class="qr-placeholder">
+              QR
+            </div>
+
+            <strong>{{ record.lessorPaymentAccount }}</strong>
+            <span>{{ record.paymentMethod }}</span>
+          </div>
+
+          <div class="proof-card">
+            <p>Payment Proof</p>
+
+            <div
+              class="payment-attempts"
+              *ngIf="record.paymentAttempts && record.paymentAttempts.length > 1"
+            >
+              <div class="attempts-header">
+                <strong>Payment Request History</strong>
+                <span>{{ record.paymentAttempts.length }} attempts</span>
+              </div>
+
+              <button
+                type="button"
+                class="attempt-item"
+                *ngFor="let attempt of record.paymentAttempts"
+                [class.active]="getSelectedAttempt(record)?.id === attempt.id"
+                (click)="selectPaymentAttempt(record, attempt)"
+              >
+                <div>
+                  <span>Ref No.</span>
+                  <strong>{{ attempt.referenceNo || 'No reference' }}</strong>
+                </div>
+
+                <div>
+                  <span>Status</span>
+                  <strong
+                    [class.good]="attempt.status === 'Reservation Fee Confirmed'"
+                    [class.warning]="attempt.status === 'Pending Payment' || attempt.status === 'Pending Payment Confirmation'"
+                    [class.danger]="attempt.status === 'Payment Rejected' || attempt.status === 'Payment Failed'"
+                  >
+                    {{ attempt.status }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Date</span>
+                  <strong>{{ attempt.submittedDate }}</strong>
+                </div>
+              </button>
+            </div>
+
+            <div class="attempt-detail" *ngIf="getSelectedAttempt(record) as attempt">
+              <div class="attempt-detail-grid">
+                <div>
+                  <span>Reference No.</span>
+                  <strong>{{ attempt.referenceNo || 'Not submitted' }}</strong>
+                </div>
+
+                <div>
+                  <span>Attempt Status</span>
+                  <strong
+                    [class.good]="attempt.status === 'Reservation Fee Confirmed'"
+                    [class.warning]="attempt.status === 'Pending Payment' || attempt.status === 'Pending Payment Confirmation'"
+                    [class.danger]="attempt.status === 'Payment Rejected' || attempt.status === 'Payment Failed'"
+                  >
+                    {{ attempt.status }}
+                  </strong>
+                </div>
+
+                <div>
+                  <span>Payment Method</span>
+                  <strong>{{ attempt.paymentMethod }}</strong>
+                </div>
+
+                <div>
+                  <span>Submitted Date</span>
+                  <strong>{{ attempt.submittedDate }}</strong>
+                </div>
+              </div>
+
+              <div class="proof-placeholder" *ngIf="!attempt.paymentProofUrl">
+                🧾
+                <span>Payment proof placeholder</span>
+              </div>
+
+              <img
+                *ngIf="attempt.paymentProofUrl"
+                [src]="attempt.paymentProofUrl"
+                alt="Payment proof"
+              />
+
+              <div class="attempt-note" *ngIf="attempt.notes">
+                <span>Attempt Note</span>
+                <p>{{ attempt.notes }}</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="detail-grid">
+            <div>
+              <span>Rental Total</span>
+              <strong>₱{{ record.rentalTotal | number }}</strong>
+            </div>
+
+            <div>
+              <span>Reservation Fee</span>
+              <strong>₱{{ record.reservationFee | number }}</strong>
+            </div>
+
+            <div>
+              <span>Remaining Balance</span>
+              <strong>₱{{ record.remainingBalance | number }}</strong>
+            </div>
+
+            <div>
+              <span>Current Payment Status</span>
+              <strong
+                [class.good]="record.paymentStatus === 'Reservation Fee Confirmed'"
+                [class.warning]="record.paymentStatus === 'Pending Payment' || record.paymentStatus === 'Pending Payment Confirmation'"
+                [class.danger]="record.paymentStatus === 'Payment Rejected' || record.paymentStatus === 'Payment Failed'"
+              >
+                {{ record.paymentStatus }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Booking Status</span>
+              <strong
+                [class.good]="record.bookingStatus === 'Approved'"
+                [class.warning]="record.bookingStatus === 'Pending Lessor Approval'"
+                [class.danger]="record.bookingStatus === 'Rejected' || record.bookingStatus === 'Cancelled'"
+              >
+                {{ record.bookingStatus }}
+              </strong>
+            </div>
+
+            <div *ngIf="record.confirmedDate">
+              <span>Confirmed Date</span>
+              <strong>{{ record.confirmedDate }}</strong>
+            </div>
+
+            <div *ngIf="record.confirmedBy">
+              <span>Confirmed By</span>
+              <strong>{{ record.confirmedBy }}</strong>
+            </div>
+
+            <div *ngIf="record.cancelledDate">
+              <span>Cancelled Date</span>
+              <strong>{{ record.cancelledDate }}</strong>
+            </div>
+
+            <div *ngIf="record.cancelledBy">
+              <span>Cancelled By</span>
+              <strong>{{ record.cancelledBy }}</strong>
+            </div>
+          </div>
+
+          <div class="notes-box">
+            <div class="notes-header">
+              <p>Payment / Booking Notes</p>
+              <span>{{ record.notes.length }} note(s)</span>
+            </div>
+
+            <div class="note-list" *ngIf="record.notes.length > 0">
+              <div
+                class="note-item"
+                *ngFor="let note of record.notes"
+                [class.renter]="note.source === 'Renter'"
+                [class.system]="note.source === 'System'"
+                [class.lessor]="note.source === 'Lessor'"
+              >
+                <div class="note-top">
+                  <span class="note-source">{{ note.source }}</span>
+                  <small>{{ note.createdAt }}</small>
+                </div>
+
+                <strong>{{ note.createdBy }}</strong>
+                <p>{{ note.message }}</p>
+              </div>
+            </div>
+
+            <div class="no-notes" *ngIf="record.notes.length === 0">
+              No payment notes added.
+            </div>
+          </div>
+        </section>
+      </div>
+    </section>
+
+  </section>
+</app-lessor-sidebar>

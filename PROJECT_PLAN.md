@@ -12,6 +12,8 @@ Phase 1 focuses on car rental businesses.
 
 The goal is to help existing car rental businesses digitize their process using FamBridge software and FamBridge API.
 
+The rental business owns the operation, vehicles, customers, payment accounts, approvals, and transactions. FamBridge provides the software, API, logging, automation, and support system.
+
 ## Phase 1 Focus
 
 Phase 1 is focused on:
@@ -29,6 +31,10 @@ FamBridge will provide tools for car rental businesses to manage:
 * Renter approval
 * Booking requests
 * Reservation fee flow
+* Direct payment tracking
+* Lessor-owned payment QR/account display
+* Payment proof and payment reference records
+* Lessor payment confirmation
 * Lessor approval flow
 * Renter document collection
 * Renter trust profile
@@ -65,6 +71,38 @@ When asked for AI tool configuration:
 None
 ```
 
+## Important Route Rule
+
+This Angular project/build is for the rental business / lessor side.
+
+Routes should not include `lessor` prefix.
+
+Correct routes:
+
+```text
+/login
+/dashboard
+/vehicles
+/vehicles/new
+/vehicles/:id/edit
+/booking-requests
+/reservation-fees
+/api-usage
+/verification-credits
+/reports
+/settings
+```
+
+Avoid routes like:
+
+```text
+/lessor-login
+/lessor-dashboard
+/lessor-booking-requests
+```
+
+Component and folder names may still include `lessor` internally if needed, but public routes should stay clean.
+
 ## Recommended Folder Structure
 
 ```text
@@ -76,6 +114,7 @@ src/app/
 
   shared/
     components/
+      lessor-sidebar/
       public-header/
       vehicle-card/
       filter-panel/
@@ -83,6 +122,18 @@ src/app/
       trust-profile-card/
 
   pages/
+    lessor-login/
+    lessor-dashboard/
+
+    vehicles/
+    vehicle-form/
+    booking-requests/
+    reservation-fees/
+    api-usage/
+    verification-credits/
+    reports/
+    settings/
+
     renter-verification-gate/
     renter-login/
     renter-profile/
@@ -94,9 +145,21 @@ src/app/
 
     lessor-public-page/
     lessor-public-header/
-    lessor-dashboard/
-    verification-queue/
-    credit-wallet/
+```
+
+## Current Completed Items
+
+```text
+[x] AI_CONTEXT.md
+[x] PROJECT_PLAN.md
+[x] GOOSE_INSTRUCTIONS.md
+[x] Lessor Login Page
+[x] Sidebar / Burger Menu
+[x] Dashboard Page
+[x] Vehicle Management Page
+[x] Add / Edit Vehicle Form
+[x] Booking Requests Page
+[x] Reservation Fees Page
 ```
 
 ## Development Priority
@@ -105,20 +168,422 @@ Build frontend pages first using mock data.
 
 Do not connect to the backend yet until the UI flow is stable.
 
-Priority order:
+Current priority order:
 
-1. Lessor public header
-2. Lessor public page
-3. Vehicle list/cards
-4. Booking request panel
-5. Reservation fee panel
-6. Renter verification gate
-7. Renter login
-8. Renter profile
-9. Renter documents
-10. Lessor dashboard
+1. Lessor login
+2. Sidebar / burger menu layout
+3. Dashboard
+4. Vehicle management
+5. Add / edit vehicle form
+6. Booking requests
+7. Reservation fees / payment confirmation records
+8. API usage
+9. Verification credits
+10. Reports
+11. Settings
 
-## Page 1: Lessor Public Header
+## Page 1: Lessor Login
+
+Purpose:
+
+Login page for rental business owners/admin users.
+
+Design:
+
+* Business software themed
+* FamBridge branding
+* Not marketplace-themed
+* Not renter login
+* GSAP animation allowed
+* Shows that the portal is powered by FamBridge API
+
+Route:
+
+```text
+/login
+```
+
+## Page 2: Sidebar / Burger Menu Layout
+
+Purpose:
+
+Main layout for the rental business/admin side.
+
+Includes:
+
+* Desktop sidebar
+* Mobile hamburger menu
+* Breadcrumb/topbar
+* Notification/profile area
+* Content area using `ng-content`
+
+Used by:
+
+* Dashboard
+* Vehicles
+* Booking requests
+* Reservation fees
+* API usage
+* Verification credits
+* Reports
+* Settings
+
+## Page 3: Dashboard
+
+Purpose:
+
+Private admin dashboard for the rental business.
+
+Sections:
+
+* Booking requests summary
+* Pending lessor approval
+* Vehicle summary
+* Reservation fee records
+* API request usage
+* API logs preview
+* Credits
+* Reports preview
+* Renter trust preview
+
+Important:
+
+Do not mix dashboard UI with the public rental business website.
+
+Route:
+
+```text
+/dashboard
+```
+
+## Page 4: Vehicle Management
+
+Purpose:
+
+Manage vehicles owned or operated by the rental business.
+
+Sections:
+
+* Vehicle list
+* Search/filter
+* Status: Active / Inactive / Under Review
+* Insurance status
+* Availability status
+* Edit button
+* Add Vehicle button
+
+Vehicle card should show:
+
+* Vehicle image
+* Vehicle name
+* Pickup location
+* Car type
+* Seats
+* Fuel type
+* Transmission
+* Insurance status
+* Price
+* Availability status
+* Edit button
+
+Routes:
+
+```text
+/vehicles
+/vehicles/new
+/vehicles/:id/edit
+```
+
+## Page 5: Add / Edit Vehicle Form
+
+Purpose:
+
+Allow the rental business to add and update vehicle records.
+
+Form sections:
+
+* Basic vehicle information
+* Car type
+* Rental type
+* Seats
+* Transmission
+* Fuel type
+* Color
+* Plate number
+* MV file number
+* Pickup address
+* 12-hour rate
+* 24-hour / daily rate
+* With-driver add-on
+* Insurance coverage
+* Vehicle photo
+* OR/CR document
+* Insurance policy document
+* Availability status
+* Vehicle notes
+
+Important:
+
+Seats should be stored as vehicle information, but not used as a primary filter on the renter-facing lessor page.
+
+## Page 6: Booking Requests
+
+Purpose:
+
+Allow the rental business to review renter booking requests.
+
+Correct booking flow:
+
+```text
+Renter searches vehicle
+→ Renter clicks Book Now
+→ Renter sends booking request
+→ Renter scans lessor-owned payment QR or pays to lessor payment account
+→ Renter submits payment proof or payment reference
+→ Booking request is submitted
+→ Payment status becomes Pending Payment Confirmation
+→ Lessor confirms payment
+→ Reservation fee status becomes Reservation Fee Confirmed
+→ Booking status remains Pending Lessor Approval
+→ Lessor reviews renter profile/documents
+→ Lessor approves or rejects booking
+```
+
+Booking Requests Page should show:
+
+* Booking request number
+* Renter name
+* Renter Trust ID
+* Trust score
+* Verified documents count
+* Successful rentals
+* Vehicle requested
+* Pickup location
+* Pickup date/time
+* Return date/time
+* Rental type
+* Reservation fee amount
+* Payment status
+* Booking status
+* Approve button
+* Reject button
+* View details panel
+
+Important rule:
+
+Reservation fee payment does not mean the booking is fully confirmed.
+
+Payment confirmation also does not mean the booking is approved.
+
+Correct booking status after payment confirmation:
+
+```text
+Pending Lessor Approval
+```
+
+Route:
+
+```text
+/booking-requests
+```
+
+## Page 7: Reservation Fees / Payment Confirmation Records
+
+Purpose:
+
+Track renter reservation fee payments that are paid directly to the lessor.
+
+In Phase 1, FamBridge does not receive renter payments directly.
+
+The renter pays the rental business / lessor directly using the lessor-owned payment QR code or payment account.
+
+Correct payment flow:
+
+```text
+Renter
+→ scans lessor QR code
+→ payment goes directly to lessor account
+→ renter submits payment reference/proof
+→ FamBridge records payment details
+→ lessor confirms payment
+→ booking remains Pending Lessor Approval until lessor approves
+```
+
+Reservation Fees Page should show:
+
+* Booking request number
+* Renter name
+* Vehicle name
+* Rental total
+* Reservation fee amount
+* Payment method
+* Lessor payment QR/payment account used
+* Payment reference number
+* Uploaded payment proof
+* Payment date/time
+* Payment confirmation status
+* Lessor confirmation date/time
+* Confirmed by
+* Notes or remarks
+
+Recommended payment statuses:
+
+```text
+Pending Payment
+Pending Payment Confirmation
+Reservation Fee Confirmed
+Payment Failed
+Payment Rejected
+Refunded
+```
+
+Recommended labels:
+
+* Lessor Payment QR
+* Direct Payment to Lessor
+* Payment Reference
+* Payment Proof
+* Pending Payment Confirmation
+* Reservation Fee Confirmed
+* Lessor Confirmed Payment
+
+Avoid these labels in Phase 1:
+
+* Payout
+* Settlement
+* Disbursement
+* Net Lessor Payout
+
+Route:
+
+```text
+/reservation-fees
+```
+
+## Removed / Postponed for Phase 1
+
+Do not prioritize a Payouts page in Phase 1.
+
+Reason:
+
+The renter payment goes directly to the lessor-owned QR/payment account.
+
+FamBridge does not hold the renter’s money.
+
+Therefore, there is no payout, settlement, or disbursement process required in Phase 1.
+
+If needed in the future, payout features can be added only when FamBridge starts collecting payments on behalf of the rental business.
+
+## Page 8: API Usage
+
+Purpose:
+
+Show API request usage because FamBridge charges clients based on API usage, subscription, or agreed pricing model.
+
+Sections:
+
+* Total API requests
+* Successful requests
+* Failed requests
+* Current billing cycle
+* Estimated API charges
+* API logs preview
+* Endpoint usage breakdown
+
+Route:
+
+```text
+/api-usage
+```
+
+## Page 9: Verification Credits
+
+Purpose:
+
+Track credits used for verification workflow if enabled.
+
+Sections:
+
+* Remaining credits
+* Earned credits
+* Used credits
+* Deducted credits
+* Verification activity list
+* Incorrect verification tracking
+
+Route:
+
+```text
+/verification-credits
+```
+
+## Page 10: Reports
+
+Purpose:
+
+Show business reports for the rental business.
+
+Possible sections:
+
+* Booking requests report
+* Vehicle performance
+* Reservation fee records
+* Payment confirmation report
+* API usage report
+* Renter approval report
+
+Route:
+
+```text
+/reports
+```
+
+## Page 11: Settings
+
+Purpose:
+
+Manage rental business configuration.
+
+Sections:
+
+* Business profile
+* Logo
+* Contact details
+* Payment QR/account details
+* Public website settings
+* API keys/client keys
+* Notification settings
+
+Route:
+
+```text
+/settings
+```
+
+## Public Rental Business Website
+
+Purpose:
+
+Each rental business can have a public-facing page or website.
+
+This page is for their renters.
+
+It should show:
+
+* Business logo
+* Business name
+* Business contact information
+* Available vehicles
+* Vehicle details
+* Insurance coverage
+* Booking request form
+* Lessor-owned payment QR/payment instructions when needed
+* About Us
+* Contact Us
+
+The page should look like the rental business website, not like FamBridge owns the cars.
+
+## Lessor Public Header
 
 Purpose:
 
@@ -153,7 +618,7 @@ Second row:
 * About Us
 * Contact Us
 
-## Page 2: Lessor Public Page
+## Lessor Public Page
 
 Purpose:
 
@@ -186,7 +651,7 @@ Important:
 * Do not add Seats as a filter.
 * Seats can be displayed only as vehicle information inside the vehicle card.
 
-## Page 3: Vehicle Search
+## Vehicle Search
 
 Use the same structure as the current renter vehicle search page:
 
@@ -215,51 +680,7 @@ Vehicle card should show:
 * Availability status
 * Book Now button
 
-## Page 4: Booking Request Flow
-
-Correct booking flow:
-
-```text
-Renter searches vehicle
-→ Renter clicks Book Now
-→ Renter sends booking request
-→ Renter pays reservation fee
-→ Booking request is submitted
-→ Booking status becomes Pending Lessor Approval
-→ Lessor reviews renter profile/documents
-→ Lessor approves or rejects booking
-```
-
-Important rule:
-
-Reservation fee payment does not mean the booking is fully confirmed.
-
-Correct status after payment:
-
-```text
-Pending Lessor Approval
-```
-
-## Page 5: Reservation Fee Flow
-
-Reservation fee page should show:
-
-* Rental total
-* Reservation fee
-* Platform service fee
-* Total to pay now
-* Remaining balance
-* Payment method
-* Payment result
-
-After successful payment, show:
-
-```text
-Reservation fee received successfully.
-Your booking request has been submitted and is awaiting lessor approval.
-```
-
-## Page 6: Renter Verification Gate
+## Renter Verification Gate
 
 Purpose:
 
@@ -285,7 +706,7 @@ Actions:
 * Login
 * Create Account
 
-## Page 7: Renter Login
+## Renter Login
 
 Purpose:
 
@@ -301,7 +722,7 @@ Design:
 * Create account option
 * Message about approved renters only
 
-## Page 8: Renter Profile
+## Renter Profile
 
 Purpose:
 
@@ -322,7 +743,7 @@ Sections:
 * TikTok references
 * Faster approval tips
 
-## Page 9: Renter Documents
+## Renter Documents
 
 Documents:
 
@@ -340,29 +761,6 @@ Rules:
 * Store files in Cloudflare R2.
 * Do not store base64 in database.
 * Store file metadata and file path only.
-
-## Page 10: Lessor Dashboard
-
-Purpose:
-
-Private admin dashboard for the rental business.
-
-Sections:
-
-* Booking requests
-* Renter approval
-* Vehicle list
-* Vehicle availability
-* Reservation fee records
-* Payout records
-* API request usage
-* API logs
-* Credits
-* Reports
-
-Important:
-
-Do not mix dashboard UI with the public lessor website.
 
 ## Deployment Model
 
@@ -425,6 +823,8 @@ Logs are used for:
 * Support
 * Audit trail
 * Transaction tracing
+* Payment proof/reference checking
+* Payment confirmation issue checking
 * API usage monitoring
 * Client billing
 * Security monitoring
@@ -465,6 +865,9 @@ Avoid:
 * Marketplace
 * SaaS marketplace
 * We own cars
+* Payouts
+* Settlement
+* Disbursement
 
 Use:
 
@@ -477,6 +880,10 @@ Use:
 * Pending lessor approval
 * FamBridge API
 * Business-owned rental website
+* Direct payment to lessor
+* Lessor payment QR
+* Payment proof
+* Payment confirmation
 
 ## Correct Mental Model
 
@@ -486,12 +893,17 @@ The rental business is the operator.
 
 The renter is the customer of the rental business.
 
+The renter pays the rental business directly using the lessor-owned payment account or QR code.
+
+FamBridge records and supports the transaction workflow but does not hold the renter’s money in Phase 1.
+
 Correct flow:
 
 ```text
 Renter
 → Rental Business Website powered by FamBridge
 → FamBridge API
-→ Rental Business Owner / Lessor
-→ Booking approval
+→ Renter pays lessor directly
+→ Rental Business Owner / Lessor confirms payment
+→ Rental Business Owner / Lessor approves booking
 ```

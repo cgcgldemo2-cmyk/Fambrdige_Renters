@@ -14,7 +14,7 @@ FamBridge provides software and API services for existing rental businesses.
 
 Phase 1 focuses on rental businesses, specifically **car rental businesses**.
 
-The rental business owners already have their own rental operations, vehicles, customers, pricing, verification process, and business rules. FamBridge helps them digitize, automate, and manage those processes through software.
+The rental business owners already have their own rental operations, vehicles, customers, pricing, verification process, payment accounts, and business rules. FamBridge helps them digitize, automate, and manage those processes through software and API services.
 
 ## What FamBridge Provides
 
@@ -27,6 +27,10 @@ FamBridge provides the software platform and API layer that helps rental busines
 * Renter approval
 * Booking requests
 * Reservation fee flow
+* Direct payment tracking
+* Lessor payment QR/payment account display
+* Payment proof/reference recording
+* Lessor payment confirmation
 * Lessor approval flow
 * Renter document collection
 * Renter trust profile
@@ -48,11 +52,13 @@ FamBridge does not:
 * Replace the rental business owner
 * Become the main marketplace between all rental companies
 * Approve every renter manually for the lessor
+* Receive or hold renter payments directly in Phase 1
+* Handle payout, settlement, or disbursement of renter payments in Phase 1
 * Take responsibility for damages, loss, theft, or issues between renter and lessor
 
 FamBridge provides the system, API, and process automation.
 
-The rental business owner is still responsible for their own renters, vehicles, approvals, operations, and transactions.
+The rental business owner is still responsible for their own renters, vehicles, approvals, payment accounts, operations, and transactions.
 
 ## Phase 1 Focus
 
@@ -73,6 +79,7 @@ Each rental business can have:
 * Own booking flow
 * Own customer records
 * Own payment setup
+* Own lessor-owned QR code/payment account
 * Own domain or subdomain
 * Own server or FamBridge-hosted option
 
@@ -89,6 +96,8 @@ The lessor is the client/customer of FamBridge.
 
 They use FamBridge software to run their rental operation online.
 
+The lessor owns and controls their payment account or QR code used for renter reservation fee payments.
+
 ## Renter
 
 A renter is the customer of the car rental business.
@@ -100,7 +109,8 @@ Rules:
 * Renter may need to upload documents.
 * Renter may have a trust profile.
 * Renter can send booking requests.
-* Renter can pay reservation fees.
+* Renter can pay reservation fees directly to the lessor using the lessor-owned QR code or payment account.
+* Renter may need to upload payment proof or enter payment reference.
 * Booking is still subject to lessor approval.
 
 ## Deployment / Hosting Model
@@ -132,7 +142,9 @@ The business-owned application still connects to FamBridge API for:
 * Renter approval
 * Vehicle listing data
 * Booking requests
-* Reservation fee flow
+* Reservation fee tracking
+* Payment proof/reference records
+* Lessor payment confirmation records
 * Renter documents
 * Trust profile
 * Verification records
@@ -152,7 +164,7 @@ Business-owned website/domain/server
 → business pays FamBridge for API/service usage
 ```
 
-This setup gives the rental business stronger control over branding and hosting, while FamBridge continues to provide the backend platform, API, trust system, verification system, and business logic.
+This setup gives the rental business stronger control over branding and hosting, while FamBridge continues to provide the backend platform, API, trust system, verification system, booking workflow, payment tracking, and business logic.
 
 ### Option 2: FamBridge Subdomain and Server
 
@@ -185,6 +197,7 @@ It should show:
 * Vehicle details
 * Insurance coverage
 * Booking request form
+* Lessor-owned payment QR/payment instructions when needed
 * About Us
 * Contact Us
 
@@ -232,6 +245,30 @@ Do not add Seats as a filter.
 
 Seats can be displayed only as vehicle information inside the vehicle card.
 
+## Phase 1 Payment Model
+
+In Phase 1, FamBridge does not receive renter payments directly.
+
+The renter pays the rental business / lessor directly using the lessor-owned payment QR code or payment account.
+
+Example flow:
+
+```text
+Renter
+→ scans lessor QR code
+→ payment goes directly to lessor account
+→ renter submits payment reference/proof
+→ FamBridge records payment details
+→ lessor confirms payment
+→ booking remains Pending Lessor Approval until lessor approves
+```
+
+FamBridge records the payment transaction for tracking, support, audit trail, API logging, and booking workflow.
+
+FamBridge does not hold the renter’s money in Phase 1.
+
+There is no payout, settlement, or disbursement page required in Phase 1 because the payment is already paid directly to the lessor.
+
 ## Booking Flow
 
 Correct booking flow:
@@ -240,9 +277,13 @@ Correct booking flow:
 Renter searches vehicle
 → Renter clicks Book Now
 → Renter sends booking request
-→ Renter pays reservation fee
+→ Renter scans lessor-owned payment QR or pays to lessor payment account
+→ Renter submits payment proof or payment reference
 → Booking request is submitted
-→ Booking status becomes Pending Lessor Approval
+→ Payment status becomes Pending Payment Confirmation
+→ Lessor confirms payment
+→ Reservation fee status becomes Reservation Fee Confirmed
+→ Booking status remains Pending Lessor Approval
 → Lessor reviews renter profile/documents
 → Lessor approves or rejects booking
 ```
@@ -251,11 +292,63 @@ Important:
 
 Reservation fee payment does not mean the booking is fully confirmed.
 
-The correct status after payment is:
+Payment confirmation also does not mean the booking is fully approved.
+
+The lessor still needs to review and approve the booking request.
+
+Correct payment statuses:
+
+```text
+Pending Payment
+Pending Payment Confirmation
+Reservation Fee Confirmed
+Payment Failed
+Payment Rejected
+```
+
+Correct booking status after payment confirmation:
 
 ```text
 Pending Lessor Approval
 ```
+
+## Reservation Fee and Payment Tracking
+
+The system should track reservation fee records even though payment goes directly to the lessor.
+
+Reservation fee records may include:
+
+* Booking request number
+* Renter name
+* Vehicle name
+* Rental total
+* Reservation fee amount
+* Payment method
+* Lessor payment QR/payment account used
+* Payment reference number
+* Uploaded payment proof
+* Payment date/time
+* Payment confirmation status
+* Lessor confirmation date/time
+* Confirmed by
+* Notes or remarks
+
+Recommended labels:
+
+* Lessor Payment QR
+* Direct Payment to Lessor
+* Payment Reference
+* Payment Proof
+* Pending Payment Confirmation
+* Reservation Fee Confirmed
+* Lessor Confirmed Payment
+
+Avoid using these labels for Phase 1:
+
+* Payout
+* Settlement
+* Disbursement
+* Net Lessor Payout
 
 ## Trust and Verification Concept
 
@@ -316,7 +409,8 @@ Purpose of storing payloads and responses:
 * Faster debugging
 * Transaction tracing
 * Booking issue investigation
-* Payment flow checking
+* Payment proof/reference checking
+* Payment confirmation issue checking
 * Document verification issue checking
 * API usage monitoring
 * Client billing based on API usage
@@ -385,6 +479,8 @@ If the business owner uses FamBridge subdomain and server, additional cost will 
 
 Even if the business owner uses their own domain and server, the application still connects to FamBridge API, and FamBridge can charge based on API request usage or agreed subscription terms.
 
+In Phase 1, FamBridge does not need to process payouts because renter payments go directly to the lessor-owned payment account.
+
 ## Design Direction
 
 Use a professional, rental-business-friendly design.
@@ -416,6 +512,9 @@ Avoid wording like:
 * Marketplace
 * SaaS marketplace
 * We own cars
+* Payouts
+* Settlement
+* Disbursement
 
 Use wording like:
 
@@ -428,6 +527,10 @@ Use wording like:
 * Pending lessor approval
 * Business-owned rental website
 * FamBridge API
+* Direct payment to lessor
+* Lessor payment QR
+* Payment proof
+* Payment confirmation
 
 ## Correct Mental Model
 
@@ -437,12 +540,17 @@ The rental business is the operator.
 
 The renter is the customer of the rental business.
 
+The renter pays the rental business directly using the lessor-owned payment account or QR code.
+
+FamBridge records and supports the transaction workflow but does not hold the renter’s money in Phase 1.
+
 Correct flow:
 
 ```text
 Renter
 → Rental Business Website powered by FamBridge
 → FamBridge API
-→ Business Owner / Lessor
-→ Booking approval
+→ Renter pays lessor directly
+→ Rental Business Owner / Lessor confirms payment
+→ Rental Business Owner / Lessor approves booking
 ```

@@ -38,6 +38,12 @@ export const routes: Routes = [
         .then(m => m.BookingRequestsComponent)
   },
   {
+    path: 'reservation-fees',
+    loadComponent: () =>
+      import('./pages/reservation-fees/reservation-fees.component')
+        .then(m => m.ReservationFeesComponent)
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'
