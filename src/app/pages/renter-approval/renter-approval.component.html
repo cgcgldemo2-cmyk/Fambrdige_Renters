@@ -237,13 +237,16 @@
             </div>
 
             <div class="document-list">
-              <div
+              <button
+                type="button"
                 class="document-item"
                 *ngFor="let doc of renter.documents"
                 [class.verified]="doc.status === 'Verified'"
                 [class.submitted]="doc.status === 'Submitted'"
                 [class.rejected]="doc.status === 'Rejected'"
                 [class.missing]="doc.status === 'Missing'"
+                [class.no-upload]="doc.status === 'Missing'"
+                (click)="openDocument(doc)"
               >
                 <div class="doc-preview">
                   📄
@@ -256,8 +259,11 @@
                   <p>{{ doc.remarks || 'No remarks.' }}</p>
                 </div>
 
-                <strong>{{ doc.status }}</strong>
-              </div>
+                <div class="document-status-stack">
+                  <strong>{{ doc.status }}</strong>
+                  <small>{{ doc.status === 'Missing' ? 'No file' : 'Click to view' }}</small>
+                </div>
+              </button>
             </div>
           </div>
 
@@ -455,6 +461,86 @@
             </button>
           </div>
         </section>
+      </div>
+    </section>
+
+    <div
+      class="document-viewer-backdrop"
+      *ngIf="selectedDocument"
+      (click)="closeDocumentViewer()"
+    ></div>
+
+    <section
+      class="document-viewer-modal"
+      *ngIf="selectedDocument as document"
+      aria-label="Document viewer"
+    >
+      <div class="document-viewer-header">
+        <div>
+          <p>Document Viewer</p>
+          <h2>{{ document.name }}</h2>
+          <span>{{ document.documentTypeCode }} · {{ document.status }}</span>
+        </div>
+
+        <button
+          type="button"
+          class="viewer-close-btn"
+          (click)="closeDocumentViewer()"
+          aria-label="Close document viewer"
+        >
+          ×
+        </button>
+      </div>
+
+      <div class="document-viewer-toolbar">
+        <button type="button" (click)="zoomOutDocument()">−</button>
+
+        <strong>{{ documentZoomPercent }}%</strong>
+
+        <button type="button" (click)="zoomInDocument()">+</button>
+
+        <button type="button" (click)="resetDocumentViewer()">
+          Reset
+        </button>
+      </div>
+
+      <div
+        class="document-viewer-stage"
+        [class.panning]="isPanningDocument"
+        (pointerdown)="startDocumentPan($event)"
+        (pointermove)="panDocument($event)"
+        (pointerup)="endDocumentPan()"
+        (pointerleave)="endDocumentPan()"
+        (pointercancel)="endDocumentPan()"
+      >
+        <img
+          class="document-viewer-image"
+          [src]="getDocumentImageUrl(document)"
+          [alt]="document.name"
+          [style.transform]="documentImageTransform"
+          draggable="false"
+        />
+
+        <div class="document-watermark">
+          WATERMARKED · {{ selectedRenter?.trustId || 'FAMBRIDGE' }}
+        </div>
+      </div>
+
+      <div class="document-viewer-footer">
+        <div>
+          <span>Submitted Date</span>
+          <strong>{{ document.submittedDate || 'Not submitted' }}</strong>
+        </div>
+
+        <div>
+          <span>Remarks</span>
+          <strong>{{ document.remarks || 'No remarks.' }}</strong>
+        </div>
+
+        <div>
+          <span>Instruction</span>
+          <strong>Use + / − to zoom, then drag the document to pan.</strong>
+        </div>
       </div>
     </section>
 
