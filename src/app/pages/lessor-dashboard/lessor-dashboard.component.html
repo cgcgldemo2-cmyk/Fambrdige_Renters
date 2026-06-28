@@ -1,0 +1,135 @@
+<app-lessor-sidebar>
+  <section class="dashboard-page">
+
+    <div class="dashboard-hero">
+      <div>
+        <p>Business Dashboard</p>
+        <h1>Welcome back, Juan Dela Cruz Car Rental</h1>
+        <span>
+          Manage booking requests, vehicles, reservation fees, API usage, and renter approvals.
+        </span>
+      </div>
+
+      <button type="button">
+        Add Vehicle
+      </button>
+    </div>
+
+    <section class="summary-grid">
+      <article class="summary-card" *ngFor="let card of summaryCards">
+        <span>{{ card.label }}</span>
+        <strong>{{ card.value }}</strong>
+        <p>{{ card.description }}</p>
+      </article>
+    </section>
+
+    <section class="dashboard-grid">
+
+      <article class="panel-card booking-panel">
+        <div class="panel-header">
+          <div>
+            <p>Latest Requests</p>
+            <h2>Booking Requests</h2>
+          </div>
+
+          <button type="button">View All</button>
+        </div>
+
+        <div class="booking-list">
+          <div class="booking-row" *ngFor="let booking of bookingRequests">
+            <div>
+              <strong>{{ booking.renter }}</strong>
+              <span>{{ booking.vehicle }}</span>
+            </div>
+
+            <div>
+              <small>{{ booking.date }}</small>
+              <span class="status">{{ booking.status }}</span>
+            </div>
+
+            <div class="fee">
+              {{ booking.fee }}
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel-card trust-panel">
+        <div class="panel-header">
+          <div>
+            <p>Renter Review</p>
+            <h2>Trust Profile Preview</h2>
+          </div>
+        </div>
+
+        <div class="trust-score">
+          <strong>82</strong>
+          <span>Trust Score</span>
+        </div>
+
+        <div class="trust-list">
+          <div>
+            <span>Verified Documents</span>
+            <strong>5</strong>
+          </div>
+
+          <div>
+            <span>Successful Rentals</span>
+            <strong>12</strong>
+          </div>
+
+          <div>
+            <span>Average Rating</span>
+            <strong>4.8</strong>
+          </div>
+        </div>
+      </article>
+
+      <article class="panel-card">
+        <div class="panel-header">
+          <div>
+            <p>Billing</p>
+            <h2>API Usage</h2>
+          </div>
+        </div>
+
+        <div class="usage-box">
+          <strong>8,420</strong>
+          <span>API requests this cycle</span>
+        </div>
+
+        <p class="muted-text">
+          Used for renter registration, booking requests, vehicle data, documents, and reports.
+        </p>
+      </article>
+
+      <article class="panel-card">
+        <div class="panel-header">
+          <div>
+            <p>Credits</p>
+            <h2>Verification Credits</h2>
+          </div>
+        </div>
+
+        <div class="credit-grid">
+          <div>
+            <span>Remaining</span>
+            <strong>128</strong>
+          </div>
+
+          <div>
+            <span>Earned</span>
+            <strong>42</strong>
+          </div>
+
+          <div>
+            <span>Used</span>
+            <strong>18</strong>
+          </div>
+        </div>
+      </article>
+
+    </section>
+
+  </section>
+</app-lessor-sidebar>
