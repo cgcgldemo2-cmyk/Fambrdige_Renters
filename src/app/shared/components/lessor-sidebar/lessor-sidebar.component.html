@@ -1,0 +1,80 @@
+<div class="dashboard-shell" [class.sidebar-open]="isSidebarOpen">
+  <div class="mobile-backdrop" *ngIf="isSidebarOpen" (click)="closeSidebar()"></div>
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand-mark">F</div>
+      <div class="brand-copy">
+        <h1>FamBridge</h1>
+        <span>Rental Business Software</span>
+      </div>
+
+      <button type="button" class="sidebar-close" (click)="closeSidebar()" aria-label="Close sidebar">
+        <span>×</span>
+      </button>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Lessor navigation">
+      <button
+        type="button"
+        class="nav-item"
+        *ngFor="let item of menuItems"
+        [class.active]="item.route === activeRoute"
+        (click)="goTo(item.route)"
+      >
+        <span class="nav-icon">{{ item.icon }}</span>
+        <span class="nav-label">{{ item.label }}</span>
+        <span class="nav-badge" *ngIf="item.badge">{{ item.badge }}</span>
+      </button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div class="business-card">
+        <div class="business-icon">JD</div>
+        <div>
+          <strong>{{ businessName }}</strong>
+          <span>Lessor Account</span>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- MAIN CONTENT AREA -->
+  <section class="main-panel">
+    <!-- MOBILE / TOP BAR -->
+    <header class="topbar">
+      <button type="button" class="menu-toggle" (click)="openSidebar()" aria-label="Open sidebar">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+
+      <div class="page-title-group">
+        <nav class="breadcrumb" aria-label="Breadcrumb">
+          <button type="button" (click)="goTo('/lessor/dashboard')">Dashboard</button>
+          <span>/</span>
+          <strong>{{ currentPageTitle }}</strong>
+        </nav>
+
+        <h2>{{ currentPageTitle }}</h2>
+      </div>
+
+      <div class="topbar-actions">
+        <button type="button" class="notification-btn" aria-label="Notifications">
+          🔔
+          <span *ngIf="notificationCount > 0">{{ notificationCount }}</span>
+        </button>
+
+        <button type="button" class="profile-btn">
+          <span>{{ ownerInitials }}</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- CONTENT SLOT -->
+    <main class="content-area">
+      <ng-content></ng-content>
+    </main>
+  </section>
+</div>
