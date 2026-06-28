@@ -1,0 +1,183 @@
+<app-lessor-sidebar>
+  <section class="vehicles-page">
+
+    <!-- HERO -->
+    <section class="page-hero">
+      <div>
+        <p>Vehicle Management</p>
+        <h1>Manage your rental vehicles</h1>
+        <span>
+          Add vehicles, update availability, check insurance status, and manage pricing.
+        </span>
+      </div>
+
+      <a routerLink="/vehicles/new" class="add-vehicle-btn">
+        Add Vehicle
+      </a>
+    </section>
+
+    <!-- SUMMARY -->
+    <section class="summary-grid">
+      <article>
+        <span>Total Vehicles</span>
+        <strong>{{ vehicles.length }}</strong>
+        <p>All vehicles registered</p>
+      </article>
+
+      <article>
+        <span>Active Vehicles</span>
+        <strong>{{ activeVehicles }}</strong>
+        <p>Visible for booking</p>
+      </article>
+
+      <article>
+        <span>Available Today</span>
+        <strong>{{ availableVehicles }}</strong>
+        <p>Ready for renters</p>
+      </article>
+
+      <article>
+        <span>Needs Insurance</span>
+        <strong>{{ missingInsurance }}</strong>
+        <p>Missing documents</p>
+      </article>
+    </section>
+
+    <!-- FILTERS -->
+    <section class="filter-card">
+      <div class="search-field">
+        <label>Search Vehicle</label>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          placeholder="Search by vehicle name, plate no, or location"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label>Status</label>
+        <select [(ngModel)]="selectedStatus">
+          <option *ngFor="let status of statusOptions" [value]="status">
+            {{ status }}
+          </option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Car Type</label>
+        <select [(ngModel)]="selectedCarType">
+          <option *ngFor="let type of carTypeOptions" [value]="type">
+            {{ type }}
+          </option>
+        </select>
+      </div>
+    </section>
+
+    <!-- EMPTY -->
+    <section class="empty-state" *ngIf="filteredVehicles.length === 0">
+      <div class="empty-icon">🚘</div>
+      <h2>No vehicles found</h2>
+      <p>Try changing your search or filters.</p>
+      <a routerLink="/vehicles/new">Add Vehicle</a>
+    </section>
+
+    <!-- VEHICLE LIST -->
+    <section class="vehicle-list" *ngIf="filteredVehicles.length > 0">
+      <article class="vehicle-card" *ngFor="let vehicle of filteredVehicles">
+
+        <div class="vehicle-image">
+          <img
+            *ngIf="vehicle.imageUrl"
+            [src]="vehicle.imageUrl"
+            [alt]="vehicle.name"
+          />
+
+          <div class="vehicle-placeholder" *ngIf="!vehicle.imageUrl">
+            🚗
+          </div>
+        </div>
+
+        <div class="vehicle-info">
+          <div class="vehicle-title-row">
+            <div>
+              <h2>{{ vehicle.name }}</h2>
+              <p>{{ vehicle.location }}</p>
+            </div>
+
+            <span
+              class="status-badge"
+              [class.active]="vehicle.status === 'Active'"
+              [class.inactive]="vehicle.status === 'Inactive'"
+              [class.review]="vehicle.status === 'Under Review'"
+            >
+              {{ vehicle.status }}
+            </span>
+          </div>
+
+          <div class="vehicle-spec-grid">
+            <div>
+              <span>Car Type</span>
+              <strong>{{ vehicle.carType }}</strong>
+            </div>
+
+            <div>
+              <span>Seats</span>
+              <strong>{{ vehicle.seats }} seater</strong>
+            </div>
+
+            <div>
+              <span>Transmission</span>
+              <strong>{{ vehicle.transmission }}</strong>
+            </div>
+
+            <div>
+              <span>Fuel</span>
+              <strong>{{ vehicle.fuelType }}</strong>
+            </div>
+
+            <div>
+              <span>Rental Type</span>
+              <strong>{{ vehicle.rentalType }}</strong>
+            </div>
+
+            <div>
+              <span>Plate No.</span>
+              <strong>{{ vehicle.plateNumber }}</strong>
+            </div>
+          </div>
+
+          <div class="vehicle-footer">
+            <div>
+              <span>Daily Rate</span>
+              <strong>₱{{ vehicle.pricePerDay | number }}</strong>
+            </div>
+
+            <div>
+              <span>Insurance</span>
+              <strong
+                [class.good]="vehicle.insuranceStatus === 'Complete'"
+                [class.warning]="vehicle.insuranceStatus === 'Expiring Soon'"
+                [class.danger]="vehicle.insuranceStatus === 'Missing'"
+              >
+                {{ vehicle.insuranceStatus }}
+              </strong>
+            </div>
+
+            <div>
+              <span>Availability</span>
+              <strong [class.good]="vehicle.isAvailable" [class.danger]="!vehicle.isAvailable">
+                {{ vehicle.isAvailable ? 'Available' : 'Unavailable' }}
+              </strong>
+            </div>
+
+            <a [routerLink]="['/vehicles', vehicle.id, 'edit']">
+              Edit
+            </a>
+          </div>
+        </div>
+
+      </article>
+    </section>
+
+  </section>
+</app-lessor-sidebar>
