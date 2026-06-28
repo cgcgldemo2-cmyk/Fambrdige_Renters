@@ -1,0 +1,161 @@
+<div class="lessor-login-page">
+
+  <!-- LEFT CONTENT -->
+  <section class="login-visual-panel" #visualPanel>
+
+    <div class="brand-area">
+      <div class="brand-logo">F</div>
+
+      <div>
+        <h1>Fam<span>Bridge</span></h1>
+        <p>Rental Business Software</p>
+      </div>
+    </div>
+
+    <div class="hero-content">
+      <div class="api-badge">
+        <span>🔗</span>
+        POWERED BY FAMBRIDGE API
+      </div>
+
+      <h2>
+        Manage your rental business from one
+        <span>secure portal.</span>
+      </h2>
+
+      <p>
+        Login to manage vehicles, renter approvals, booking requests,
+        reservation fees, documents, and business reports.
+      </p>
+    </div>
+
+    <div class="feature-list">
+      <button type="button" class="feature-card">
+        <div class="feature-icon">📅</div>
+        <div>
+          <strong>Booking Requests</strong>
+          <span>Review renter requests before approval</span>
+        </div>
+        <small>›</small>
+      </button>
+
+      <button type="button" class="feature-card">
+        <div class="feature-icon">🛡</div>
+        <div>
+          <strong>Renter Approval</strong>
+          <span>Check documents and trust profile</span>
+        </div>
+        <small>›</small>
+      </button>
+
+      <button type="button" class="feature-card">
+        <div class="feature-icon">🔗</div>
+        <div>
+          <strong>API Connected</strong>
+          <span>Your website connects to FamBridge API</span>
+        </div>
+        <small>›</small>
+      </button>
+    </div>
+
+    <div class="booking-status-card">
+      <div class="status-icon">📊</div>
+      <span>Today</span>
+      <strong>12 Booking Requests</strong>
+      <p>Pending lessor approval</p>
+    </div>
+
+    <div class="car-glow"></div>
+    <div class="car-image"></div>
+    <div class="road-line road-line-one"></div>
+    <div class="road-line road-line-two"></div>
+
+  </section>
+
+  <!-- RIGHT LOGIN CARD -->
+  <section class="login-form-panel">
+    <div class="login-card" #loginCard>
+
+      <div class="login-header">
+        <span>LESSOR PORTAL</span>
+        <h2>Welcome back</h2>
+        <p>Sign in to your rental business account.</p>
+      </div>
+
+      <form (ngSubmit)="login()">
+
+        <label class="form-field">
+          <span>Email Address</span>
+
+          <div class="input-wrap">
+            <small>✉</small>
+            <input
+              type="email"
+              name="email"
+              [(ngModel)]="email"
+              placeholder="Enter your email"
+            />
+          </div>
+        </label>
+
+        <label class="form-field">
+          <span>Password</span>
+
+          <div class="input-wrap">
+            <small>🔒</small>
+            <input
+              [type]="showPassword ? 'text' : 'password'"
+              name="password"
+              [(ngModel)]="password"
+              placeholder="Enter your password"
+            />
+
+            <button
+              type="button"
+              class="show-password-btn"
+              (click)="togglePassword()"
+            >
+              {{ showPassword ? 'Hide' : 'Show' }}
+            </button>
+          </div>
+        </label>
+
+        <div class="form-options">
+          <label>
+            <input
+              type="checkbox"
+              name="rememberMe"
+              [(ngModel)]="rememberMe"
+            />
+            Remember me
+          </label>
+
+          <button type="button" (click)="forgotPassword()">
+            Forgot password?
+          </button>
+        </div>
+
+        <button
+          type="submit"
+          class="login-btn"
+          [disabled]="isLoading"
+        >
+          {{ isLoading ? 'Signing in...' : 'Login to Dashboard' }}
+        </button>
+      </form>
+
+      <div class="security-note">
+        <div class="security-icon">🔐</div>
+
+        <div>
+          <strong>Secure business access</strong>
+          <span>
+            This portal is for verified rental business owners using FamBridge software.
+          </span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+</div>

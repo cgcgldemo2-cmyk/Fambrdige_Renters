@@ -1,1 +1,27 @@
-/* You can add global styles to this file, and also import other style files */
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+$primary: #ff4104;
+$primary-dark: #e03705;
+$dark: #001621;
+$dark-soft: #062236;
+$text: #111827;
+$muted: #667085;
+$border: #e5eaf2;
+$green: #2f7d32;
+
+.lessor-login-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  font-family: 'Plus Jakarta Sans',
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  background: #ffffff;
+  color: #001621;
+}
