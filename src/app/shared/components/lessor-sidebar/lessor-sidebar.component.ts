@@ -1,12 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
+import { Component, EventEmitter, Input, OnDestroy, OnInit, Output } from '@angular/core';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { filter, Subscription } from 'rxjs';
 
 export interface LessorSidebarMenuItem {
   label: string;
   route: string;
   icon: string;
   badge?: number | string;
+  disabled?: boolean;
 }
 
 @Component({
@@ -16,73 +18,89 @@ export interface LessorSidebarMenuItem {
   templateUrl: './lessor-sidebar.component.html',
   styleUrls: ['./lessor-sidebar.component.scss']
 })
-export class LessorSidebarComponent {
+export class LessorSidebarComponent implements OnInit, OnDestroy {
   @Input() businessName = 'Juan Dela Cruz Car Rental';
   @Input() ownerInitials = 'JD';
   @Input() notificationCount = 3;
-  @Input() activeRoute = '/lessor/dashboard';
-  @Input() currentPageTitle = 'Dashboard';
 
   @Output() routeSelected = new EventEmitter<string>();
 
   isSidebarOpen = false;
+  activeRoute = '/dashboard';
+  currentPageTitle = 'Dashboard';
+
+  private routerSub?: Subscription;
 
   menuItems: LessorSidebarMenuItem[] = [
     {
       label: 'Dashboard',
-      route: '/lessor/dashboard',
+      route: '/dashboard',
       icon: '▦'
     },
     {
       label: 'Booking Requests',
-      route: '/lessor/booking-requests',
+      route: '/booking-requests',
       icon: '▣',
       badge: 23
     },
     {
-      label: 'Renter Approvals',
-      route: '/lessor/renter-approvals',
+      label: 'Renters',
+      route: '/renters',
       icon: '👥',
       badge: 8
     },
     {
       label: 'Vehicles',
-      route: '/lessor/vehicles',
+      route: '/vehicles',
       icon: '🚘'
     },
     {
       label: 'Reservation Fees',
-      route: '/lessor/reservation-fees',
+      route: '/reservation-fees',
       icon: '₱'
     },
     {
-      label: 'Payouts',
-      route: '/lessor/payouts',
-      icon: '▤'
-    },
-    {
       label: 'API Usage',
-      route: '/lessor/api-usage',
-      icon: '</>'
+      route: '/api-usage',
+      icon: '</>',
+      disabled: true
     },
     {
       label: 'Verification Credits',
-      route: '/lessor/verification-credits',
-      icon: '🛡'
+      route: '/verification-credits',
+      icon: '🛡',
+      disabled: true
     },
     {
       label: 'Reports',
-      route: '/lessor/reports',
-      icon: '▥'
+      route: '/reports',
+      icon: '▥',
+      disabled: true
     },
     {
       label: 'Settings',
-      route: '/lessor/settings',
-      icon: '⚙'
+      route: '/settings',
+      icon: '⚙',
+      disabled: true
     }
   ];
 
   constructor(private router: Router) {}
+
+  ngOnInit(): void {
+    this.syncPageState(this.router.url);
+
+    this.routerSub = this.router.events
+      .pipe(filter(event => event instanceof NavigationEnd))
+      .subscribe(event => {
+        const nav = event as NavigationEnd;
+        this.syncPageState(nav.urlAfterRedirects);
+      });
+  }
+
+  ngOnDestroy(): void {
+    this.routerSub?.unsubscribe();
+  }
 
   openSidebar(): void {
     this.isSidebarOpen = true;
@@ -92,14 +110,43 @@ export class LessorSidebarComponent {
     this.isSidebarOpen = false;
   }
 
-  goTo(route: string): void {
-    this.activeRoute = route;
+  goTo(route: string, disabled = false): void {
+    if (disabled) {
+      return;
+    }
+
     this.routeSelected.emit(route);
     this.closeSidebar();
+    this.router.navigateByUrl(route);
+  }
 
-    // Keep this safe. If routes are not created yet, the emit still works.
-    this.router.navigateByUrl(route).catch(() => {
-      console.log('Route not created yet:', route);
+  private syncPageState(url: string): void {
+    const cleanUrl = url.split('?')[0].split('#')[0];
+
+    const matchedItem = this.menuItems.find(item => {
+      if (item.route === '/vehicles') {
+        return cleanUrl === '/vehicles' ||
+          cleanUrl === '/vehicles/new' ||
+          cleanUrl.startsWith('/vehicles/');
+      }
+
+      return item.route === cleanUrl;
     });
+
+    this.activeRoute = matchedItem?.route || cleanUrl;
+    this.currentPageTitle = matchedItem?.label || this.formatTitle(cleanUrl);
+  }
+
+  private formatTitle(url: string): string {
+    const path = url.replace('/', '');
+
+    if (!path) {
+      return 'Dashboard';
+    }
+
+    return path
+      .split('-')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   }
 }

@@ -44,7 +44,7 @@ export const routes: Routes = [
         .then(m => m.ReservationFeesComponent)
   },
   {
-    path: 'renter-approval',
+    path: 'renters',
     loadComponent: () =>
       import('./pages/renter-approval/renter-approval.component')
         .then(m => m.RenterApprovalComponent)

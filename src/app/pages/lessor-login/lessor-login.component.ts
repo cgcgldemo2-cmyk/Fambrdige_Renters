@@ -6,7 +6,7 @@ import {
   ViewChild
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { gsap } from 'gsap';
 
 @Component({
@@ -17,11 +17,12 @@ import { gsap } from 'gsap';
   styleUrls: ['./lessor-login.component.scss']
 })
 export class LessorLoginComponent implements AfterViewInit {
+  constructor(private router: Router) {}
   @ViewChild('visualPanel') visualPanel!: ElementRef<HTMLElement>;
   @ViewChild('loginCard') loginCard!: ElementRef<HTMLElement>;
 
-  email = '';
-  password = '';
+  email = 'lessor@sample.comment';
+  password = 'password';
   rememberMe = false;
   showPassword = false;
   isLoading = false;
@@ -45,6 +46,7 @@ export class LessorLoginComponent implements AfterViewInit {
 
     setTimeout(() => {
       this.isLoading = false;
+      this.router.navigate(['/dashboard']);
     }, 900);
   }
 
