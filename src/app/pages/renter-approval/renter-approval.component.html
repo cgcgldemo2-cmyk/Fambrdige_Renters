@@ -245,8 +245,7 @@
                 [class.submitted]="doc.status === 'Submitted'"
                 [class.rejected]="doc.status === 'Rejected'"
                 [class.missing]="doc.status === 'Missing'"
-                [class.no-upload]="doc.status === 'Missing'"
-                (click)="openDocument(doc)"
+                (click)="openDocumentViewer(doc)"
               >
                 <div class="doc-preview">
                   📄
@@ -257,12 +256,10 @@
                   <h3>{{ doc.name }}</h3>
                   <span>{{ doc.submittedDate || 'Not submitted' }}</span>
                   <p>{{ doc.remarks || 'No remarks.' }}</p>
+                  <small class="doc-code">{{ doc.documentTypeCode }}</small>
                 </div>
 
-                <div class="document-status-stack">
-                  <strong>{{ doc.status }}</strong>
-                  <small>{{ doc.status === 'Missing' ? 'No file' : 'Click to view' }}</small>
-                </div>
+                <strong>{{ doc.status }}</strong>
               </button>
             </div>
           </div>
@@ -464,82 +461,141 @@
       </div>
     </section>
 
-    <div
-      class="document-viewer-backdrop"
-      *ngIf="selectedDocument"
-      (click)="closeDocumentViewer()"
-    ></div>
-
     <section
-      class="document-viewer-modal"
+      class="document-viewer-backdrop"
       *ngIf="selectedDocument as document"
-      aria-label="Document viewer"
+      (mouseup)="stopDocumentPan()"
+      (mouseleave)="stopDocumentPan()"
     >
-      <div class="document-viewer-header">
-        <div>
-          <p>Document Viewer</p>
-          <h2>{{ document.name }}</h2>
-          <span>{{ document.documentTypeCode }} · {{ document.status }}</span>
+      <div class="document-viewer-modal">
+        <header class="document-viewer-header">
+          <div>
+            <p>Document Viewer</p>
+            <h2>{{ document.name }}</h2>
+            <span>{{ document.documentTypeCode }} · {{ document.status }}</span>
+          </div>
+
+          <button type="button" class="viewer-close-btn" (click)="closeDocumentViewer()">
+            ×
+          </button>
+        </header>
+
+        <div class="document-viewer-toolbar">
+          <button type="button" (click)="zoomOutDocument()">−</button>
+          <strong>{{ documentZoom | number:'1.1-1' }}x</strong>
+          <button type="button" (click)="zoomInDocument()">+</button>
+          <button type="button" (click)="resetDocumentView()">Reset</button>
         </div>
 
-        <button
-          type="button"
-          class="viewer-close-btn"
-          (click)="closeDocumentViewer()"
-          aria-label="Close document viewer"
+        <div
+          class="document-viewer-stage"
+          [class.panning]="isPanning"
+          (mousedown)="startDocumentPan($event)"
+          (mousemove)="moveDocumentPan($event)"
+          (mouseup)="stopDocumentPan()"
+          (wheel)="onDocumentWheel($event)"
         >
-          ×
-        </button>
-      </div>
+          <div
+            class="document-viewer-image-wrap"
+            [style.transform]="'translate(' + documentPanX + 'px, ' + documentPanY + 'px) scale(' + documentZoom + ')'"
+          >
+            <img
+              *ngIf="document.fileUrl"
+              [src]="document.fileUrl"
+              [alt]="document.name"
+              draggable="false"
+            />
 
-      <div class="document-viewer-toolbar">
-        <button type="button" (click)="zoomOutDocument()">−</button>
+            <div class="document-viewer-placeholder" *ngIf="!document.fileUrl">
+              <div>📄</div>
+              <strong>{{ document.name }}</strong>
+              <span>Document preview placeholder</span>
+              <small>{{ document.documentTypeCode }}</small>
+            </div>
 
-        <strong>{{ documentZoomPercent }}%</strong>
-
-        <button type="button" (click)="zoomInDocument()">+</button>
-
-        <button type="button" (click)="resetDocumentViewer()">
-          Reset
-        </button>
-      </div>
-
-      <div
-        class="document-viewer-stage"
-        [class.panning]="isPanningDocument"
-        (pointerdown)="startDocumentPan($event)"
-        (pointermove)="panDocument($event)"
-        (pointerup)="endDocumentPan()"
-        (pointerleave)="endDocumentPan()"
-        (pointercancel)="endDocumentPan()"
-      >
-        <img
-          class="document-viewer-image"
-          [src]="getDocumentImageUrl(document)"
-          [alt]="document.name"
-          [style.transform]="documentImageTransform"
-          draggable="false"
-        />
-
-        <div class="document-watermark">
-          WATERMARKED · {{ selectedRenter?.trustId || 'FAMBRIDGE' }}
-        </div>
-      </div>
-
-      <div class="document-viewer-footer">
-        <div>
-          <span>Submitted Date</span>
-          <strong>{{ document.submittedDate || 'Not submitted' }}</strong>
+            <div class="viewer-watermark">
+              FamBridge Protected · {{ selectedRenter?.trustId }}
+            </div>
+          </div>
         </div>
 
-        <div>
-          <span>Remarks</span>
-          <strong>{{ document.remarks || 'No remarks.' }}</strong>
+        <div class="document-viewer-info">
+          <div>
+            <span>Status</span>
+            <strong
+              [class.good]="document.status === 'Verified'"
+              [class.warning]="document.status === 'Submitted'"
+              [class.danger]="document.status === 'Rejected'"
+            >
+              {{ document.status }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Submitted Date</span>
+            <strong>{{ document.submittedDate || 'Not submitted' }}</strong>
+          </div>
+
+          <div>
+            <span>Remarks</span>
+            <strong>{{ document.remarks || 'No remarks.' }}</strong>
+          </div>
         </div>
 
-        <div>
-          <span>Instruction</span>
-          <strong>Use + / − to zoom, then drag the document to pan.</strong>
+        <div class="document-viewer-actions">
+          <button
+            type="button"
+            class="verify-document-btn"
+            [disabled]="document.status === 'Verified' || document.status === 'Missing'"
+            (click)="verifySelectedDocument()"
+          >
+            Verify
+          </button>
+
+          <button
+            type="button"
+            class="reject-document-btn"
+            [disabled]="document.status === 'Missing'"
+            (click)="startRejectSelectedDocument()"
+          >
+            Reject
+          </button>
+        </div>
+
+        <div class="document-reject-box" *ngIf="showDocumentRejectBox">
+          <p>Reject Document</p>
+          <span>
+            Please provide a clear reason. Minimum 50 characters are required before proceeding.
+          </span>
+
+          <textarea
+            [(ngModel)]="documentRejectReason"
+            rows="4"
+            placeholder="Example: The uploaded document is blurry and the ID number/name cannot be clearly verified."
+          ></textarea>
+
+          <div class="reject-character-count" [class.valid]="canProceedDocumentReject">
+            {{ documentRejectCharacters }}/50 minimum characters
+          </div>
+
+          <div class="document-reject-actions">
+            <button
+              type="button"
+              class="proceed-document-reject-btn"
+              [disabled]="!canProceedDocumentReject"
+              (click)="proceedRejectSelectedDocument()"
+            >
+              Proceed Reject Document
+            </button>
+
+            <button
+              type="button"
+              class="cancel-document-reject-btn"
+              (click)="cancelDocumentReject()"
+            >
+              Cancel
+            </button>
+          </div>
         </div>
       </div>
     </section>

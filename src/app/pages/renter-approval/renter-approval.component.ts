@@ -15,32 +15,17 @@ type DocumentStatus =
   | 'Rejected'
   | 'Missing';
 
-type RenterDocumentCode =
-  | 'driver_license'
-  | 'government_id'
-  | 'proof_of_address'
-  | 'selfie_verification'
-  | 'other_supporting_document';
-
 type NoteSource = 'Renter' | 'System' | 'Lessor';
 
 interface RenterDocument {
   id: number;
   documentTypeId: number;
-  documentTypeCode: RenterDocumentCode;
+  documentTypeCode: string;
   name: string;
   status: DocumentStatus;
   submittedDate?: string;
   fileUrl?: string;
   remarks?: string;
-}
-
-interface RequestDocumentOption {
-  documentTypeId: number;
-  documentTypeCode: RenterDocumentCode;
-  label: string;
-  description: string;
-  icon: string;
 }
 
 interface RenterNote {
@@ -55,6 +40,14 @@ interface RentalReference {
   platform: 'Facebook' | 'Instagram' | 'TikTok' | 'Manual';
   url: string;
   status: 'Provided' | 'Verified' | 'Needs Review';
+}
+
+interface RequestDocumentOption {
+  documentTypeId: number;
+  documentTypeCode: string;
+  label: string;
+  description: string;
+  icon: string;
 }
 
 interface RenterApprovalRecord {
@@ -101,57 +94,19 @@ export class RenterApprovalComponent {
 
   rejectReason = '';
   requestDocsReason = '';
-  selectedRequestDocumentCodes: RenterDocumentCode[] = [];
+
+  selectedRequestDocuments: RequestDocumentOption[] = [];
 
   selectedDocument: RenterDocument | null = null;
   documentZoom = 1;
   documentPanX = 0;
   documentPanY = 0;
-  isPanningDocument = false;
+  isPanning = false;
+  panStartX = 0;
+  panStartY = 0;
 
-  private lastDocumentPointerX = 0;
-  private lastDocumentPointerY = 0;
-  private readonly minDocumentZoom = 0.6;
-  private readonly maxDocumentZoom = 3;
-  private readonly documentZoomStep = 0.25;
-
-  requestDocumentOptions: RequestDocumentOption[] = [
-    {
-      documentTypeId: 1,
-      documentTypeCode: 'driver_license',
-      label: 'Driver License',
-      description: 'Front and back, clear and readable',
-      icon: '🚘'
-    },
-    {
-      documentTypeId: 2,
-      documentTypeCode: 'government_id',
-      label: 'Government ID',
-      description: 'Clear and valid government ID',
-      icon: '🪪'
-    },
-    {
-      documentTypeId: 3,
-      documentTypeCode: 'proof_of_address',
-      label: 'Proof of Address',
-      description: 'Recent utility bill or similar proof',
-      icon: '🏠'
-    },
-    {
-      documentTypeId: 4,
-      documentTypeCode: 'selfie_verification',
-      label: 'Selfie Verification',
-      description: 'Clear selfie for identity checking',
-      icon: '🤳'
-    },
-    {
-      documentTypeId: 5,
-      documentTypeCode: 'other_supporting_document',
-      label: 'Other Supporting Document',
-      description: 'Any other document requested by lessor',
-      icon: '📎'
-    }
-  ];
+  showDocumentRejectBox = false;
+  documentRejectReason = '';
 
   approvalStatuses = [
     'All',
@@ -159,6 +114,44 @@ export class RenterApprovalComponent {
     'Approved',
     'Rejected',
     'Need More Documents'
+  ];
+
+  requestDocumentOptions: RequestDocumentOption[] = [
+    {
+      documentTypeId: 1,
+      documentTypeCode: 'DRIVER_LICENSE',
+      label: 'Driver License',
+      description: 'Valid driver license front/back copy.',
+      icon: '🚗'
+    },
+    {
+      documentTypeId: 2,
+      documentTypeCode: 'GOVERNMENT_ID',
+      label: 'Government ID',
+      description: 'Valid government-issued identification.',
+      icon: '🪪'
+    },
+    {
+      documentTypeId: 3,
+      documentTypeCode: 'PROOF_OF_ADDRESS',
+      label: 'Proof of Address',
+      description: 'Utility bill, billing statement, or barangay certificate.',
+      icon: '🏠'
+    },
+    {
+      documentTypeId: 4,
+      documentTypeCode: 'SELFIE_VERIFICATION',
+      label: 'Selfie Verification',
+      description: 'Selfie photo used to match submitted documents.',
+      icon: '🤳'
+    },
+    {
+      documentTypeId: 5,
+      documentTypeCode: 'RENTAL_REFERENCE',
+      label: 'Rental Reference',
+      description: 'Previous rental company or reference proof.',
+      icon: '📌'
+    }
   ];
 
   renters: RenterApprovalRecord[] = [
@@ -177,37 +170,41 @@ export class RenterApprovalComponent {
         {
           id: 1,
           documentTypeId: 1,
-          documentTypeCode: 'driver_license',
+          documentTypeCode: 'DRIVER_LICENSE',
           name: 'Driver License',
           status: 'Submitted',
           submittedDate: 'Jul 18, 2026 08:30 AM',
+          fileUrl: '',
           remarks: 'Clear image uploaded.'
         },
         {
           id: 2,
           documentTypeId: 2,
-          documentTypeCode: 'government_id',
+          documentTypeCode: 'GOVERNMENT_ID',
           name: 'Government ID',
           status: 'Submitted',
           submittedDate: 'Jul 18, 2026 08:31 AM',
+          fileUrl: '',
           remarks: 'Needs manual review.'
         },
         {
           id: 3,
           documentTypeId: 3,
-          documentTypeCode: 'proof_of_address',
+          documentTypeCode: 'PROOF_OF_ADDRESS',
           name: 'Proof of Address',
           status: 'Submitted',
           submittedDate: 'Jul 18, 2026 08:33 AM',
+          fileUrl: '',
           remarks: 'Utility bill uploaded.'
         },
         {
           id: 4,
           documentTypeId: 4,
-          documentTypeCode: 'selfie_verification',
+          documentTypeCode: 'SELFIE_VERIFICATION',
           name: 'Selfie Verification',
           status: 'Submitted',
           submittedDate: 'Jul 18, 2026 08:35 AM',
+          fileUrl: '',
           remarks: 'Face is visible.'
         }
       ],
@@ -257,28 +254,31 @@ export class RenterApprovalComponent {
         {
           id: 1,
           documentTypeId: 1,
-          documentTypeCode: 'driver_license',
+          documentTypeCode: 'DRIVER_LICENSE',
           name: 'Driver License',
           status: 'Verified',
           submittedDate: 'Jul 16, 2026 10:00 AM',
+          fileUrl: '',
           remarks: 'Verified by lessor.'
         },
         {
           id: 2,
           documentTypeId: 2,
-          documentTypeCode: 'government_id',
+          documentTypeCode: 'GOVERNMENT_ID',
           name: 'Government ID',
           status: 'Verified',
           submittedDate: 'Jul 16, 2026 10:01 AM',
+          fileUrl: '',
           remarks: 'Verified by lessor.'
         },
         {
           id: 3,
           documentTypeId: 3,
-          documentTypeCode: 'proof_of_address',
+          documentTypeCode: 'PROOF_OF_ADDRESS',
           name: 'Proof of Address',
           status: 'Verified',
           submittedDate: 'Jul 16, 2026 10:04 AM',
+          fileUrl: '',
           remarks: 'Verified by lessor.'
         }
       ],
@@ -322,16 +322,17 @@ export class RenterApprovalComponent {
         {
           id: 1,
           documentTypeId: 1,
-          documentTypeCode: 'driver_license',
+          documentTypeCode: 'DRIVER_LICENSE',
           name: 'Driver License',
           status: 'Submitted',
           submittedDate: 'Jul 20, 2026 03:10 PM',
+          fileUrl: '',
           remarks: 'Image is slightly blurry.'
         },
         {
           id: 2,
           documentTypeId: 2,
-          documentTypeCode: 'government_id',
+          documentTypeCode: 'GOVERNMENT_ID',
           name: 'Government ID',
           status: 'Missing',
           remarks: 'Required document not uploaded.'
@@ -339,7 +340,7 @@ export class RenterApprovalComponent {
         {
           id: 3,
           documentTypeId: 3,
-          documentTypeCode: 'proof_of_address',
+          documentTypeCode: 'PROOF_OF_ADDRESS',
           name: 'Proof of Address',
           status: 'Missing',
           remarks: 'Required document not uploaded.'
@@ -378,10 +379,11 @@ export class RenterApprovalComponent {
         {
           id: 1,
           documentTypeId: 1,
-          documentTypeCode: 'driver_license',
+          documentTypeCode: 'DRIVER_LICENSE',
           name: 'Driver License',
           status: 'Rejected',
           submittedDate: 'Jul 22, 2026 01:10 PM',
+          fileUrl: '',
           remarks: 'Document does not match renter information.'
         }
       ],
@@ -402,153 +404,6 @@ export class RenterApprovalComponent {
       ]
     }
   ];
-
-  get selectedRequestDocuments(): RequestDocumentOption[] {
-    return this.requestDocumentOptions.filter(option =>
-      this.selectedRequestDocumentCodes.includes(option.documentTypeCode)
-    );
-  }
-
-  isRequestDocumentSelected(documentTypeCode: RenterDocumentCode): boolean {
-    return this.selectedRequestDocumentCodes.includes(documentTypeCode);
-  }
-
-  toggleRequestDocument(option: RequestDocumentOption): void {
-    if (this.isRequestDocumentSelected(option.documentTypeCode)) {
-      this.removeRequestDocument(option.documentTypeCode);
-      return;
-    }
-
-    this.selectedRequestDocumentCodes = [
-      ...this.selectedRequestDocumentCodes,
-      option.documentTypeCode
-    ];
-  }
-
-  removeRequestDocument(documentTypeCode: RenterDocumentCode): void {
-    this.selectedRequestDocumentCodes = this.selectedRequestDocumentCodes.filter(
-      code => code !== documentTypeCode
-    );
-  }
-
-  get documentZoomPercent(): number {
-    return Math.round(this.documentZoom * 100);
-  }
-
-  get documentImageTransform(): string {
-    return `translate(${this.documentPanX}px, ${this.documentPanY}px) scale(${this.documentZoom})`;
-  }
-
-  openDocument(document: RenterDocument): void {
-    this.selectedDocument = document;
-    this.resetDocumentViewer();
-  }
-
-  closeDocumentViewer(): void {
-    this.selectedDocument = null;
-    this.resetDocumentViewer();
-  }
-
-  zoomInDocument(): void {
-    this.documentZoom = Math.min(
-      this.maxDocumentZoom,
-      this.roundZoom(this.documentZoom + this.documentZoomStep)
-    );
-  }
-
-  zoomOutDocument(): void {
-    this.documentZoom = Math.max(
-      this.minDocumentZoom,
-      this.roundZoom(this.documentZoom - this.documentZoomStep)
-    );
-  }
-
-  resetDocumentViewer(): void {
-    this.documentZoom = 1;
-    this.documentPanX = 0;
-    this.documentPanY = 0;
-    this.isPanningDocument = false;
-  }
-
-  startDocumentPan(event: PointerEvent): void {
-    if (!this.selectedDocument) {
-      return;
-    }
-
-    this.isPanningDocument = true;
-    this.lastDocumentPointerX = event.clientX;
-    this.lastDocumentPointerY = event.clientY;
-
-    const target = event.currentTarget as HTMLElement;
-    target.setPointerCapture?.(event.pointerId);
-
-    event.preventDefault();
-  }
-
-  panDocument(event: PointerEvent): void {
-    if (!this.isPanningDocument) {
-      return;
-    }
-
-    const deltaX = event.clientX - this.lastDocumentPointerX;
-    const deltaY = event.clientY - this.lastDocumentPointerY;
-
-    this.documentPanX += deltaX;
-    this.documentPanY += deltaY;
-
-    this.lastDocumentPointerX = event.clientX;
-    this.lastDocumentPointerY = event.clientY;
-
-    event.preventDefault();
-  }
-
-  endDocumentPan(): void {
-    this.isPanningDocument = false;
-  }
-
-  getDocumentImageUrl(document: RenterDocument): string {
-    if (document.fileUrl) {
-      return document.fileUrl;
-    }
-
-    const title = this.escapeSvgText(document.name);
-    const status = this.escapeSvgText(document.status);
-    const code = this.escapeSvgText(document.documentTypeCode);
-
-    const svg = `
-      <svg xmlns="http://www.w3.org/2000/svg" width="900" height="1200" viewBox="0 0 900 1200">
-        <rect width="900" height="1200" fill="#f8fafc"/>
-        <rect x="70" y="80" width="760" height="1040" rx="28" fill="#ffffff" stroke="#e5eaf2" stroke-width="4"/>
-        <rect x="120" y="150" width="660" height="70" rx="14" fill="#ff4104" opacity="0.12"/>
-        <text x="450" y="195" text-anchor="middle" font-family="Arial, sans-serif" font-size="32" font-weight="700" fill="#001621">${title}</text>
-        <text x="450" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#667085">${code}</text>
-        <rect x="140" y="330" width="620" height="360" rx="20" fill="#f1f5f9" stroke="#cbd5e1" stroke-dasharray="14 14" stroke-width="3"/>
-        <text x="450" y="500" text-anchor="middle" font-family="Arial, sans-serif" font-size="86" fill="#94a3b8">📄</text>
-        <text x="450" y="575" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="700" fill="#001621">Document Preview</text>
-        <text x="450" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#667085">Actual uploaded file will display here from secure storage.</text>
-        <text x="450" y="780" text-anchor="middle" font-family="Arial, sans-serif" font-size="22" font-weight="700" fill="#001621">Status: ${status}</text>
-        <g opacity="0.11" transform="rotate(-28 450 600)">
-          <text x="450" y="610" text-anchor="middle" font-family="Arial, sans-serif" font-size="78" font-weight="900" fill="#ff4104">WATERMARKED</text>
-        </g>
-        <text x="450" y="1030" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" fill="#94a3b8">FamBridge Protected Document Viewer</text>
-      </svg>
-    `;
-
-    return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
-  }
-
-  private roundZoom(value: number): number {
-    return Math.round(value * 100) / 100;
-  }
-
-  private escapeSvgText(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#039;');
-  }
 
   get filteredRenters(): RenterApprovalRecord[] {
     const keyword = this.searchText.toLowerCase().trim();
@@ -593,6 +448,14 @@ export class RenterApprovalComponent {
     return this.renters.filter(item => item.approvalStatus === 'Rejected').length;
   }
 
+  get documentRejectCharacters(): number {
+    return this.documentRejectReason.trim().length;
+  }
+
+  get canProceedDocumentReject(): boolean {
+    return this.documentRejectCharacters >= 50;
+  }
+
   openRenter(renter: RenterApprovalRecord): void {
     this.selectedRenter = renter;
     this.resetActionBoxes();
@@ -607,6 +470,7 @@ export class RenterApprovalComponent {
   backToList(): void {
     this.selectedRenter = null;
     this.resetActionBoxes();
+    this.closeDocumentViewer();
 
     setTimeout(() => {
       document
@@ -694,19 +558,42 @@ export class RenterApprovalComponent {
     this.showRequestDocsBox = true;
     this.showRejectBox = false;
     this.requestDocsReason = '';
+    this.selectedRequestDocuments = [];
+  }
 
-    const suggestedDocumentCodes = renter.documents
-      .filter(document => document.status === 'Missing' || document.status === 'Rejected')
-      .map(document => document.documentTypeCode);
+  toggleRequestDocument(option: RequestDocumentOption): void {
+    const exists = this.selectedRequestDocuments.some(
+      item => item.documentTypeCode === option.documentTypeCode
+    );
 
-    this.selectedRequestDocumentCodes = Array.from(new Set(suggestedDocumentCodes));
+    if (exists) {
+      this.removeRequestDocument(option.documentTypeCode);
+      return;
+    }
+
+    this.selectedRequestDocuments = [
+      ...this.selectedRequestDocuments,
+      option
+    ];
+  }
+
+  isRequestDocumentSelected(documentTypeCode: string): boolean {
+    return this.selectedRequestDocuments.some(
+      item => item.documentTypeCode === documentTypeCode
+    );
+  }
+
+  removeRequestDocument(documentTypeCode: string): void {
+    this.selectedRequestDocuments = this.selectedRequestDocuments.filter(
+      item => item.documentTypeCode !== documentTypeCode
+    );
   }
 
   proceedRequestMoreDocuments(): void {
     if (
       !this.selectedRenter ||
       !this.requestDocsReason.trim() ||
-      this.selectedRequestDocumentCodes.length === 0
+      this.selectedRequestDocuments.length === 0
     ) {
       return;
     }
@@ -717,8 +604,12 @@ export class RenterApprovalComponent {
       return;
     }
 
-    const requestedDocuments = this.selectedRequestDocuments
-      .map(document => document.label)
+    const selectedLabels = this.selectedRequestDocuments
+      .map(item => item.label)
+      .join(', ');
+
+    const selectedCodes = this.selectedRequestDocuments
+      .map(item => item.documentTypeCode)
       .join(', ');
 
     record.approvalStatus = 'Need More Documents';
@@ -731,20 +622,169 @@ export class RenterApprovalComponent {
         source: 'Lessor',
         createdBy: 'Current User',
         createdAt: 'Today',
-        message: `More documents requested (${requestedDocuments}): ${this.requestDocsReason.trim()}`
+        message: `More documents requested: ${selectedLabels}. ${this.requestDocsReason.trim()}`
       },
       {
         source: 'System',
         createdBy: 'FamBridge API',
         createdAt: 'Today',
-        message: `Document request created with document type codes: ${this.selectedRequestDocumentCodes.join(', ')}.`
+        message: `Document request created using document type codes: ${selectedCodes}.`
       }
     ];
 
     this.selectedRenter = record;
     this.requestDocsReason = '';
-    this.selectedRequestDocumentCodes = [];
+    this.selectedRequestDocuments = [];
     this.showRequestDocsBox = false;
+  }
+
+  openDocumentViewer(doc: RenterDocument): void {
+    this.selectedDocument = doc;
+    this.documentZoom = 1;
+    this.documentPanX = 0;
+    this.documentPanY = 0;
+    this.isPanning = false;
+    this.showDocumentRejectBox = false;
+    this.documentRejectReason = '';
+  }
+
+  closeDocumentViewer(): void {
+    this.selectedDocument = null;
+    this.documentZoom = 1;
+    this.documentPanX = 0;
+    this.documentPanY = 0;
+    this.isPanning = false;
+    this.showDocumentRejectBox = false;
+    this.documentRejectReason = '';
+  }
+
+  zoomInDocument(): void {
+    this.documentZoom = Math.min(this.documentZoom + 0.2, 3);
+  }
+
+  zoomOutDocument(): void {
+    this.documentZoom = Math.max(this.documentZoom - 0.2, 0.6);
+  }
+
+  resetDocumentView(): void {
+    this.documentZoom = 1;
+    this.documentPanX = 0;
+    this.documentPanY = 0;
+  }
+
+  startDocumentPan(event: MouseEvent): void {
+    if (!this.selectedDocument) {
+      return;
+    }
+
+    event.preventDefault();
+    this.isPanning = true;
+    this.panStartX = event.clientX - this.documentPanX;
+    this.panStartY = event.clientY - this.documentPanY;
+  }
+
+  moveDocumentPan(event: MouseEvent): void {
+    if (!this.isPanning) {
+      return;
+    }
+
+    this.documentPanX = event.clientX - this.panStartX;
+    this.documentPanY = event.clientY - this.panStartY;
+  }
+
+  stopDocumentPan(): void {
+    this.isPanning = false;
+  }
+
+  onDocumentWheel(event: WheelEvent): void {
+    event.preventDefault();
+
+    if (event.deltaY < 0) {
+      this.zoomInDocument();
+      return;
+    }
+
+    this.zoomOutDocument();
+  }
+
+  verifySelectedDocument(): void {
+    if (!this.selectedDocument || !this.selectedRenter) {
+      return;
+    }
+
+    if (this.selectedDocument.status === 'Missing') {
+      return;
+    }
+
+    this.selectedDocument.status = 'Verified';
+    this.selectedDocument.remarks = 'Document verified by lessor.';
+
+    this.selectedRenter.notes = [
+      ...this.selectedRenter.notes,
+      {
+        source: 'Lessor',
+        createdBy: 'Current User',
+        createdAt: 'Today',
+        message: `Document verified: ${this.selectedDocument.name} (${this.selectedDocument.documentTypeCode}).`
+      },
+      {
+        source: 'System',
+        createdBy: 'FamBridge API',
+        createdAt: 'Today',
+        message: `Document status changed to Verified for documentTypeCode ${this.selectedDocument.documentTypeCode}.`
+      }
+    ];
+
+    this.showDocumentRejectBox = false;
+    this.documentRejectReason = '';
+  }
+
+  startRejectSelectedDocument(): void {
+    if (!this.selectedDocument || this.selectedDocument.status === 'Missing') {
+      return;
+    }
+
+    this.showDocumentRejectBox = true;
+    this.documentRejectReason = '';
+  }
+
+  proceedRejectSelectedDocument(): void {
+    if (
+      !this.selectedDocument ||
+      !this.selectedRenter ||
+      !this.canProceedDocumentReject
+    ) {
+      return;
+    }
+
+    const reason = this.documentRejectReason.trim();
+
+    this.selectedDocument.status = 'Rejected';
+    this.selectedDocument.remarks = reason;
+
+    this.selectedRenter.notes = [
+      ...this.selectedRenter.notes,
+      {
+        source: 'Lessor',
+        createdBy: 'Current User',
+        createdAt: 'Today',
+        message: `Document rejected: ${this.selectedDocument.name} (${this.selectedDocument.documentTypeCode}). Reason: ${reason}`
+      },
+      {
+        source: 'System',
+        createdBy: 'FamBridge API',
+        createdAt: 'Today',
+        message: `Document status changed to Rejected for documentTypeCode ${this.selectedDocument.documentTypeCode}. Rejection reason met the minimum 50-character requirement.`
+      }
+    ];
+
+    this.showDocumentRejectBox = false;
+    this.documentRejectReason = '';
+  }
+
+  cancelDocumentReject(): void {
+    this.showDocumentRejectBox = false;
+    this.documentRejectReason = '';
   }
 
   cancelAction(): void {
@@ -756,6 +796,6 @@ export class RenterApprovalComponent {
     this.showRequestDocsBox = false;
     this.rejectReason = '';
     this.requestDocsReason = '';
-    this.selectedRequestDocumentCodes = [];
+    this.selectedRequestDocuments = [];
   }
 }
