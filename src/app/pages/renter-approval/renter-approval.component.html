@@ -1,4 +1,9 @@
 <app-lessor-sidebar [activeRoute]="'/renter-approval'" [currentPageTitle]="'Renters'">
+  <div class="floating-review-actions" *ngIf="showFloatingActions && selectedRecord">
+    <button type="button" class="btn back" (click)="backToRenterList()">Back to List</button>
+    <button type="button" class="btn approve" (click)="approveRenter()">Approve Renter</button>
+    <button type="button" class="btn reject" (click)="rejectRenter()">Reject Renter</button>
+  </div>
   <section class="renter-approval-page">
     <section class="page-hero">
       <div>
@@ -130,7 +135,7 @@
             <span>{{ record.trustId }}</span>
           </div>
 
-          <div class="detail-actions-top">
+          <div id="renterTopActions" class="detail-actions-top">
             <button type="button" class="btn back" (click)="backToRenterList()">Back to List</button>
             <button type="button" class="btn approve" (click)="approveRenter()">Approve Renter</button>
             <button type="button" class="btn reject" (click)="rejectRenter()">Reject Renter</button>

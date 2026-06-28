@@ -99,6 +99,8 @@ interface RenterApprovalRecord {
   styleUrls: ['./renter-approval.component.scss']
 })
 export class RenterApprovalComponent {
+  showFloatingActions = false;
+  private actionObserver?: IntersectionObserver;
   searchText = '';
   selectedStatus = 'All';
   activeTab: DetailTab = 'documents';
@@ -820,6 +822,8 @@ export class RenterApprovalComponent {
       document
         .getElementById('renterDetailSection')
         ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+        this.setupFloatingActions();
     }, 100);
   }
 
@@ -827,6 +831,8 @@ export class RenterApprovalComponent {
     const renterId = this.lastViewedRenterId;
 
     this.selectedRecord = null;
+    this.showFloatingActions = false;
+    this.actionObserver?.disconnect();
     this.returningRenterId = renterId;
     this.resetRequestMoreDocumentsBox();
 
@@ -1137,5 +1143,28 @@ export class RenterApprovalComponent {
       (total, group) => total + group.history.filter(item => item.status === 'Verified').length,
       0
     );
+  }
+  setupFloatingActions(): void {
+    setTimeout(() => {
+      const target = document.getElementById('renterTopActions');
+
+      if (!target) {
+        return;
+      }
+
+      this.actionObserver?.disconnect();
+
+      this.actionObserver = new IntersectionObserver(
+        entries => {
+          const entry = entries[0];
+          this.showFloatingActions = !entry.isIntersecting;
+        },
+        {
+          threshold: 0
+        }
+      );
+
+      this.actionObserver.observe(target);
+    }, 100);
   }
 }
