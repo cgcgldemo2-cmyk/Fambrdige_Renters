@@ -1,0 +1,139 @@
+$dark: #001621;
+$muted: #667085;
+$border: #e5eaf2;
+$green: #16a34a;
+$orange: #f97316;
+$red: #ef4444;
+
+.status-card {
+  height: 100%;
+  min-height: 280px;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba($dark, 0.04);
+
+  h2 {
+    margin: 0 0 18px;
+    color: $dark;
+    font-size: 17px;
+    font-weight: 900;
+  }
+}
+
+.status-content {
+  display: grid;
+  grid-template-columns: 1fr 0.9fr;
+  gap: 16px;
+  align-items: center;
+}
+
+.donut-wrap {
+  display: grid;
+  place-items: center;
+}
+
+.donut-chart {
+  width: 168px;
+  height: 168px;
+  border-radius: 50%;
+  background: conic-gradient($green 0 69.8%, $orange 69.8% 81.4%, $red 81.4% 100%);
+  position: relative;
+  display: grid;
+  place-items: center;
+}
+
+.donut-chart::after {
+  content: '';
+  position: absolute;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  background: #ffffff;
+}
+
+.donut-center {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+
+  strong,
+  span {
+    display: block;
+  }
+
+  strong {
+    color: $dark;
+    font-size: 24px;
+    font-weight: 900;
+  }
+
+  span {
+    color: $muted;
+    font-size: 12px;
+    font-weight: 800;
+  }
+}
+
+.legend-list {
+  display: grid;
+  gap: 14px;
+}
+
+.legend-item {
+  display: flex;
+  gap: 10px;
+  align-items: flex-start;
+
+  strong,
+  small {
+    display: block;
+  }
+
+  strong {
+    color: $dark;
+    font-size: 13px;
+  }
+
+  small {
+    margin-top: 2px;
+    color: $muted;
+    font-size: 12px;
+  }
+}
+
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  margin-top: 4px;
+  border-radius: 50%;
+
+  &.approved {
+    background: $green;
+  }
+
+  &.pending {
+    background: $orange;
+  }
+
+  &.rejected {
+    background: $red;
+  }
+}
+
+@media (max-width: 700px) {
+  .status-card {
+    min-height: auto;
+    padding: 14px;
+  }
+
+  .status-content {
+    grid-template-columns: 1fr;
+  }
+
+  .donut-chart {
+    width: 138px;
+    height: 138px;
+  }
+}

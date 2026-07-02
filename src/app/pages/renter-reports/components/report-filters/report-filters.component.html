@@ -1,0 +1,34 @@
+<section class="filters-card">
+  <div class="filter-field">
+    <label for="dateRange">Date Range</label>
+    <select id="dateRange" [(ngModel)]="filters.dateRange" (change)="emitFilters()">
+      <option *ngFor="let item of dateRanges" [value]="item">{{ item }}</option>
+    </select>
+  </div>
+
+  <div class="filter-field">
+    <label for="reportType">Report Type</label>
+    <select id="reportType" [(ngModel)]="filters.reportType" (change)="emitFilters()">
+      <option *ngFor="let item of reportTypes" [value]="item">{{ item }}</option>
+    </select>
+  </div>
+
+  <div class="filter-field">
+    <label for="verificationStatus">Verification Status</label>
+    <select id="verificationStatus" [(ngModel)]="filters.verificationStatus" (change)="emitFilters()">
+      <option *ngFor="let item of statuses" [value]="item">{{ item }}</option>
+    </select>
+  </div>
+
+  <div class="filter-field">
+    <label for="location">Location</label>
+    <select id="location" [(ngModel)]="filters.location" (change)="emitFilters()">
+      <option *ngFor="let item of locations" [value]="item">{{ item }}</option>
+    </select>
+  </div>
+
+  <div class="export-actions">
+    <button type="button" class="outline-button" (click)="export('pdf')">⬇ Export PDF</button>
+    <button type="button" class="solid-button" (click)="export('csv')">⬇ Export CSV</button>
+  </div>
+</section>

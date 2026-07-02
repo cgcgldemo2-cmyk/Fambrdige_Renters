@@ -1,0 +1,21 @@
+<article class="documents-card">
+  <div class="card-header">
+    <div>
+      <h2>Top Submitted Documents</h2>
+      <p>By submission count</p>
+    </div>
+  </div>
+
+  <div class="bar-list">
+    <div class="bar-item" *ngFor="let document of documents">
+      <div class="bar-label">
+        <span>{{ document.name }}</span>
+        <strong>{{ document.count | number }}</strong>
+      </div>
+
+      <div class="bar-track">
+        <div class="bar-fill" [style.width]="getBarWidth(document.count)"></div>
+      </div>
+    </div>
+  </div>
+</article>

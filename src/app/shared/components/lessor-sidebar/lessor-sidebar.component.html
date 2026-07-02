@@ -25,20 +25,43 @@
     </div>
 
     <nav class="sidebar-nav" aria-label="Lessor navigation">
-      <button
-        type="button"
-        class="nav-item"
-        *ngFor="let item of menuItems"
-        [class.active]="item.route === activeRoute"
-        [class.disabled]="item.disabled"
-        [disabled]="item.disabled"
-        (click)="goTo(item.route, item.disabled)"
-      >
-        <span class="nav-icon">{{ item.icon }}</span>
-        <span class="nav-label">{{ item.label }}</span>
-        <span class="nav-badge" *ngIf="item.badge">{{ item.badge }}</span>
-        <span class="nav-soon" *ngIf="item.disabled">Soon</span>
-      </button>
+      <ng-container *ngFor="let item of menuItems">
+        <!-- Main menu item -->
+        <div class="nav-item-wrapper">
+          <button
+            type="button"
+            class="nav-item"
+            [class.active]="isMenuItemActive(item)"
+            [class.disabled]="item.disabled"
+            [class.has-children]="item.children && item.children.length > 0"
+            [disabled]="item.disabled"
+            (click)="item.children ? toggleSubmenu(item.label) : goTo(item.route, item.disabled)"
+          >
+            <span class="nav-icon">{{ item.icon }}</span>
+            <span class="nav-label">{{ item.label }}</span>
+            <span class="nav-badge" *ngIf="item.badge">{{ item.badge }}</span>
+            <span class="nav-soon" *ngIf="item.disabled">Soon</span>
+            <span class="nav-arrow" *ngIf="item.children && item.children.length > 0" [class.expanded]="isSubmenuExpanded(item.label)">›</span>
+          </button>
+
+          <!-- Submenu items -->
+          <div class="submenu" *ngIf="item.children && item.children.length > 0 && isSubmenuExpanded(item.label)">
+            <button
+              type="button"
+              class="submenu-item"
+              *ngFor="let child of item.children"
+              [class.active]="child.route === activeRoute"
+              [class.disabled]="child.disabled"
+              [disabled]="child.disabled"
+              (click)="goTo(child.route, child.disabled)"
+            >
+              <span class="submenu-icon" *ngIf="child.icon">{{ child.icon }}</span>
+              <span class="submenu-label">{{ child.label }}</span>
+              <span class="nav-badge" *ngIf="child.badge">{{ child.badge }}</span>
+            </button>
+          </div>
+        </div>
+      </ng-container>
     </nav>
 
     <div class="sidebar-footer">

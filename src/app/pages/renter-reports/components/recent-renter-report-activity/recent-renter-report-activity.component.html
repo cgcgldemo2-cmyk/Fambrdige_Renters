@@ -1,0 +1,51 @@
+<article class="activity-card">
+  <div class="card-header">
+    <h2>Recent Renter Report Activity</h2>
+    <button type="button">View all</button>
+  </div>
+
+  <div class="desktop-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Reference</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Count</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        <tr *ngFor="let activity of activities">
+          <td>{{ activity.date }}</td>
+          <td>{{ activity.reference }}</td>
+          <td>{{ activity.type }}</td>
+          <td>
+            <span class="status-pill" [class]="getStatusClass(activity.status)">
+              {{ activity.status }}
+            </span>
+          </td>
+          <td class="count-text">{{ activity.count }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mobile-list">
+    <div class="activity-item" *ngFor="let activity of activities | slice: 0:3">
+      <div class="file-icon">▧</div>
+
+      <div>
+        <small>{{ activity.date }}</small>
+        <strong>{{ activity.reference }}</strong>
+      </div>
+
+      <span class="status-pill" [class]="getStatusClass(activity.status)">
+        {{ activity.status }}
+      </span>
+
+      <em>{{ activity.count }}</em>
+    </div>
+  </div>
+</article>

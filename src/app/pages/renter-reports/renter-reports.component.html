@@ -1,0 +1,28 @@
+<app-lessor-sidebar>
+  <div class="renter-reports-page">
+
+    <app-report-filters
+      (filtersChanged)="onFiltersChanged($event)"
+      (exportRequested)="exportReports($event)"
+    ></app-report-filters>
+
+    <section class="kpi-grid">
+      <app-total-renter-applications></app-total-renter-applications>
+      <app-verified-renters></app-verified-renters>
+      <app-pending-review></app-pending-review>
+      <app-approval-rate></app-approval-rate>
+    </section>
+
+    <section class="charts-grid">
+      <app-renter-application-trend></app-renter-application-trend>
+      <app-verification-status-breakdown></app-verification-status-breakdown>
+      <app-top-submitted-documents></app-top-submitted-documents>
+    </section>
+
+    <section class="bottom-grid">
+      <app-renter-insights></app-renter-insights>
+      <app-recent-renter-report-activity></app-recent-renter-report-activity>
+      <app-top-cities-by-applications></app-top-cities-by-applications>
+    </section>
+  </div>
+</app-lessor-sidebar>

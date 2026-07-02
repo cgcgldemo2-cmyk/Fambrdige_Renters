@@ -1,0 +1,15 @@
+<article class="insights-card">
+  <h2>Renter Insights</h2>
+
+  <div class="insight-list">
+    <div class="insight-item" *ngFor="let item of insights">
+      <div class="insight-icon" [class]="item.tone">{{ item.icon }}</div>
+
+      <div>
+        <small>{{ item.label }}</small>
+        <strong>{{ item.value }}</strong>
+        <span>{{ item.note }}</span>
+      </div>
+    </div>
+  </div>
+</article>

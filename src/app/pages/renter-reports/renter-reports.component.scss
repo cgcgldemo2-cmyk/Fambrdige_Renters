@@ -1,0 +1,148 @@
+$primary: #ff4104;
+$primary-dark: #e03705;
+$dark: #001621;
+$text: #111827;
+$muted: #667085;
+$border: #e5eaf2;
+$bg: #f7f9fc;
+
+.renter-reports-page {
+  min-height: 100vh;
+  padding: 30px 34px;
+  background: $bg;
+  color: $text;
+}
+
+.page-header {
+  min-height: 58px;
+  border-bottom: 1px solid $border;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+
+  h1 {
+    margin: 0;
+    color: $dark;
+    font-size: 28px;
+    font-weight: 900;
+  }
+
+  p {
+    margin: 5px 0 0;
+    color: $muted;
+    font-size: 14px;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.notification-button,
+.profile-button {
+  border: 0;
+  background: #ffffff;
+  color: $dark;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba($dark, 0.04);
+}
+
+.notification-button {
+  position: relative;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+
+  span {
+    position: absolute;
+    top: 2px;
+    right: 0;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: $primary;
+    color: #ffffff;
+    font-size: 11px;
+    display: grid;
+    place-items: center;
+    border: 2px solid #ffffff;
+  }
+}
+
+.profile-button {
+  height: 40px;
+  padding: 0 12px;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 800;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(170px, 1fr));
+  gap: 16px;
+  margin: 18px 0;
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr 1fr;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.bottom-grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.55fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 1200px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .charts-grid,
+  .bottom-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .renter-reports-page {
+    padding: 16px;
+    background: #ffffff;
+  }
+
+  .page-header {
+    border-bottom: 0;
+    margin-bottom: 12px;
+
+    h1 {
+      font-size: 22px;
+    }
+
+    p {
+      display: none;
+    }
+  }
+
+  .profile-button {
+    display: none;
+  }
+
+  .notification-button {
+    box-shadow: none;
+  }
+
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+}

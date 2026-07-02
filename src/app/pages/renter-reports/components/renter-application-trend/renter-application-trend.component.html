@@ -1,0 +1,70 @@
+<article class="chart-card">
+  <div class="card-header">
+    <div>
+      <h2>Renter Application Trend</h2>
+      <p>Monthly renter applications</p>
+    </div>
+
+    <select aria-label="Trend range">
+      <option>Monthly</option>
+      <option>Weekly</option>
+      <option>Daily</option>
+    </select>
+  </div>
+
+  <div class="line-chart">
+    <svg
+      viewBox="0 0 520 240"
+      preserveAspectRatio="none"
+      role="img"
+      aria-label="Renter application trend chart"
+    >
+      <defs>
+        <linearGradient id="trendFill" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0%" stop-color="#1d74d8" stop-opacity="0.2" />
+          <stop offset="100%" stop-color="#1d74d8" stop-opacity="0" />
+        </linearGradient>
+      </defs>
+
+      <line x1="40" y1="20" x2="40" y2="205" class="axis" />
+      <line x1="40" y1="205" x2="500" y2="205" class="axis" />
+
+      <polyline
+        class="trend-area"
+        [attr.points]="areaPoints"
+      ></polyline>
+
+      <polyline
+        class="trend-line"
+        [attr.points]="linePoints"
+      ></polyline>
+
+      <g *ngFor="let item of chartPoints">
+        <circle
+          [attr.cx]="item.x"
+          [attr.cy]="item.y"
+          r="6"
+          class="dot"
+        ></circle>
+
+        <text
+          [attr.x]="item.x"
+          [attr.y]="item.labelY"
+          text-anchor="middle"
+          class="value-label"
+        >
+          {{ item.value | number }}
+        </text>
+
+        <text
+          [attr.x]="item.x"
+          y="228"
+          text-anchor="middle"
+          class="month-label"
+        >
+          {{ item.month }}
+        </text>
+      </g>
+    </svg>
+  </div>
+</article>

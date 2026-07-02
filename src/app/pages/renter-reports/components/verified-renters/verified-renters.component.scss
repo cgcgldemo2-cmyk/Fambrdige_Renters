@@ -1,0 +1,112 @@
+$primary: #ff4104;
+$dark: #001621;
+$muted: #667085;
+$border: #e5eaf2;
+$green: #16a34a;
+$red: #dc2626;
+$blue: #1d74d8;
+$purple: #7c3aed;
+
+.kpi-card {
+  min-height: 118px;
+  padding: 20px;
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba($dark, 0.04);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+
+  p,
+  h3,
+  small {
+    margin: 0;
+  }
+
+  p {
+    color: $dark;
+    font-size: 14px;
+    font-weight: 800;
+  }
+
+  h3 {
+    margin-top: 7px;
+    color: $dark;
+    font-size: 30px;
+    font-weight: 900;
+  }
+
+  small {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 800;
+  }
+}
+
+.kpi-icon {
+  flex: 0 0 54px;
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-size: 24px;
+}
+
+.blue .kpi-icon {
+  background: rgba($blue, 0.12);
+  color: $blue;
+}
+
+.green .kpi-icon {
+  background: rgba($green, 0.12);
+  color: $green;
+}
+
+.orange .kpi-icon {
+  background: rgba($primary, 0.12);
+  color: $primary;
+}
+
+.purple .kpi-icon {
+  background: rgba($purple, 0.12);
+  color: $purple;
+}
+
+.trend-up {
+  color: $green;
+}
+
+.trend-down {
+  color: $red;
+}
+
+@media (max-width: 700px) {
+  .kpi-card {
+    min-height: 96px;
+    padding: 12px;
+    gap: 10px;
+    align-items: flex-start;
+  }
+
+  .kpi-icon {
+    width: 38px;
+    height: 38px;
+    flex-basis: 38px;
+    font-size: 18px;
+  }
+
+  .kpi-card p {
+    font-size: 11px;
+  }
+
+  .kpi-card h3 {
+    font-size: 21px;
+  }
+
+  .kpi-card small {
+    font-size: 10px;
+  }
+}

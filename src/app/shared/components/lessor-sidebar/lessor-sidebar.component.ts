@@ -9,6 +9,7 @@ export interface LessorSidebarMenuItem {
   icon: string;
   badge?: number | string;
   disabled?: boolean;
+  children?: LessorSidebarMenuItem[];
 }
 
 @Component({
@@ -28,6 +29,7 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
   @Output() routeSelected = new EventEmitter<string>();
 
   isSidebarOpen = false;
+  expandedMenus = new Set<string>();
 
   private routerSub?: Subscription;
 
@@ -73,7 +75,13 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
       label: 'Reports',
       route: '/reports',
       icon: '▥',
-      disabled: true
+      children: [
+        {
+          label: 'Renters',
+          route: '/reports/renters',
+          icon: '👥'
+        }
+      ]
     },
     {
       label: 'Settings',
@@ -118,21 +126,62 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
     this.router.navigateByUrl(route);
   }
 
+  toggleSubmenu(label: string): void {
+    if (this.expandedMenus.has(label)) {
+      this.expandedMenus.delete(label);
+    } else {
+      this.expandedMenus.add(label);
+    }
+  }
+
+  isSubmenuExpanded(label: string): boolean {
+    return this.expandedMenus.has(label);
+  }
+
+  isMenuItemActive(item: LessorSidebarMenuItem): boolean {
+    if (item.route === this.activeRoute) {
+      return true;
+    }
+    if (item.children) {
+      return item.children.some(child => child.route === this.activeRoute);
+    }
+    return false;
+  }
+
   private syncPageState(url: string): void {
     const cleanUrl = url.split('?')[0].split('#')[0];
 
-    const matchedItem = this.menuItems.find(item => {
+    let matchedItem: LessorSidebarMenuItem | undefined;
+    let matchedChild: LessorSidebarMenuItem | undefined;
+
+    // Search in all items and their children
+    for (const item of this.menuItems) {
       if (item.route === '/vehicles') {
-        return cleanUrl === '/vehicles' ||
+        if (cleanUrl === '/vehicles' ||
           cleanUrl === '/vehicles/new' ||
-          cleanUrl.startsWith('/vehicles/');
+          cleanUrl.startsWith('/vehicles/')) {
+          matchedItem = item;
+          break;
+        }
+      } else if (item.route === cleanUrl) {
+        matchedItem = item;
+        break;
       }
 
-      return item.route === cleanUrl;
-    });
+      // Check children
+      if (item.children) {
+        const child = item.children.find(child => child.route === cleanUrl);
+        if (child) {
+          matchedItem = item;
+          matchedChild = child;
+          this.expandedMenus.add(item.label);
+          break;
+        }
+      }
+    }
 
-    this.activeRoute = matchedItem?.route || cleanUrl;
-    this.currentPageTitle = matchedItem?.label || this.formatTitle(cleanUrl);
+    this.activeRoute = matchedChild?.route || matchedItem?.route || cleanUrl;
+    this.currentPageTitle = matchedChild?.label || matchedItem?.label || this.formatTitle(cleanUrl);
   }
 
   private formatTitle(url: string): string {

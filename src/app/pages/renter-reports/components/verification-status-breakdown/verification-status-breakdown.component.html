@@ -1,0 +1,25 @@
+<article class="status-card">
+  <h2>Verification Status Breakdown</h2>
+
+  <div class="status-content">
+    <div class="donut-wrap">
+      <div class="donut-chart">
+        <div class="donut-center">
+          <strong>{{ total | number }}</strong>
+          <span>Total</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="legend-list">
+      <div class="legend-item" *ngFor="let item of statuses">
+        <span class="legend-dot" [class]="item.colorClass"></span>
+
+        <div>
+          <strong>{{ item.label }}</strong>
+          <small>{{ item.value | number }} ({{ item.percentage }}%)</small>
+        </div>
+      </div>
+    </div>
+  </div>
+</article>

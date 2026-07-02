@@ -1,0 +1,18 @@
+<article class="cities-card">
+  <div class="card-header">
+    <h2>Top Cities by Applications</h2>
+    <button type="button">View all</button>
+  </div>
+
+  <div class="city-chart">
+    <div class="city-bar" *ngFor="let city of cities">
+      <strong>{{ city.count | number }}</strong>
+
+      <div class="bar-area">
+        <div class="bar-fill" [style.height]="getBarHeight(city.count)"></div>
+      </div>
+
+      <span>{{ city.city }}</span>
+    </div>
+  </div>
+</article>

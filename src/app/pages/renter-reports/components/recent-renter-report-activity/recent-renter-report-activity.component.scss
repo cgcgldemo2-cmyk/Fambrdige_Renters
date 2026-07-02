@@ -1,0 +1,150 @@
+$dark: #001621;
+$muted: #667085;
+$border: #e5eaf2;
+$green: #16a34a;
+$red: #dc2626;
+$primary: #ff4104;
+
+.activity-card {
+  height: 100%;
+  padding: 18px;
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  box-shadow: 0 12px 28px rgba($dark, 0.04);
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  h2 {
+    margin: 0;
+    color: $dark;
+    font-size: 17px;
+    font-weight: 900;
+  }
+
+  button {
+    border: 0;
+    background: transparent;
+    color: #1d74d8;
+    font-weight: 900;
+    cursor: pointer;
+  }
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+
+  th,
+  td {
+    text-align: left;
+    padding: 12px 10px;
+    border-bottom: 1px solid $border;
+    font-size: 13px;
+  }
+
+  th {
+    color: $muted;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  td {
+    color: $dark;
+    font-weight: 700;
+  }
+}
+
+.status-pill {
+  display: inline-flex;
+  min-height: 24px;
+  padding: 0 10px;
+  align-items: center;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 900;
+
+  &.completed {
+    background: rgba($green, 0.12);
+    color: $green;
+  }
+
+  &.failed {
+    background: rgba($red, 0.1);
+    color: $red;
+  }
+}
+
+.count-text {
+  color: $green !important;
+  font-weight: 900 !important;
+}
+
+.mobile-list {
+  display: none;
+}
+
+@media (max-width: 700px) {
+  .activity-card {
+    padding: 14px;
+  }
+
+  .desktop-table {
+    display: none;
+  }
+
+  .mobile-list {
+    display: grid;
+    gap: 10px;
+  }
+
+  .activity-item {
+    display: grid;
+    grid-template-columns: 34px 1fr auto;
+    gap: 10px;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid $border;
+    border-radius: 12px;
+
+    small,
+    strong {
+      display: block;
+    }
+
+    small {
+      color: $muted;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    strong {
+      color: $dark;
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    em {
+      grid-column: 2 / -1;
+      color: $green;
+      font-style: normal;
+      font-size: 12px;
+      font-weight: 900;
+    }
+  }
+
+  .file-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    display: grid;
+    place-items: center;
+    background: rgba($primary, 0.08);
+    color: $primary;
+  }
+}
