@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import gsap from 'gsap';
 import { LessorSidebarComponent } from '../../shared/components/lessor-sidebar/lessor-sidebar.component';
 
 type ApiStatus = 'Success' | 'Failed' | 'Warning';
@@ -53,10 +54,11 @@ export class ApiUsageComponent {
   selectedModule = 'All';
 
   selectedLog: ApiLogRecord | null = null;
+  expandedEndpointKey: string | null = null;
 
   statuses = ['All', 'Success', 'Failed', 'Warning'];
   methods = ['All', 'GET', 'POST', 'PUT', 'PATCH', 'DELETE'];
-  modules = ['All', 'Authentication', 'Vehicles', 'Booking Requests', 'Reservation Fees', 'Renter Approval'];
+  modules = ['All', 'Dashboard', 'Authentication', 'Vehicles', 'Booking Requests', 'Reservation Fees', 'Renter Approval'];
 
   apiLogs: ApiLogRecord[] = [
     {
@@ -283,6 +285,76 @@ export class ApiUsageComponent {
 
     return Array.from(groups.values());
   }
+
+
+trackByEndpoint(index: number, item: EndpointUsage): string {
+  return item.endpoint;
+}
+
+isEndpointExpanded(endpoint: EndpointUsage): boolean {
+  return this.expandedEndpointKey === endpoint.endpoint;
+}
+
+toggleEndpoint(endpoint: EndpointUsage): void {
+  const endpointKey = endpoint.endpoint;
+
+  if (this.expandedEndpointKey === endpointKey) {
+    this.collapseEndpoint(endpointKey);
+    return;
+  }
+
+  this.expandedEndpointKey = endpointKey;
+
+  setTimeout(() => {
+    const panel = document.getElementById(this.getEndpointPanelId(endpointKey));
+
+    if (!panel) {
+      return;
+    }
+
+    gsap.fromTo(
+      panel,
+      {
+        height: 0,
+        opacity: 0,
+        y: -8
+      },
+      {
+        height: 'auto',
+        opacity: 1,
+        y: 0,
+        duration: 0.28,
+        ease: 'power2.out'
+      }
+    );
+  }, 0);
+}
+
+collapseEndpoint(endpointKey: string): void {
+  const panel = document.getElementById(this.getEndpointPanelId(endpointKey));
+
+  if (!panel) {
+    this.expandedEndpointKey = null;
+    return;
+  }
+
+  gsap.to(panel, {
+    height: 0,
+    opacity: 0,
+    y: -8,
+    duration: 0.22,
+    ease: 'power2.inOut',
+    onComplete: () => {
+      if (this.expandedEndpointKey === endpointKey) {
+        this.expandedEndpointKey = null;
+      }
+    }
+  });
+}
+
+getEndpointPanelId(endpointKey: string): string {
+  return 'endpoint-details-' + endpointKey.replace(/[^a-zA-Z0-9]/g, '-');
+}
 
   openLog(record: ApiLogRecord): void {
     this.selectedLog = record;

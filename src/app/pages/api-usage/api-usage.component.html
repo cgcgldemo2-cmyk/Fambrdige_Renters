@@ -37,7 +37,80 @@
         <p>{{ totalCreditsUsed }} API credits used</p>
       </article>
     </section>
+    <section class="endpoint-card" *ngIf="!selectedLog">
+      <div class="section-header">
+        <div>
+          <p>Endpoint Usage Breakdown</p>
+          <h2>Requests by endpoint</h2>
+        </div>
 
+        <span>Avg duration: {{ averageDuration }}ms</span>
+      </div>
+
+      <div class="endpoint-accordion">
+        <article
+          class="endpoint-item"
+          *ngFor="let endpoint of endpointUsage; trackBy: trackByEndpoint"
+          [class.open]="isEndpointExpanded(endpoint)"
+        >
+          <button
+            type="button"
+            class="endpoint-summary"
+            (click)="toggleEndpoint(endpoint)"
+          >
+            <div class="endpoint-summary-main">
+              <div class="endpoint-label-group">
+                <span class="endpoint-module">{{ endpoint.module }}</span>
+                <span>{{ endpoint.endpoint }}</span>
+              </div>
+
+              <div class="endpoint-summary-right">
+                <span class="credit-badge">
+                  {{ endpoint.creditsUsed }}
+                  {{ endpoint.creditsUsed === 1 ? 'credit' : 'credits' }}
+                </span>
+
+                <span
+                  class="expand-icon"
+                  [class.open]="isEndpointExpanded(endpoint)"
+                  aria-hidden="true"
+                >
+                  ⌄
+                </span>
+              </div>
+            </div>
+          </button>
+
+          <div
+            *ngIf="isEndpointExpanded(endpoint)"
+            class="endpoint-details"
+            [attr.id]="getEndpointPanelId(endpoint.endpoint)"
+          >
+            <div class="endpoint-stats-grid">
+              <div class="stat-box total">
+                <span>Total</span>
+                <strong>{{ endpoint.totalRequests }}</strong>
+              </div>
+
+              <div class="stat-box success">
+                <span>Success</span>
+                <strong class="good">{{ endpoint.successCount }}</strong>
+              </div>
+
+              <div class="stat-box failed">
+                <span>Failed</span>
+                <strong class="danger">{{ endpoint.failedCount }}</strong>
+              </div>
+
+              <div class="stat-box duration">
+                <span>Avg Time</span>
+                <strong>{{ endpoint.avgDurationMs }}ms</strong>
+              </div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
     <section class="usage-note">
       <div class="note-icon">🔐</div>
       <div>
@@ -87,81 +160,6 @@
     </section>
 
     <section class="usage-layout">
-
-      <section class="endpoint-card" *ngIf="!selectedLog">
-        <div class="section-header">
-          <div>
-            <p>Endpoint Usage Breakdown</p>
-            <h2>Requests by endpoint</h2>
-          </div>
-
-          <span>Avg duration: {{ averageDuration }}ms</span>
-        </div>
-
-        <div class="endpoint-table-wrap desktop-endpoint-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Endpoint</th>
-                <th>Module</th>
-                <th>Total</th>
-                <th>Success</th>
-                <th>Failed</th>
-                <th>Avg Time</th>
-                <th>Credits</th>
-              </tr>
-            </thead>
-
-            <tbody>
-              <tr *ngFor="let endpoint of endpointUsage">
-                <td>{{ endpoint.endpoint }}</td>
-                <td>{{ endpoint.module }}</td>
-                <td>{{ endpoint.totalRequests }}</td>
-                <td class="good">{{ endpoint.successCount }}</td>
-                <td class="danger">{{ endpoint.failedCount }}</td>
-                <td>{{ endpoint.avgDurationMs }}ms</td>
-                <td>{{ endpoint.creditsUsed }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-
-        <div class="endpoint-mobile-list">
-          <article class="endpoint-mobile-card" *ngFor="let endpoint of endpointUsage">
-            <div class="endpoint-mobile-header">
-              <div>
-                <span>{{ endpoint.module }}</span>
-                <h3>{{ endpoint.endpoint }}</h3>
-              </div>
-
-              <strong>{{ endpoint.creditsUsed }} credits</strong>
-            </div>
-
-            <div class="endpoint-mobile-grid">
-              <div>
-                <span>Total</span>
-                <strong>{{ endpoint.totalRequests }}</strong>
-              </div>
-
-              <div>
-                <span>Success</span>
-                <strong class="good">{{ endpoint.successCount }}</strong>
-              </div>
-
-              <div>
-                <span>Failed</span>
-                <strong class="danger">{{ endpoint.failedCount }}</strong>
-              </div>
-
-              <div>
-                <span>Avg Time</span>
-                <strong>{{ endpoint.avgDurationMs }}ms</strong>
-              </div>
-            </div>
-          </article>
-        </div>
-      </section>
-
       <section
         id="apiLogListSection"
         class="logs-card"

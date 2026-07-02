@@ -54,6 +54,9 @@ $blue: #2563eb;
     line-height: 1.6;
   }
 }
+.endpoint-card {
+  margin-top: 20px;
+}
 
 .summary-grid {
   margin-top: 20px;
@@ -207,108 +210,140 @@ $blue: #2563eb;
   }
 }
 
-.endpoint-table-wrap {
-  overflow-x: auto;
-
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-
-  th,
-  td {
-    padding: 13px 12px;
-    border-bottom: 1px solid $border;
-    text-align: left;
-    font-size: 13px;
-  }
-
-  th {
-    color: $muted;
-    font-size: 12px;
-    font-weight: 900;
-    background: $soft;
-  }
-
-  td {
-    color: $dark;
-  }
-}
-
-/* Mobile endpoint cards are hidden by default and enabled inside the mobile media query. */
-.endpoint-mobile-list {
-  display: none;
-}
-
-.endpoint-mobile-card {
-  padding: 16px;
-  border-radius: 18px;
-  background: #ffffff;
-  border: 1px solid $border;
-  box-shadow: 0 10px 24px rgba(0, 22, 33, 0.04);
-}
-
-.endpoint-mobile-header {
-  display: flex;
-  justify-content: space-between;
+/* Endpoint accordion */
+.endpoint-accordion {
+  display: grid;
   gap: 14px;
-  margin-bottom: 14px;
+}
 
-  span {
-    display: block;
-    margin-bottom: 5px;
-    color: $primary;
-    font-size: 12px;
-    font-weight: 900;
+.endpoint-item {
+  border: 1px solid $border;
+  border-radius: 22px;
+  background: #ffffff;
+  overflow: hidden;
+  transition: border-color 0.18s ease, box-shadow 0.18s ease, transform 0.18s ease;
+
+  &:hover,
+  &.open {
+    border-color: rgba(255, 65, 4, 0.42);
+    box-shadow: 0 16px 38px rgba(255, 65, 4, 0.08);
   }
 
-  h3 {
-    margin: 0;
-    color: $dark;
-    font-size: 15px;
-    line-height: 1.35;
-    word-break: break-word;
-  }
-
-  strong {
-    height: 30px;
-    padding: 0 10px;
-    border-radius: 999px;
-    background: rgba(255, 65, 4, 0.08);
-    color: $primary;
-    display: inline-flex;
-    align-items: center;
-    white-space: nowrap;
-    font-size: 12px;
-    font-weight: 900;
+  &.open {
+    transform: translateY(-1px);
   }
 }
 
-.endpoint-mobile-grid {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 10px;
+.endpoint-summary {
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 18px;
+  text-align: left;
+  cursor: pointer;
+}
 
-  div {
-    padding: 12px;
-    border-radius: 14px;
-    background: $soft;
-    border: 1px solid $border;
-    width: 100px;
-    text-align: center;
+.endpoint-summary-main {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+}
+
+.endpoint-label-group {
+  min-width: 0;
+}
+
+.endpoint-module {
+  display: block;
+  margin-bottom: 8px;
+  color: $primary;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.endpoint-name {
+  display: block;
+  color: $dark;
+  font-size: 20px;
+  line-height: 1.3;
+  font-weight: 900;
+  word-break: break-word;
+}
+
+.endpoint-summary-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 0 0 auto;
+}
+
+.credit-badge {
+  min-width: 82px;
+  min-height: 34px;
+  padding: 8px 13px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 65, 4, 0.08);
+  color: $primary;
+  font-size: 13px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.expand-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: $soft;
+  border: 1px solid $border;
+  color: $dark;
+  font-size: 18px;
+  line-height: 1;
+  transition: transform 0.18s ease;
+
+  &.open {
+    transform: rotate(180deg);
   }
+}
+
+.endpoint-details {
+  overflow: hidden;
+  padding: 0 18px 18px;
+}
+
+.endpoint-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  padding-top: 2px;
+}
+
+.stat-box {
+  padding: 16px;
+  border-radius: 16px;
+  background: $soft;
+  border: 1px solid $border;
+  text-align: center;
 
   span {
     display: block;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
     color: $muted;
     font-size: 12px;
+    font-weight: 800;
   }
 
   strong {
+    display: block;
     color: $dark;
-    font-size: 14px;
+    font-size: 22px;
+    font-weight: 900;
+    line-height: 1.1;
   }
 }
 
@@ -439,6 +474,18 @@ $blue: #2563eb;
   }
 }
 
+.open-detail-hint {
+  margin-top: 14px;
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 65, 4, 0.06);
+  border: 1px dashed rgba(255, 65, 4, 0.25);
+  color: $primary;
+  font-size: 13px;
+  font-weight: 900;
+  text-align: center;
+}
+
 .detail-header {
   button {
     width: 38px;
@@ -536,18 +583,6 @@ $blue: #2563eb;
   }
 }
 
-.open-detail-hint {
-  margin-top: 14px;
-  padding: 12px;
-  border-radius: 14px;
-  background: rgba(255, 65, 4, 0.06);
-  border: 1px dashed rgba(255, 65, 4, 0.25);
-  color: $primary;
-  font-size: 13px;
-  font-weight: 900;
-  text-align: center;
-}
-
 .good {
   color: $green !important;
 }
@@ -573,35 +608,13 @@ $blue: #2563eb;
     width: 100%;
   }
 
+  .endpoint-stats-grid,
   .detail-grid {
     grid-template-columns: repeat(2, 1fr);
   }
 
   .code-panels {
     grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 900px) {
-  .desktop-endpoint-table {
-    display: none;
-  }
-
-  .endpoint-mobile-list {
-    display: grid;
-    gap: 12px;
-  }
-
-  .endpoint-card {
-    padding: 16px;
-  }
-
-  .endpoint-mobile-header {
-    flex-direction: column;
-
-    strong {
-      width: fit-content;
-    }
   }
 }
 
@@ -621,7 +634,8 @@ $blue: #2563eb;
   .summary-grid,
   .filter-card,
   .log-grid,
-  .detail-grid {
+  .detail-grid,
+  .endpoint-stats-grid {
     grid-template-columns: 1fr;
   }
 
@@ -631,7 +645,36 @@ $blue: #2563eb;
     flex-direction: column;
   }
 
-  .endpoint-mobile-grid {
-    grid-template-columns: 1fr;
+  .endpoint-card {
+    padding: 16px;
+  }
+
+  .endpoint-summary {
+    padding: 16px;
+  }
+
+  .endpoint-summary-main {
+    align-items: flex-start;
+  }
+
+  .endpoint-name {
+    font-size: 15px;
+  }
+
+  .endpoint-summary-main {
+    flex-direction: column;
+  }
+
+  .endpoint-summary-right {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .endpoint-details {
+    padding: 0 16px 16px;
+  }
+
+  .stat-box {
+    text-align: left;
   }
 }
