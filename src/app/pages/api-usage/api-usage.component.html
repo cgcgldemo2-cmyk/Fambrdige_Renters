@@ -98,7 +98,7 @@
           <span>Avg duration: {{ averageDuration }}ms</span>
         </div>
 
-        <div class="endpoint-table-wrap">
+        <div class="endpoint-table-wrap desktop-endpoint-table">
           <table>
             <thead>
               <tr>
@@ -124,6 +124,41 @@
               </tr>
             </tbody>
           </table>
+        </div>
+
+        <div class="endpoint-mobile-list">
+          <article class="endpoint-mobile-card" *ngFor="let endpoint of endpointUsage">
+            <div class="endpoint-mobile-header">
+              <div>
+                <span>{{ endpoint.module }}</span>
+                <h3>{{ endpoint.endpoint }}</h3>
+              </div>
+
+              <strong>{{ endpoint.creditsUsed }} credits</strong>
+            </div>
+
+            <div class="endpoint-mobile-grid">
+              <div>
+                <span>Total</span>
+                <strong>{{ endpoint.totalRequests }}</strong>
+              </div>
+
+              <div>
+                <span>Success</span>
+                <strong class="good">{{ endpoint.successCount }}</strong>
+              </div>
+
+              <div>
+                <span>Failed</span>
+                <strong class="danger">{{ endpoint.failedCount }}</strong>
+              </div>
+
+              <div>
+                <span>Avg Time</span>
+                <strong>{{ endpoint.avgDurationMs }}ms</strong>
+              </div>
+            </div>
+          </article>
         </div>
       </section>
 

@@ -295,6 +295,7 @@ export class ApiUsageComponent {
     }, 100);
   }
 
+
   backToLogList(): void {
     const lastViewedId = this.selectedLog?.id;
 
