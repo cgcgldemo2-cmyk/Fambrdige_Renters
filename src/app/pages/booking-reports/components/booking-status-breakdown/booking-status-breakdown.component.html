@@ -1,0 +1,18 @@
+<article class="chart-card">
+  <h2>Booking Status Breakdown</h2>
+
+  <div class="status-content">
+    <div class="donut">
+      <strong>{{ total | number }}</strong>
+      <span>Total</span>
+    </div>
+
+    <div class="legend">
+      <div *ngFor="let item of status">
+        <span class="dot" [class]="item.className"></span>
+        <p>{{ item.label }}</p>
+        <strong>{{ item.value | number }} ({{ item.percent }})</strong>
+      </div>
+    </div>
+  </div>
+</article>

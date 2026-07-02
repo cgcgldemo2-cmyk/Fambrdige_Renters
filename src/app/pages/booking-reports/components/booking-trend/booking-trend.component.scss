@@ -1,0 +1,51 @@
+$dark: #001621;
+$muted: #667085;
+$border: #e5eaf2;
+$blue: #1d74d8;
+
+.chart-card {
+  min-height: 276px;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba($dark, .04);
+}
+
+.card-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  h2, p { margin: 0; }
+  h2 { color: $dark; font-size: 17px; font-weight: 900; }
+  p { margin-top: 4px; color: $muted; font-size: 12px; }
+
+  select {
+    height: 36px;
+    border: 1px solid $border;
+    border-radius: 10px;
+    background: #fff;
+    padding: 0 10px;
+    font-weight: 800;
+    color: $dark;
+  }
+}
+
+.line-chart { height: 220px; }
+svg { width: 100%; height: 100%; overflow: visible; }
+.axis { stroke: #d8e0ed; stroke-width: 1; }
+.trend-area { fill: url(#bookingTrendFill); stroke: none; }
+.trend-line { fill: none; stroke: $blue; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+.dot { fill: $blue; stroke: #fff; stroke-width: 4; }
+.value-label { fill: $dark; font-size: 13px; font-weight: 900; }
+.month-label { fill: $muted; font-size: 12px; font-weight: 800; }
+
+@media (max-width: 700px) {
+  .chart-card { min-height: 235px; padding: 14px; }
+  .line-chart { height: 184px; }
+  .value-label { font-size: 11px; }
+  .month-label { font-size: 10px; }
+}

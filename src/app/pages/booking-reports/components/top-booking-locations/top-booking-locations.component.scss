@@ -1,0 +1,28 @@
+$dark: #001621;
+$muted: #667085;
+$border: #e5eaf2;
+$blue: #1d74d8;
+
+.chart-card {
+  min-height: 276px;
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba($dark, .04);
+
+  h2, p { margin: 0; }
+  h2 { color: $dark; font-size: 17px; font-weight: 900; }
+  p { margin-top: 4px; color: $muted; font-size: 12px; }
+}
+
+.bar-list { display: grid; gap: 14px; margin-top: 22px; }
+.bar-row { display: grid; grid-template-columns: 118px 1fr 54px; gap: 10px; align-items: center; }
+.bar-row span { color: $dark; font-size: 12px; font-weight: 800; }
+.bar-row strong { color: $dark; font-size: 12px; font-weight: 900; text-align: right; }
+.bar-track { height: 12px; border-radius: 999px; background: #edf2f7; overflow: hidden; }
+.bar-fill { height: 100%; border-radius: 999px; background: linear-gradient(90deg, $blue, #4f8ff0); }
+
+@media (max-width: 700px) {
+  .bar-row { grid-template-columns: 92px 1fr 45px; }
+}

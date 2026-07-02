@@ -1,0 +1,40 @@
+$dark: #001621;
+$muted: #667085;
+$border: #e5eaf2;
+$green: #2f7d32;
+
+.insights-card {
+  background: #fff;
+  border: 1px solid $border;
+  border-radius: 16px;
+  padding: 18px;
+  box-shadow: 0 12px 28px rgba($dark, .04);
+
+  h2 { margin: 0 0 14px; color: $dark; font-size: 17px; font-weight: 900; }
+}
+
+.insight-item {
+  display: flex;
+  gap: 12px;
+  padding: 14px 0;
+  border-top: 1px solid $border;
+
+  &:first-of-type { border-top: 0; padding-top: 0; }
+  p, h3, small { margin: 0; }
+  p { color: $muted; font-size: 12px; font-weight: 800; }
+  h3 { margin-top: 4px; color: $dark; font-size: 21px; font-weight: 900; }
+  small { display: block; margin-top: 3px; color: $green; font-size: 11px; font-weight: 800; }
+}
+
+.icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex: 0 0 40px;
+
+  &.blue { background: rgba(#1d74d8, .1); color: #1d74d8; }
+  &.orange { background: rgba(#ff4104, .12); color: #ff4104; }
+  &.purple { background: rgba(#7c3aed, .12); color: #7c3aed; }
+}

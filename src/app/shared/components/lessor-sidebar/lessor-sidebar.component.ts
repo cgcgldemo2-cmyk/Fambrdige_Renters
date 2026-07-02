@@ -80,6 +80,11 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
           label: 'Renters',
           route: '/reports/renters',
           icon: '👥'
+        },
+        {
+          label: 'Bookings',
+          route: '/reports/bookings',
+          icon: '�'
         }
       ]
     },

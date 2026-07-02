@@ -1,0 +1,41 @@
+<article class="activity-card">
+  <div class="card-header">
+    <h2>Recent Booking Report Activity</h2>
+    <button type="button">View all</button>
+  </div>
+
+  <div class="activity-table">
+    <table>
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Reference</th>
+          <th>Type</th>
+          <th>Status</th>
+          <th>Count / Amount</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of activities">
+          <td>{{ item.date }}</td>
+          <td>{{ item.reference }}</td>
+          <td>{{ item.type }}</td>
+          <td><span class="status" [class.failed]="item.status === 'Failed'">{{ item.status }}</span></td>
+          <td>{{ item.value }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="mobile-list">
+    <div class="mobile-row" *ngFor="let item of activities.slice(0, 3)">
+      <div class="doc-icon">▤</div>
+      <div>
+        <small>{{ item.date }}</small>
+        <strong>{{ item.reference }}</strong>
+      </div>
+      <span class="status" [class.failed]="item.status === 'Failed'">{{ item.status }}</span>
+      <b>{{ item.value }}</b>
+    </div>
+  </div>
+</article>

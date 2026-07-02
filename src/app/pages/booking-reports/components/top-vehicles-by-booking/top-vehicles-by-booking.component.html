@@ -1,0 +1,16 @@
+<article class="vehicle-card">
+  <div class="card-header">
+    <h2>Top Vehicles by Booking</h2>
+    <button type="button">View all</button>
+  </div>
+
+  <div class="vehicle-bars">
+    <div class="vehicle-row" *ngFor="let item of vehicles">
+      <span>{{ item.type }}</span>
+      <div class="vertical-wrap">
+        <div class="vertical-bar" [style.height.%]="item.percent"></div>
+      </div>
+      <strong>{{ item.bookings | number }}</strong>
+    </div>
+  </div>
+</article>

@@ -1,0 +1,14 @@
+<article class="chart-card">
+  <h2>Top Booking Locations</h2>
+  <p>By booking count</p>
+
+  <div class="bar-list">
+    <div class="bar-row" *ngFor="let item of locations">
+      <span>{{ item.name }}</span>
+      <div class="bar-track">
+        <div class="bar-fill" [style.width.%]="item.percent"></div>
+      </div>
+      <strong>{{ item.count | number }}</strong>
+    </div>
+  </div>
+</article>
