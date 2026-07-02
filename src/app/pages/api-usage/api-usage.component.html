@@ -1,0 +1,294 @@
+<app-lessor-sidebar>
+  <section class="api-usage-page">
+
+    <section class="page-hero">
+      <div>
+        <p>API Usage</p>
+        <h1>Monitor FamBridge API usage</h1>
+        <span>
+          Track API requests, endpoint usage, request/response logs, credits consumed,
+          and support details for the rental business website powered by FamBridge.
+        </span>
+      </div>
+    </section>
+
+    <section class="summary-grid">
+      <article>
+        <span>Total API Requests</span>
+        <strong>{{ totalRequests }}</strong>
+        <p>Current mock billing cycle</p>
+      </article>
+
+      <article>
+        <span>Successful Requests</span>
+        <strong>{{ successfulRequests }}</strong>
+        <p>Completed without errors</p>
+      </article>
+
+      <article>
+        <span>Failed / Warning</span>
+        <strong>{{ failedRequests + warningRequests }}</strong>
+        <p>Needs monitoring</p>
+      </article>
+
+      <article>
+        <span>Estimated Usage Cost</span>
+        <strong>₱{{ estimatedCost | number:'1.2-2' }}</strong>
+        <p>{{ totalCreditsUsed }} API credits used</p>
+      </article>
+    </section>
+
+    <section class="usage-note">
+      <div class="note-icon">🔐</div>
+      <div>
+        <strong>API Logging Notice</strong>
+        <span>
+          FamBridge stores request payloads and responses for support, debugging,
+          audit trail, transaction tracing, usage monitoring, billing, and security checks.
+          Sensitive values like passwords, tokens, OTP codes, and secret keys should be masked or excluded.
+        </span>
+      </div>
+    </section>
+
+    <section class="filter-card" *ngIf="!selectedLog">
+      <div class="search-field">
+        <label>Search API Logs</label>
+        <input
+          type="text"
+          [(ngModel)]="searchText"
+          placeholder="Search request ID, endpoint, module, or client app"
+        />
+      </div>
+
+      <div class="filter-field">
+        <label>Status</label>
+        <select [(ngModel)]="selectedStatus">
+          <option *ngFor="let status of statuses" [value]="status">{{ status }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Method</label>
+        <select [(ngModel)]="selectedMethod">
+          <option *ngFor="let method of methods" [value]="method">{{ method }}</option>
+        </select>
+      </div>
+
+      <div class="filter-field">
+        <label>Module</label>
+        <select [(ngModel)]="selectedModule">
+          <option *ngFor="let module of modules" [value]="module">{{ module }}</option>
+        </select>
+      </div>
+
+      <button type="button" class="clear-btn" (click)="clearFilters()">
+        Clear
+      </button>
+    </section>
+
+    <section class="usage-layout">
+
+      <section class="endpoint-card" *ngIf="!selectedLog">
+        <div class="section-header">
+          <div>
+            <p>Endpoint Usage Breakdown</p>
+            <h2>Requests by endpoint</h2>
+          </div>
+
+          <span>Avg duration: {{ averageDuration }}ms</span>
+        </div>
+
+        <div class="endpoint-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Endpoint</th>
+                <th>Module</th>
+                <th>Total</th>
+                <th>Success</th>
+                <th>Failed</th>
+                <th>Avg Time</th>
+                <th>Credits</th>
+              </tr>
+            </thead>
+
+            <tbody>
+              <tr *ngFor="let endpoint of endpointUsage">
+                <td>{{ endpoint.endpoint }}</td>
+                <td>{{ endpoint.module }}</td>
+                <td>{{ endpoint.totalRequests }}</td>
+                <td class="good">{{ endpoint.successCount }}</td>
+                <td class="danger">{{ endpoint.failedCount }}</td>
+                <td>{{ endpoint.avgDurationMs }}ms</td>
+                <td>{{ endpoint.creditsUsed }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section
+        id="apiLogListSection"
+        class="logs-card"
+      >
+        <div class="section-header">
+          <div>
+            <p>API Logs Preview</p>
+            <h2>
+              {{ selectedLog ? 'Selected API request' : 'Request and response records' }}
+            </h2>
+          </div>
+
+          <span>
+            {{ selectedLog ? 'Viewing selected log' : filteredLogs.length + ' result(s)' }}
+          </span>
+        </div>
+
+        <section class="empty-state" *ngIf="!selectedLog && filteredLogs.length === 0">
+          <div class="empty-icon">📭</div>
+          <h2>No API logs found</h2>
+          <p>Try changing your search or filters.</p>
+        </section>
+
+        <div class="log-list" *ngIf="visibleLogs.length > 0">
+          <article
+            class="log-card"
+            *ngFor="let log of visibleLogs"
+            [attr.id]="'api-log-card-' + log.id"
+            [class.selected]="selectedLog?.id === log.id"
+            [class.return-focus]="returningLogId === log.id && !selectedLog"
+            (click)="openLog(log)"
+          >
+            <div class="log-top">
+              <div>
+                <span class="request-id">{{ log.requestId }}</span>
+                <h3>{{ log.endpoint }}</h3>
+                <p>{{ log.requestDate }} · {{ log.clientApp }}</p>
+              </div>
+
+              <span
+                class="status-badge"
+                [class.success]="log.status === 'Success'"
+                [class.failed]="log.status === 'Failed'"
+                [class.warning]="log.status === 'Warning'"
+              >
+                {{ log.status }}
+              </span>
+            </div>
+
+            <div class="log-grid">
+              <div>
+                <span>Method</span>
+                <strong>{{ log.method }}</strong>
+              </div>
+
+              <div>
+                <span>Status Code</span>
+                <strong>{{ log.statusCode }}</strong>
+              </div>
+
+              <div>
+                <span>Duration</span>
+                <strong>{{ log.durationMs }}ms</strong>
+              </div>
+
+              <div>
+                <span>Credits</span>
+                <strong>{{ log.apiCredits }}</strong>
+              </div>
+            </div>
+
+            <div class="open-detail-hint" *ngIf="!selectedLog">
+              Click this API log to view request payload, response, and support details
+            </div>
+          </article>
+        </div>
+      </section>
+
+      <section
+        id="apiLogDetailSection"
+        class="detail-panel"
+        *ngIf="selectedLog as log"
+      >
+        <div class="detail-header">
+          <div>
+            <p>API Request Detail</p>
+            <h2>{{ log.requestId }}</h2>
+            <span>{{ log.endpoint }}</span>
+          </div>
+
+          <button type="button" class="back-btn" (click)="backToLogList()">
+            Back to List
+          </button>
+        </div>
+
+        <div class="detail-grid">
+          <div>
+            <span>Module</span>
+            <strong>{{ log.module }}</strong>
+          </div>
+
+          <div>
+            <span>Method</span>
+            <strong>{{ log.method }}</strong>
+          </div>
+
+          <div>
+            <span>Status</span>
+            <strong
+              [class.good]="log.status === 'Success'"
+              [class.warning]="log.status === 'Warning'"
+              [class.danger]="log.status === 'Failed'"
+            >
+              {{ log.status }}
+            </strong>
+          </div>
+
+          <div>
+            <span>Status Code</span>
+            <strong>{{ log.statusCode }}</strong>
+          </div>
+
+          <div>
+            <span>Duration</span>
+            <strong>{{ log.durationMs }}ms</strong>
+          </div>
+
+          <div>
+            <span>API Credits</span>
+            <strong>{{ log.apiCredits }}</strong>
+          </div>
+
+          <div>
+            <span>Client App</span>
+            <strong>{{ log.clientApp }}</strong>
+          </div>
+
+          <div>
+            <span>IP Address</span>
+            <strong>{{ log.ipAddress }}</strong>
+          </div>
+        </div>
+
+        <div class="code-panels">
+          <div class="code-box">
+            <p>Request Payload</p>
+            <pre>{{ log.payload }}</pre>
+          </div>
+
+          <div class="code-box">
+            <p>Response Data</p>
+            <pre>{{ log.response }}</pre>
+          </div>
+        </div>
+
+        <div class="error-box" *ngIf="log.errorMessage">
+          <p>Error Message</p>
+          <span>{{ log.errorMessage }}</span>
+        </div>
+      </section>
+
+    </section>
+
+  </section>
+</app-lessor-sidebar>

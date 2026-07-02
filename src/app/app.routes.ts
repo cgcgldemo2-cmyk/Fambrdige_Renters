@@ -50,6 +50,12 @@ export const routes: Routes = [
         .then(m => m.RenterApprovalComponent)
   },
   {
+    path: 'api-usage',
+    loadComponent: () =>
+      import('./pages/api-usage/api-usage.component')
+        .then(m => m.ApiUsageComponent)
+  },
+  {
     path: '',
     redirectTo: 'login',
     pathMatch: 'full'

@@ -62,8 +62,7 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
     {
       label: 'API Usage',
       route: '/api-usage',
-      icon: '</>',
-      disabled: true
+      icon: '</>'
     },
     {
       label: 'Verification Credits',
