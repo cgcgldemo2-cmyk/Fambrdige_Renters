@@ -1,31 +1,12 @@
 <app-lessor-sidebar>
   <div class="credits-page">
     <main class="main-content">
-      <header class="page-header">
-        <button class="menu-button" type="button">☰</button>
-
-        <h1>Verification Credits</h1>
-
-        <div class="header-actions">
-          <button class="notification-button" type="button">
-            🔔
-            <span>3</span>
-          </button>
-
-          <button class="profile-button" type="button">
-            AA
-            <span>⌄</span>
-          </button>
-        </div>
-      </header>
-
       <section class="mobile-balance-card">
         <div class="mobile-balance-icon">💳</div>
 
         <div>
           <p>Available Credits</p>
           <h2>{{ availableCredits }}</h2>
-          <small>Valid until May 31, 2027</small>
         </div>
       </section>
 
@@ -45,24 +26,6 @@
             <small>{{ stat.subtitle }}</small>
           </div>
         </article>
-      </section>
-
-      <section class="credits-info">
-        <div class="info-copy">
-          <div class="info-icon">i</div>
-
-          <div>
-            <h3>How Credits Work</h3>
-            <p>
-              Credits may be added from purchases, consumed by verification requests
-              or billable API usage, and returned when a request is rejected or cancelled.
-            </p>
-          </div>
-        </div>
-
-        <button class="buy-button desktop-buy" type="button" (click)="buyCredits()">
-          🛒 Buy Credits
-        </button>
       </section>
 
       <section class="packages-section">
@@ -104,6 +67,24 @@
         </div>
 
         <button class="buy-button mobile-buy" type="button" (click)="buyCredits()">
+          🛒 Buy Credits
+        </button>
+      </section>
+
+      <section class="credits-info">
+        <div class="info-copy">
+          <div class="info-icon">i</div>
+
+          <div>
+            <h3>How Credits Work</h3>
+            <p>
+              Credits may be added from purchases, consumed by verification requests
+              or billable API usage, and returned when a request is rejected or cancelled.
+            </p>
+          </div>
+        </div>
+
+        <button class="buy-button desktop-buy" type="button" (click)="buyCredits()">
           🛒 Buy Credits
         </button>
       </section>

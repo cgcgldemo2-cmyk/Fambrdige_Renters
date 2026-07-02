@@ -97,7 +97,7 @@ export class VerificationCreditsComponent {
   ];
 
   pageSizeOptions: number[] = [10, 20, 30, 50, 75, 100];
-  pageSize = 20;
+  pageSize = 10;
   currentPage = 1;
 
   expandedTransactionId: number | null = null;
@@ -109,7 +109,7 @@ export class VerificationCreditsComponent {
     {
       label: 'Available Credits',
       value: 118,
-      subtitle: 'Valid until May 31, 2027',
+      subtitle: '',
       icon: '💳',
       type: 'orange'
     },
