@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { VerificationCreditsComponent } from './pages/verification-credits/verification-credits.component';
 
 export const routes: Routes = [
   {
@@ -54,6 +55,10 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./pages/api-usage/api-usage.component')
         .then(m => m.ApiUsageComponent)
+  },
+  {
+    path: 'verification-credits',
+    component: VerificationCreditsComponent
   },
   {
     path: '',

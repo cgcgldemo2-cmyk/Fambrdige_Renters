@@ -1,0 +1,195 @@
+<section class="payment-flow" *ngIf="selectedPackage">
+  <div class="payment-header">
+    <div>
+      <p>Buy Verification Credits</p>
+      <h2>Complete Payment Submission</h2>
+    </div>
+
+    <button type="button" class="close-button" (click)="cancel()">
+      ✕
+    </button>
+  </div>
+
+  <div class="steps">
+    <div class="step done">
+      <span>1</span>
+      Select Package
+    </div>
+
+    <div class="line"></div>
+
+    <div class="step active">
+      <span>2</span>
+      Choose Payment
+    </div>
+
+    <div class="line"></div>
+
+    <div class="step active">
+      <span>3</span>
+      Submit Proof
+    </div>
+
+    <div class="line"></div>
+
+    <div class="step" [class.done]="isSubmitted">
+      <span>4</span>
+      Success
+    </div>
+  </div>
+
+  <div class="selected-package-card">
+    <div class="package-icon">🪙</div>
+
+    <div>
+      <p>Selected Package</p>
+      <h3>{{ selectedPackage.credits }} Credits</h3>
+      <small>{{ selectedPackage.description }}</small>
+    </div>
+
+    <div class="package-price">
+      <span>USD</span>
+      <strong>${{ selectedPackage.price }}</strong>
+    </div>
+  </div>
+
+  <div class="payment-grid">
+    <div class="payment-method-card">
+      <h3>Choose Payment Method</h3>
+
+      <div class="method-list">
+        <button
+          type="button"
+          class="method-item"
+          *ngFor="let method of paymentMethods"
+          [class.active]="selectedPaymentMethodId === method.id"
+          (click)="selectPaymentMethod(method.id)"
+        >
+          <span>{{ method.icon }}</span>
+          <strong>{{ method.name }}</strong>
+          <small>QR</small>
+        </button>
+      </div>
+
+      <div class="qr-panel">
+        <div class="qr-info">
+          <h4>{{ selectedPaymentMethod.name }}</h4>
+          <p>
+            Scan the QR code using your app to complete your payment.
+          </p>
+        </div>
+
+        <div class="qr-placeholder">
+          <div class="qr-box">
+            <span>{{ selectedPaymentMethod.qrLabel }}</span>
+          </div>
+        </div>
+
+        <div class="amount-card">
+          <small>Amount Due</small>
+          <strong>USD ${{ selectedPackage.price }}</strong>
+          <p>PHP equivalent will be shown in your payment app.</p>
+
+          <small>Account Name</small>
+          <strong class="account-name">
+            {{ selectedPaymentMethod.accountName }}
+          </strong>
+        </div>
+      </div>
+
+      <div class="payment-note">
+        <span>i</span>
+        After payment, enter your reference number and upload your receipt screenshot.
+      </div>
+    </div>
+
+    <div class="submit-card">
+      <h3>Submit Payment Details</h3>
+
+      <label>
+        Reference Number
+        <input
+          type="text"
+          placeholder="e.g., REF-2026-001245"
+          [(ngModel)]="paymentReference"
+        />
+      </label>
+
+      <label>
+        Upload Receipt Screenshot
+
+        <div class="upload-box" *ngIf="!receiptFile">
+          <input
+            type="file"
+            accept="image/png,image/jpeg"
+            (change)="onReceiptSelected($event)"
+          />
+
+          <div>
+            <span>☁</span>
+            <strong>Drag file here or browse</strong>
+            <small>Accepted formats: JPG, PNG. Max file size: 5MB.</small>
+          </div>
+        </div>
+      </label>
+
+      <div class="receipt-preview" *ngIf="receiptFile">
+        <img [src]="receiptPreviewUrl" alt="Receipt preview" />
+
+        <div>
+          <strong>{{ receiptFile.name }}</strong>
+          <small>{{ receiptFile.size / 1024 | number: '1.0-0' }} KB</small>
+        </div>
+
+        <button type="button" (click)="removeReceipt()">✕</button>
+      </div>
+
+      <button
+        type="button"
+        class="submit-button"
+        (click)="submitPayment()"
+      >
+        Submit Payment
+      </button>
+
+      <button
+        type="button"
+        class="cancel-button"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+
+      <div class="next-info">
+        <strong>What happens next?</strong>
+        <p>
+          Your payment will be reviewed. Once approved, the purchased credits will
+          be added to your balance and recorded in Transaction History.
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="success-card" *ngIf="isSubmitted">
+    <div class="success-icon">✓</div>
+
+    <div>
+      <h3>Payment Submitted Successfully</h3>
+      <p>Your credit purchase request has been sent for verification.</p>
+
+      <div class="success-summary">
+        <span>Package</span>
+        <strong>{{ selectedPackage.credits }} Credits</strong>
+
+        <span>Payment Method</span>
+        <strong>{{ selectedPaymentMethod.name }}</strong>
+
+        <span>Reference Number</span>
+        <strong>{{ paymentReference }}</strong>
+
+        <span>Status</span>
+        <strong class="pending-badge">Pending Review</strong>
+      </div>
+    </div>
+  </div>
+</section>

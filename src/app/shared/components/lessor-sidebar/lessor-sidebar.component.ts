@@ -66,6 +66,11 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
     },
     {
       label: 'Verification Credits',
+      icon: '💳',
+      route: '/verification-credits'
+    },
+    {
+      label: 'Verification Credits',
       route: '/verification-credits',
       icon: '🛡',
       disabled: true

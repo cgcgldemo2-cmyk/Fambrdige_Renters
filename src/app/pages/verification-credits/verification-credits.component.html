@@ -1,0 +1,378 @@
+<div class="credits-page">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">⌁</div>
+
+      <div>
+        <h2>FamBridge</h2>
+        <p>CGIC Documents Verification</p>
+      </div>
+    </div>
+
+    <nav class="side-nav">
+      <a>
+        <span>⌂</span>
+        Dashboard
+      </a>
+
+      <a>
+        <span>✓</span>
+        Verifications
+      </a>
+
+      <a>
+        <span>▣</span>
+        Applications
+      </a>
+
+      <a>
+        <span>□</span>
+        Documents
+      </a>
+
+      <a class="active">
+        <span>💳</span>
+        Verification Credits
+      </a>
+
+      <a>
+        <span>▤</span>
+        Billing & Invoices
+      </a>
+
+      <a>
+        <span>↗</span>
+        Reports
+      </a>
+
+      <a>
+        <span>⚙</span>
+        Settings
+      </a>
+
+      <a>
+        <span>?</span>
+        Support
+      </a>
+    </nav>
+
+    <div class="user-card">
+      <div class="avatar">AA</div>
+
+      <div>
+        <strong>Aarav A.</strong>
+        <small>Organization Admin</small>
+      </div>
+
+      <span class="chevron">⌄</span>
+    </div>
+  </aside>
+
+  <main class="main-content">
+    <header class="page-header">
+      <button class="menu-button" type="button">☰</button>
+
+      <h1>Verification Credits</h1>
+
+      <div class="header-actions">
+        <button class="notification-button" type="button">
+          🔔
+          <span>3</span>
+        </button>
+
+        <button class="profile-button" type="button">
+          AA
+          <span>⌄</span>
+        </button>
+      </div>
+    </header>
+
+    <section class="mobile-balance-card">
+      <div class="mobile-balance-icon">💳</div>
+
+      <div>
+        <p>Available Credits</p>
+        <h2>{{ availableCredits }}</h2>
+        <small>Valid until May 31, 2026</small>
+      </div>
+    </section>
+
+    <section class="stats-grid">
+      <article
+        class="stat-card"
+        *ngFor="let stat of stats"
+        [class.mobile-hide]="stat.label === 'Available Credits'"
+      >
+        <div class="stat-icon" [class]="stat.type">
+          {{ stat.icon }}
+        </div>
+
+        <div>
+          <p>{{ stat.label }}</p>
+          <h3>{{ stat.value }}</h3>
+          <small>{{ stat.subtitle }}</small>
+        </div>
+      </article>
+    </section>
+
+    <section class="credits-info">
+      <div class="info-copy">
+        <div class="info-icon">i</div>
+
+        <div>
+          <h3>How Credits Work</h3>
+          <p>
+            1 credit can be used for one verification request.
+            Credits are consumed only when a verification is successfully submitted.
+          </p>
+        </div>
+      </div>
+
+      <button class="buy-button desktop-buy" type="button" (click)="buyCredits()">
+        🛒 Buy Credits
+      </button>
+    </section>
+
+    <section class="packages-section">
+      <div class="section-header">
+        <h2>Credit Packages</h2>
+      </div>
+
+      <div class="packages-grid">
+        <article
+          class="package-card"
+          *ngFor="let item of creditPackages"
+          [class.popular]="item.popular"
+          [class.selected]="selectedPackageId === item.id"
+          (click)="selectPackage(item.id)"
+        >
+          <span class="popular-badge" *ngIf="item.popular">Most Popular</span>
+
+          <div class="package-icon">🪙</div>
+
+          <div class="package-copy">
+            <h3>{{ item.credits }} Credits</h3>
+            <p>{{ item.description }}</p>
+
+            <div class="price">
+              ${{ item.price }}
+              <span>USD</span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="select-button"
+            [class.filled]="selectedPackageId === item.id"
+            (click)="selectPackage(item.id); $event.stopPropagation()"
+          >
+            Select
+          </button>
+        </article>
+      </div>
+
+      <button class="buy-button mobile-buy" type="button" (click)="buyCredits()">
+        🛒 Buy Credits
+      </button>
+    </section>
+    <app-verification-credit-payment
+      *ngIf="showPaymentFlow"
+      [selectedPackage]="selectedPackageForPayment"
+      (paymentSubmitted)="onPaymentSubmitted($event)"
+      (cancelled)="closePaymentFlow()"
+    ></app-verification-credit-payment>
+
+    <section class="transactions-section">
+      <div class="section-header transactions-header">
+        <div>
+          <h2>Transaction History</h2>
+          <p>
+            Showing {{ paginationStart }} to {{ paginationEnd }}
+            of {{ totalTransactions }} transactions
+          </p>
+        </div>
+
+        <div class="table-controls">
+          <label for="pageSize">Rows per page</label>
+
+          <select
+            id="pageSize"
+            [value]="pageSize"
+            (change)="changePageSize($event)"
+          >
+            <option *ngFor="let option of pageSizeOptions" [value]="option">
+              {{ option }}
+            </option>
+          </select>
+        </div>
+      </div>
+      <div class="transaction-filters">
+        <div class="filter-field reference-field">
+          <label for="searchReference">Search Reference</label>
+
+          <input
+            id="searchReference"
+            type="text"
+            placeholder="Example: TXN-2026"
+            [(ngModel)]="searchReference"
+            (input)="applyFilters()"
+          />
+        </div>
+
+        <div class="filter-field">
+          <label for="statusFilter">Status</label>
+
+          <select
+            id="statusFilter"
+            [(ngModel)]="statusFilter"
+            (change)="applyFilters()"
+          >
+            <option *ngFor="let status of statusOptions" [value]="status">
+              {{ status }}
+            </option>
+          </select>
+        </div>
+
+        <div class="filter-field">
+          <label for="dateFrom">From</label>
+
+          <input
+            id="dateFrom"
+            type="date"
+            [(ngModel)]="dateFrom"
+            (change)="applyFilters()"
+          />
+        </div>
+
+        <div class="filter-field">
+          <label for="dateTo">To</label>
+
+          <input
+            id="dateTo"
+            type="date"
+            [(ngModel)]="dateTo"
+            (change)="applyFilters()"
+          />
+        </div>
+
+        <button
+          type="button"
+          class="clear-filter-button"
+          (click)="clearFilters()"
+        >
+          Clear
+        </button>
+      </div>
+      <div class="desktop-table">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Reference</th>
+              <th>Credits</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let transaction of paginatedTransactions">
+              <td>{{ transaction.date }}</td>
+              <td>{{ transaction.reference }}</td>
+              <td [class]="getCreditClass(transaction.credits)">
+                {{ getFormattedCredits(transaction.credits) }}
+              </td>
+              <td>${{ transaction.amount | number: '1.2-2' }}</td>
+              <td>
+                <span
+                  class="status-pill"
+                  [class]="getStatusClass(transaction.status)"
+                >
+                  {{ transaction.status }}
+                </span>
+              </td>
+            </tr>
+
+            <tr *ngIf="paginatedTransactions.length === 0">
+              <td colspan="5" class="empty-table">
+                No transactions found.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mobile-transactions">
+        <article
+          class="transaction-card"
+          *ngFor="let transaction of paginatedTransactions"
+        >
+          <button
+            type="button"
+            class="transaction-main"
+            (click)="toggleTransaction(transaction.id)"
+          >
+            <div>
+              <small>{{ transaction.date }}</small>
+              <strong>{{ transaction.reference }}</strong>
+            </div>
+
+            <div class="transaction-right">
+              <span [class]="getCreditClass(transaction.credits)">
+                {{ getFormattedCredits(transaction.credits) }}
+              </span>
+
+              <span
+                class="status-pill"
+                [class]="getStatusClass(transaction.status)"
+              >
+                {{ transaction.status }}
+              </span>
+
+              <span
+                class="arrow"
+                [class.open]="isTransactionExpanded(transaction.id)"
+              >
+                ⌄
+              </span>
+            </div>
+          </button>
+
+          <div
+            class="transaction-details"
+            *ngIf="isTransactionExpanded(transaction.id)"
+          >
+            <p>{{ transaction.description }}</p>
+            <span>Amount: ${{ transaction.amount | number: '1.2-2' }}</span>
+          </div>
+        </article>
+
+        <div class="empty-mobile" *ngIf="paginatedTransactions.length === 0">
+          No transactions found.
+        </div>
+      </div>
+
+      <div class="pagination-footer">
+        <button
+          type="button"
+          (click)="goToPreviousPage()"
+          [disabled]="currentPage === 1"
+        >
+          Previous
+        </button>
+
+        <span>
+          Page {{ currentPage }} of {{ totalPages }}
+        </span>
+
+        <button
+          type="button"
+          (click)="goToNextPage()"
+          [disabled]="currentPage === totalPages"
+        >
+          Next
+        </button>
+      </div>
+    </section>
+  </main>
+</div>
