@@ -63,6 +63,10 @@
           class="method-item"
           *ngFor="let method of paymentMethods"
           [class.active]="selectedPaymentMethodId === method.id"
+          [class.gcash]="method.accentClass === 'gcash'"
+          [class.maya]="method.accentClass === 'maya'"
+          [class.shopeepay]="method.accentClass === 'shopeepay'"
+          [class.bank]="method.accentClass === 'bank'"
           (click)="selectPaymentMethod(method.id)"
         >
           <span>{{ method.icon }}</span>
@@ -75,7 +79,7 @@
         <div class="qr-info">
           <h4>{{ selectedPaymentMethod.name }}</h4>
           <p>
-            Scan the QR code using your app to complete your payment.
+            Scan the QR code using your payment app to complete your payment.
           </p>
         </div>
 
@@ -118,7 +122,12 @@
       <label>
         Upload Receipt Screenshot
 
-        <div class="upload-box" *ngIf="!receiptFile">
+        <div
+          class="upload-box"
+          *ngIf="!receiptFile"
+          (drop)="onReceiptDropped($event)"
+          (dragover)="preventDropDefault($event)"
+        >
           <input
             type="file"
             accept="image/png,image/jpeg"
@@ -148,15 +157,12 @@
         type="button"
         class="submit-button"
         (click)="submitPayment()"
+        [disabled]="isSubmitted"
       >
-        Submit Payment
+        {{ isSubmitted ? 'Payment Submitted' : 'Submit Payment' }}
       </button>
 
-      <button
-        type="button"
-        class="cancel-button"
-        (click)="cancel()"
-      >
+      <button type="button" class="cancel-button" (click)="cancel()">
         Cancel
       </button>
 

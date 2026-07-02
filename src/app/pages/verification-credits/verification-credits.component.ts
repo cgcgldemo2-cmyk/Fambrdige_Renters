@@ -6,6 +6,7 @@ import {
   PaymentSubmission,
   VerificationCreditPaymentComponent
 } from './verification-credit-payment/verification-credit-payment.component';
+import { LessorSidebarComponent } from '../../shared/components/lessor-sidebar/lessor-sidebar.component';
 
 interface CreditStat {
   label: string;
@@ -15,13 +16,8 @@ interface CreditStat {
   type: 'orange' | 'blue' | 'dark';
 }
 
-// interface CreditPackage {
-//   id: number;
-//   credits: number;
-//   price: number;
-//   description: string;
-//   popular?: boolean;
-// }
+type CreditTransactionStatus = 'Completed' | 'Consumed' | 'Pending Review';
+type CreditTransactionStatusFilter = 'All' | CreditTransactionStatus;
 
 interface CreditTransaction {
   id: number;
@@ -29,7 +25,7 @@ interface CreditTransaction {
   reference: string;
   credits: number;
   amount: number;
-  status: 'Completed' | 'Consumed' | 'Pending Review';
+  status: CreditTransactionStatus;
   description: string;
 }
 
@@ -39,6 +35,7 @@ interface CreditTransaction {
   imports: [
     CommonModule,
     FormsModule,
+    LessorSidebarComponent,
     VerificationCreditPaymentComponent
   ],
   templateUrl: './verification-credits.component.html',
@@ -47,20 +44,23 @@ interface CreditTransaction {
 export class VerificationCreditsComponent {
   showPaymentFlow = false;
   selectedPackageForPayment: CreditPackage | null = null;
+
   searchReference = '';
-  statusFilter: 'All' | CreditTransaction['status'] = 'All';
+  statusFilter: CreditTransactionStatusFilter = 'All';
   dateFrom = '';
   dateTo = '';
 
-  statusOptions: Array<'All' | CreditTransaction['status']> = [
+  statusOptions: CreditTransactionStatusFilter[] = [
     'All',
     'Completed',
     'Consumed',
     'Pending Review'
   ];
+
   pageSizeOptions: number[] = [10, 20, 30, 50, 75, 100];
-  pageSize = 20;
+  pageSize = 10;
   currentPage = 1;
+
   availableCredits = 120;
   selectedPackageId = 2;
 
@@ -118,8 +118,8 @@ export class VerificationCreditsComponent {
   ];
 
   transactions: CreditTransaction[] = this.generateSampleTransactions(200);
-
   expandedTransactionIds: number[] = [];
+
   private generateSampleTransactions(count: number): CreditTransaction[] {
     const transactions: CreditTransaction[] = [];
 
@@ -171,7 +171,7 @@ export class VerificationCreditsComponent {
           reference: `TXN-${referenceDate}-${referenceNo}`,
           credits: packageItem.credits,
           amount: packageItem.amount,
-          status: 'Pending Review',
+          status: isPending ? 'Pending Review' : 'Completed',
           description: packageItem.description
         });
 
@@ -193,6 +193,7 @@ export class VerificationCreditsComponent {
 
     return transactions;
   }
+
   selectPackage(packageId: number): void {
     this.selectedPackageId = packageId;
   }
@@ -208,6 +209,12 @@ export class VerificationCreditsComponent {
 
     this.selectedPackageForPayment = selectedPackage;
     this.showPaymentFlow = true;
+
+    setTimeout(() => {
+      document
+        .querySelector('app-verification-credit-payment')
+        ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 100);
   }
 
   toggleTransaction(transactionId: number): void {
@@ -233,38 +240,32 @@ export class VerificationCreditsComponent {
     return credits > 0 ? `+${credits}` : `${credits}`;
   }
 
-  getStatusClass(status: CreditTransaction['status']): string {
+  getStatusClass(status: CreditTransactionStatus): string {
     return status.toLowerCase().replace(/\s+/g, '-');
   }
 
   get filteredTransactions(): CreditTransaction[] {
+    const searchText = this.searchReference.trim().toLowerCase();
+
     return this.transactions.filter(transaction => {
       const matchesReference =
-        !this.searchReference ||
-        transaction.reference
-          .toLowerCase()
-          .includes(this.searchReference.toLowerCase().trim());
+        !searchText || transaction.reference.toLowerCase().includes(searchText);
 
       const matchesStatus =
-        this.statusFilter === 'All' ||
-        transaction.status === this.statusFilter;
+        this.statusFilter === 'All' || transaction.status === this.statusFilter;
 
       const transactionDate = new Date(transaction.date);
       const fromDate = this.dateFrom ? new Date(this.dateFrom) : null;
       const toDate = this.dateTo ? new Date(this.dateTo) : null;
 
-      const matchesFromDate =
-        !fromDate || transactionDate >= fromDate;
+      if (toDate) {
+        toDate.setHours(23, 59, 59, 999);
+      }
 
-      const matchesToDate =
-        !toDate || transactionDate <= toDate;
+      const matchesFromDate = !fromDate || transactionDate >= fromDate;
+      const matchesToDate = !toDate || transactionDate <= toDate;
 
-      return (
-        matchesReference &&
-        matchesStatus &&
-        matchesFromDate &&
-        matchesToDate
-      );
+      return matchesReference && matchesStatus && matchesFromDate && matchesToDate;
     });
   }
 
@@ -298,6 +299,10 @@ export class VerificationCreditsComponent {
   changePageSize(event: Event): void {
     const value = Number((event.target as HTMLSelectElement).value);
 
+    if (!this.pageSizeOptions.includes(value)) {
+      return;
+    }
+
     this.pageSize = value;
     this.currentPage = 1;
   }
@@ -313,6 +318,7 @@ export class VerificationCreditsComponent {
       this.currentPage++;
     }
   }
+
   applyFilters(): void {
     this.currentPage = 1;
   }
@@ -327,9 +333,10 @@ export class VerificationCreditsComponent {
 
   onPaymentSubmitted(payment: PaymentSubmission): void {
     const today = new Date();
+    const newId = Math.max(...this.transactions.map(item => item.id), 0) + 1;
 
     const transaction: CreditTransaction = {
-      id: this.transactions.length + 1,
+      id: newId,
       date: today.toLocaleDateString('en-US', {
         month: 'short',
         day: '2-digit',
@@ -339,16 +346,17 @@ export class VerificationCreditsComponent {
       credits: payment.credits,
       amount: payment.amount,
       status: 'Pending Review',
-      description: `Credit purchase request submitted via ${payment.paymentMethod}`
+      description: `Credit purchase request submitted via ${payment.paymentMethod}. Receipt: ${payment.receiptFileName}`
     };
 
-    this.transactions = [
-      transaction,
-      ...this.transactions
-    ];
-
+    this.transactions = [transaction, ...this.transactions];
     this.currentPage = 1;
+    this.searchReference = '';
+    this.statusFilter = 'All';
+    this.dateFrom = '';
+    this.dateTo = '';
   }
+
   closePaymentFlow(): void {
     this.showPaymentFlow = false;
     this.selectedPackageForPayment = null;

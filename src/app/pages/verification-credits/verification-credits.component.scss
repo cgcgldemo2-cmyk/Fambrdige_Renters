@@ -1070,3 +1070,32 @@ table {
     background: rgba($primary, 0.14);
   }
 }
+
+/* Payment flow/mobile filter fixes */
+@media (max-width: 700px) {
+  .transactions-header {
+    gap: 12px;
+    align-items: flex-start;
+  }
+
+  .table-controls {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .transaction-filters {
+    padding: 12px 0 14px;
+    border-bottom: 0;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .reference-field {
+    grid-column: 1 / -1;
+  }
+
+  .clear-filter-button {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+}

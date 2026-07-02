@@ -23,6 +23,7 @@ interface PaymentMethod {
   id: string;
   name: string;
   icon: string;
+  accentClass: string;
   accountName: string;
   qrLabel: string;
 }
@@ -51,6 +52,7 @@ export class VerificationCreditPaymentComponent {
       id: 'gcash',
       name: 'GCash',
       icon: '💙',
+      accentClass: 'gcash',
       accountName: 'CGIC Verification Services Inc.',
       qrLabel: 'GCash QR'
     },
@@ -58,6 +60,7 @@ export class VerificationCreditPaymentComponent {
       id: 'maya',
       name: 'Maya',
       icon: '🟢',
+      accentClass: 'maya',
       accountName: 'CGIC Verification Services Inc.',
       qrLabel: 'Maya QR'
     },
@@ -65,6 +68,7 @@ export class VerificationCreditPaymentComponent {
       id: 'shopeepay',
       name: 'ShopeePay',
       icon: '🛒',
+      accentClass: 'shopeepay',
       accountName: 'CGIC Verification Services Inc.',
       qrLabel: 'ShopeePay QR'
     },
@@ -72,6 +76,7 @@ export class VerificationCreditPaymentComponent {
       id: 'bank',
       name: 'Bank QR',
       icon: '🏦',
+      accentClass: 'bank',
       accountName: 'CGIC Verification Services Inc.',
       qrLabel: 'Bank QR'
     }
@@ -96,21 +101,52 @@ export class VerificationCreditPaymentComponent {
       return;
     }
 
+    this.setReceiptFile(file, input);
+  }
+
+  onReceiptDropped(event: DragEvent): void {
+    event.preventDefault();
+
+    const file = event.dataTransfer?.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    this.setReceiptFile(file);
+  }
+
+  preventDropDefault(event: DragEvent): void {
+    event.preventDefault();
+  }
+
+  private setReceiptFile(file: File, input?: HTMLInputElement): void {
     const allowedTypes = ['image/jpeg', 'image/png'];
 
     if (!allowedTypes.includes(file.type)) {
       alert('Only JPG and PNG files are allowed.');
-      input.value = '';
+
+      if (input) {
+        input.value = '';
+      }
+
       return;
     }
 
-    const maxSizeInMb = 5;
-    const maxSizeInBytes = maxSizeInMb * 1024 * 1024;
+    const maxSizeInBytes = 5 * 1024 * 1024;
 
     if (file.size > maxSizeInBytes) {
       alert('Maximum file size is 5MB.');
-      input.value = '';
+
+      if (input) {
+        input.value = '';
+      }
+
       return;
+    }
+
+    if (this.receiptPreviewUrl) {
+      URL.revokeObjectURL(this.receiptPreviewUrl);
     }
 
     this.receiptFile = file;
@@ -118,6 +154,10 @@ export class VerificationCreditPaymentComponent {
   }
 
   removeReceipt(): void {
+    if (this.receiptPreviewUrl) {
+      URL.revokeObjectURL(this.receiptPreviewUrl);
+    }
+
     this.receiptFile = null;
     this.receiptPreviewUrl = '';
   }

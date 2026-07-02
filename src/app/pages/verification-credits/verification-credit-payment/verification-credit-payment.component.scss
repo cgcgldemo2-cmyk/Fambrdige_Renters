@@ -1,7 +1,6 @@
 $primary: #ff4104;
 $primary-dark: #e03705;
 $dark: #001621;
-$dark-soft: #062236;
 $text: #111827;
 $muted: #667085;
 $border: #e5eaf2;
@@ -114,7 +113,6 @@ $yellow: #f59e0b;
     display: grid;
     place-items: center;
     background: rgba($primary, 0.12);
-    color: $primary;
   }
 
   p,
@@ -450,6 +448,11 @@ $yellow: #f59e0b;
   border: 0;
   background: linear-gradient(135deg, $primary, $primary-dark);
   color: #ffffff;
+
+  &:disabled {
+    opacity: 0.75;
+    cursor: not-allowed;
+  }
 }
 
 .cancel-button {
@@ -564,10 +567,8 @@ $yellow: #f59e0b;
     border-radius: 14px;
   }
 
-  .payment-header {
-    h2 {
-      font-size: 18px;
-    }
+  .payment-header h2 {
+    font-size: 18px;
   }
 
   .steps {
@@ -594,15 +595,13 @@ $yellow: #f59e0b;
   .selected-package-card {
     align-items: flex-start;
 
-    .package-price {
-      strong {
-        font-size: 20px;
-      }
+    .package-price strong {
+      font-size: 20px;
     }
   }
 
   .method-list {
-    grid-template-columns: repeat(4, minmax(90px, 1fr));
+    grid-template-columns: repeat(4, minmax(92px, 1fr));
     overflow-x: auto;
   }
 

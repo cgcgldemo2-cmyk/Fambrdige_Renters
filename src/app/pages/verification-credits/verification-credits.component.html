@@ -1,4 +1,4 @@
-<div class="credits-page">
+<!-- <div class="credits-page">
   <aside class="sidebar">
     <div class="brand">
       <div class="brand-mark">⌁</div>
@@ -68,6 +68,9 @@
     </div>
   </aside>
 
+
+</div> -->
+<app-lessor-sidebar>
   <main class="main-content">
     <header class="page-header">
       <button class="menu-button" type="button">☰</button>
@@ -115,24 +118,6 @@
       </article>
     </section>
 
-    <section class="credits-info">
-      <div class="info-copy">
-        <div class="info-icon">i</div>
-
-        <div>
-          <h3>How Credits Work</h3>
-          <p>
-            1 credit can be used for one verification request.
-            Credits are consumed only when a verification is successfully submitted.
-          </p>
-        </div>
-      </div>
-
-      <button class="buy-button desktop-buy" type="button" (click)="buyCredits()">
-        🛒 Buy Credits
-      </button>
-    </section>
-
     <section class="packages-section">
       <div class="section-header">
         <h2>Credit Packages</h2>
@@ -175,6 +160,27 @@
         🛒 Buy Credits
       </button>
     </section>
+
+
+    <section class="credits-info">
+      <div class="info-copy">
+        <div class="info-icon">i</div>
+
+        <div>
+          <h3>How Credits Work</h3>
+          <p>
+            1 credit can be used for one verification request.
+            Credits are consumed only when a verification is successfully submitted.
+          </p>
+        </div>
+      </div>
+
+      <button class="buy-button desktop-buy" type="button" (click)="buyCredits()">
+        🛒 Buy Credits
+      </button>
+    </section>
+
+
     <app-verification-credit-payment
       *ngIf="showPaymentFlow"
       [selectedPackage]="selectedPackageForPayment"
@@ -375,4 +381,4 @@
       </div>
     </section>
   </main>
-</div>
+</app-lessor-sidebar>
