@@ -1,0 +1,97 @@
+<div class="location-select">
+  <button type="button" class="location-trigger" [class.placeholder]="!selectedLabel" (click)="toggle()">
+    <span>{{ selectedLabel || placeholder }}</span>
+    <i-feather [name]="isOpen ? 'chevron-up' : 'chevron-down'" aria-hidden="true"></i-feather>
+  </button>
+
+  <div class="location-menu" *ngIf="isOpen">
+    <div class="search-wrap">
+      <i-feather name="search" aria-hidden="true"></i-feather>
+      <input type="search" [(ngModel)]="search" [placeholder]="'Search ' + placeholder.toLowerCase()" autocomplete="off" />
+    </div>
+
+    <div class="location-options">
+      <section *ngFor="let group of groupedOptions">
+        <span class="category-label">{{ group.category }}</span>
+        <button
+          type="button"
+          *ngFor="let option of group.options"
+          [class.selected]="option.value === value"
+          [disabled]="disabledValues.includes(option.value)"
+          (click)="select(option)"
+        >
+          <span><strong>{{ option.label }}</strong><small *ngIf="option.meta">{{ option.meta }}</small></span>
+          <i-feather name="check" *ngIf="option.value === value" aria-hidden="true"></i-feather>
+        </button>
+      </section>
+
+      <div class="empty-state-wrapper" *ngIf="!filteredOptions.length">
+        <div class="empty-state">No matching location found</div>
+        <button type="button" class="request-location-btn" (click)="toggleAddLocationForm()">
+          <i-feather name="plus" aria-hidden="true"></i-feather>
+          Request to add missing location
+        </button>
+      </div>
+
+      <div class="add-location-form" *ngIf="showAddLocationForm">
+        <div class="form-header">
+          <h4>Request New Location</h4>
+          <button type="button" class="close-btn" (click)="toggleAddLocationForm()" [disabled]="isSubmittingRequest">
+            <i-feather name="x" aria-hidden="true"></i-feather>
+          </button>
+        </div>
+
+        <div class="form-group">
+          <label for="category-select">Category</label>
+          <select id="category-select" [(ngModel)]="requestFormData.category" [disabled]="isSubmittingRequest">
+            <option value="">Select a category</option>
+            <option *ngFor="let cat of availableCategories" [value]="cat">{{ cat }}</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="location-name">Location Name</label>
+          <input 
+            type="text" 
+            id="location-name" 
+            [(ngModel)]="requestFormData.locationName" 
+            placeholder="e.g., SM Mall of Asia, Pasay"
+            [disabled]="isSubmittingRequest"
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="google-maps-link">Google Maps Link</label>
+          <input 
+            type="url" 
+            id="google-maps-link" 
+            [(ngModel)]="requestFormData.googleMapsLink" 
+            placeholder="https://maps.google.com/..."
+            [disabled]="isSubmittingRequest"
+          />
+        </div>
+
+        <div class="form-actions">
+          <button 
+            type="button" 
+            class="submit-btn" 
+            (click)="submitLocationRequest()"
+            [disabled]="isSubmittingRequest || !isRequestFormValid"
+          >
+            <span *ngIf="!isSubmittingRequest">Submit Request</span>
+            <span *ngIf="isSubmittingRequest">Submitting...</span>
+          </button>
+          <button 
+            type="button" 
+            class="cancel-btn" 
+            (click)="toggleAddLocationForm()"
+            [disabled]="isSubmittingRequest"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

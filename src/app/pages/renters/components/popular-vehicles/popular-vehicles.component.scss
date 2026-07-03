@@ -1,0 +1,179 @@
+$primary: #d40000;
+$orange: #ff4104;
+$dark: #001621;
+$muted: #667085;
+$border: #e5eaf2;
+$green: #16a34a;
+
+.popular-section {
+  max-width: 1180px;
+  margin: 0 auto 34px;
+  padding: 0 20px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+
+  h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 1000;
+
+    span {
+      color: $primary;
+    }
+  }
+
+  a {
+    color: $primary;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 900;
+  }
+}
+
+.vehicle-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 18px;
+}
+
+.vehicle-card {
+  position: relative;
+  border: 1px solid $border;
+  border-radius: 18px;
+  background: #ffffff;
+  overflow: hidden;
+  box-shadow: 0 14px 34px rgba($dark, 0.05);
+  transition: 0.25s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 22px 44px rgba($dark, 0.12);
+  }
+
+  img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+    background: #f8fafc;
+  }
+}
+
+.favorite-btn {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border: 1px solid $border;
+  border-radius: 50%;
+  background: rgba(#ffffff, 0.92);
+  cursor: pointer;
+}
+
+.badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: $dark;
+  color: #ffffff;
+  font-size: 10px;
+  font-weight: 1000;
+  text-transform: uppercase;
+}
+
+.vehicle-body {
+  padding: 14px;
+
+  h3 {
+    margin: 0;
+    color: $dark;
+    font-size: 15px;
+    font-weight: 950;
+  }
+}
+
+.specs {
+  margin-top: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  color: $muted;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.rate-row {
+  margin-top: 14px;
+
+  strong {
+    color: $dark;
+    font-size: 22px;
+    font-weight: 1000;
+  }
+
+  span {
+    color: $muted;
+    font-size: 12px;
+  }
+}
+
+.card-footer {
+  margin-top: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+
+  .available {
+    color: $green;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  button {
+    min-height: 36px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, $orange, $primary);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 950;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 1100px) {
+  .vehicle-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .popular-section {
+    padding: 0 14px;
+  }
+
+  .section-heading h2 {
+    font-size: 21px;
+  }
+
+  .vehicle-grid {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 10px;
+  }
+
+  .vehicle-card {
+    min-width: 220px;
+  }
+}

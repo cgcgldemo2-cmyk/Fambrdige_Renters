@@ -1,0 +1,107 @@
+<section class="booking-panel" *ngIf="vehicle as selectedVehicle">
+  <div class="panel-header">
+    <div>
+      <p>{{ bookingStep === 'payment' ? 'Reservation Fee' : bookingStep === 'success' ? 'Request Submitted' : 'Booking Request' }}</p>
+      <h2>{{ selectedVehicle.name }}</h2>
+      <span>{{ selectedVehicle.seats }} seats · {{ selectedVehicle.carType }} · {{ selectedVehicle.transmission }}</span>
+    </div>
+
+    <button type="button" class="close-btn" (click)="closed.emit()">×</button>
+  </div>
+
+  <div class="selected-car">
+    <img [src]="selectedVehicle.imageUrl" [alt]="selectedVehicle.name" />
+    <div>
+      <strong>{{ startDate }} {{ pickupTime }} → {{ endDate }} {{ returnTime }}</strong>
+      <span>{{ selectedVehicle.pickupAddress }}</span>
+      <small>Vehicle is temporarily locked while you complete this request.</small>
+    </div>
+  </div>
+
+  <ng-container *ngIf="bookingStep === 'booking'">
+    <div class="duration-grid">
+      <button type="button" [class.active]="selectedDuration === '12hrs'" (click)="selectDuration('12hrs')">
+        <span>12 hrs</span>
+        <strong>₱{{ selectedVehicle.price12hrs | number }}</strong>
+      </button>
+
+      <button type="button" [class.active]="selectedDuration === '24hrs'" (click)="selectDuration('24hrs')">
+        <span>24 hrs</span>
+        <strong>₱{{ selectedVehicle.price24hrs | number }}</strong>
+      </button>
+
+      <button type="button" [class.active]="selectedDuration === 'multi_day'" (click)="selectDuration('multi_day')">
+        <span>{{ rentalDays }} day{{ rentalDays > 1 ? 's' : '' }}</span>
+        <strong>₱{{ selectedVehicle.price24hrs | number }} / day</strong>
+      </button>
+    </div>
+
+    <div class="summary-box">
+      <div>
+        <span>Base Rental</span>
+        <strong>₱{{ basePrice | number }}</strong>
+      </div>
+      <div *ngIf="driverFee > 0">
+        <span>With Driver Add-on</span>
+        <strong>₱{{ driverFee | number }}</strong>
+      </div>
+      <div class="total">
+        <span>Estimated Total</span>
+        <strong>₱{{ totalPrice | number }}</strong>
+      </div>
+    </div>
+
+    <button type="button" class="primary-btn" (click)="continueToPayment()">
+      Send Booking Request
+    </button>
+  </ng-container>
+
+  <ng-container *ngIf="bookingStep === 'payment'">
+    <div class="payment-overview">
+      <div>
+        <span>Pay Now</span>
+        <strong>₱{{ payNow | number }}</strong>
+        <small>Reservation fee + service fee</small>
+      </div>
+      <div>
+        <span>Remaining Balance</span>
+        <strong>₱{{ balance | number }}</strong>
+        <small>Pay after approval or at handover</small>
+      </div>
+    </div>
+
+    <div class="payment-methods">
+      <button type="button" [class.active]="selectedPaymentMethod === 'gcash'" (click)="selectPaymentMethod('gcash')">GCash</button>
+      <button type="button" [class.active]="selectedPaymentMethod === 'maya'" (click)="selectPaymentMethod('maya')">Maya</button>
+      <button type="button" [class.active]="selectedPaymentMethod === 'card'" (click)="selectPaymentMethod('card')">Card</button>
+      <button type="button" [class.active]="selectedPaymentMethod === 'bank_transfer'" (click)="selectPaymentMethod('bank_transfer')">Bank Transfer</button>
+    </div>
+
+    <div class="summary-box">
+      <div>
+        <span>Reservation Fee</span>
+        <strong>₱{{ reservationFee | number }}</strong>
+      </div>
+      <div>
+        <span>Service Fee</span>
+        <strong>₱{{ serviceFee | number }}</strong>
+      </div>
+      <div class="total">
+        <span>Total to Pay Now</span>
+        <strong>₱{{ payNow | number }}</strong>
+      </div>
+    </div>
+
+    <div class="actions-row">
+      <button type="button" class="secondary-btn" (click)="back()">Back</button>
+      <button type="button" class="primary-btn" (click)="submitPayment()">Simulate Success</button>
+    </div>
+  </ng-container>
+
+  <section class="success-state" *ngIf="bookingStep === 'success'">
+    <div class="success-icon">✓</div>
+    <h3>Booking Request Submitted</h3>
+    <p>Your request has been submitted. The lessor will review your booking and documents.</p>
+    <button type="button" class="primary-btn" (click)="closed.emit()">Done</button>
+  </section>
+</section>

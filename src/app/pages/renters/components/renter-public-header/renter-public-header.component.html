@@ -1,0 +1,23 @@
+<header class="public-header">
+  <a class="brand" routerLink="/">
+    <span class="brand-mark">CGIC</span>
+    <small>Car Rental</small>
+  </a>
+
+  <nav [class.open]="isMenuOpen">
+    <a href="#book" (click)="closeMenu()">Book Now</a>
+    <a href="#vehicles" (click)="closeMenu()">Vehicles</a>
+    <a href="#why" (click)="closeMenu()">About Us</a>
+    <a href="#contact" (click)="closeMenu()">Contact Us</a>
+    <a routerLink="/lessors" (click)="closeMenu()">For Lessors</a>
+  </nav>
+
+  <div class="header-actions">
+    <a class="outline-link" routerLink="/login">Sign In</a>
+    <a class="primary-link" routerLink="/register">Create Account</a>
+  </div>
+
+  <button type="button" class="menu-toggle" (click)="toggleMenu()" aria-label="Toggle menu">
+    ☰
+  </button>
+</header>

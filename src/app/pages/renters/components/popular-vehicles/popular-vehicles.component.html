@@ -1,0 +1,34 @@
+<section class="popular-section">
+  <div class="section-heading">
+    <h2><span>{{ title.split(' ')[0] }}</span> {{ title.split(' ').slice(1).join(' ') }}</h2>
+    <a href="#vehicleResults">View all vehicles →</a>
+  </div>
+
+  <div class="vehicle-grid">
+    <article class="vehicle-card" *ngFor="let vehicle of vehicles">
+      <button type="button" class="favorite-btn">♡</button>
+      <span class="badge" *ngIf="vehicle.badge">{{ vehicle.badge }}</span>
+
+      <img [src]="vehicle.imageUrl" [alt]="vehicle.name" />
+
+      <div class="vehicle-body">
+        <h3>{{ vehicle.name }}</h3>
+
+        <div class="specs">
+          <span>👥 {{ vehicle.seats }} Seats</span>
+          <span>⚙ {{ vehicle.transmission }}</span>
+        </div>
+
+        <div class="rate-row">
+          <strong>₱{{ vehicle.price24hrs | number }}</strong>
+          <span>/ day</span>
+        </div>
+
+        <div class="card-footer">
+          <span class="available">● Available</span>
+          <button type="button" (click)="bookNow.emit(vehicle)">Book Now</button>
+        </div>
+      </div>
+    </article>
+  </div>
+</section>

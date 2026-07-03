@@ -1,0 +1,146 @@
+$primary: #d40000;
+$dark: #001621;
+$border: #e5eaf2;
+
+.public-header {
+  height: 68px;
+  padding: 0 max(24px, calc((100vw - 1180px) / 2));
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  background: rgba(#ffffff, 0.94);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid $border;
+  position: sticky;
+  top: 0;
+  z-index: 30;
+}
+
+.brand {
+  text-decoration: none;
+  color: $dark;
+  display: grid;
+  line-height: 1;
+
+  .brand-mark {
+    color: $primary;
+    font-size: 30px;
+    font-weight: 1000;
+    letter-spacing: -1px;
+    font-style: italic;
+  }
+
+  small {
+    margin-top: 2px;
+    color: $primary;
+    font-size: 10px;
+    font-weight: 900;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+  }
+}
+
+nav {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+
+  a {
+    color: #111827;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 800;
+  }
+}
+
+.header-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  a {
+    min-height: 42px;
+    padding: 0 24px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 900;
+  }
+}
+
+.outline-link {
+  border: 1px solid rgba($primary, 0.55);
+  color: $primary;
+}
+
+.primary-link {
+  background: linear-gradient(135deg, $primary, #b91c1c);
+  color: #ffffff;
+  box-shadow: 0 12px 28px rgba($primary, 0.24);
+}
+
+.menu-toggle {
+  display: none;
+  border: 0;
+  background: transparent;
+  color: $dark;
+  font-size: 28px;
+}
+
+@media (max-width: 900px) {
+  .public-header {
+    height: 64px;
+    padding: 0 16px;
+  }
+
+  nav {
+    position: fixed;
+    top: 64px;
+    left: 12px;
+    right: 12px;
+    padding: 14px;
+    border: 1px solid $border;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 18px 34px rgba($dark, 0.16);
+    display: none;
+    flex-direction: column;
+    gap: 0;
+
+    &.open {
+      display: flex;
+    }
+
+    a {
+      padding: 13px;
+      border-radius: 12px;
+    }
+  }
+
+  .header-actions {
+    margin-left: auto;
+
+    .outline-link {
+      display: none;
+    }
+
+    .primary-link {
+      min-height: 38px;
+      padding: 0 14px;
+      font-size: 12px;
+    }
+  }
+
+  .menu-toggle {
+    order: -1;
+    display: block;
+  }
+
+  .brand .brand-mark {
+    font-size: 24px;
+  }
+}

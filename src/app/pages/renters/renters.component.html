@@ -1,0 +1,122 @@
+<div class="renter-page">
+  <app-renter-public-header class="gsap-header"></app-renter-public-header>
+
+  <app-renter-hero
+    [pickupLocation]="pickupLocation"
+    [startDate]="startDate"
+    [endDate]="endDate"
+    [pickupTime]="pickupTime"
+    [returnTime]="returnTime"
+    [selectedSeats]="selectedSeats"
+    [selectedCarType]="selectedCarType"
+    [seatOptions]="seatOptions"
+    [carTypeBySeats]="carTypeBySeats"
+    [isSearching]="isSearching"
+    [trustFeatures]="trustFeatures"
+    (pickupLocationChange)="pickupLocation = $event"
+    (startDateChange)="startDate = $event"
+    (pickupTimeChange)="pickupTime = $event"
+    (endDateChange)="endDate = $event"
+    (returnTimeChange)="returnTime = $event"
+    (selectAllVehiclesRequest)="selectAllVehicles()"
+    (selectSeatRequest)="selectSeats($event)"
+    (selectCarTypeRequest)="selectCarType($event)"
+    (searchRequest)="searchCars()"
+  ></app-renter-hero>
+
+  <main>
+    <app-vehicle-category-showcase
+      [categories]="vehicleCategories"
+      (categorySelected)="selectCategory($event)"
+      data-animate
+    ></app-vehicle-category-showcase>
+
+    <app-why-choose-cgic
+      [steps]="bookingSteps"
+      data-animate
+    ></app-why-choose-cgic>
+
+    <app-cgic-care-banner data-animate></app-cgic-care-banner>
+
+    <app-popular-vehicles
+      [vehicles]="filteredFeaturedVehicles"
+      (bookNow)="openBookingPanel($event)"
+      data-animate
+    ></app-popular-vehicles>
+
+    <section id="vehicleResults" class="results-shell" *ngIf="hasSearched || isSearching || errorMessage" data-animate>
+      <div class="results-toolbar">
+        <div>
+          <p>Search Results</p>
+          <h2>
+            <ng-container *ngIf="!isSearching">
+              {{ availableCars.length }} available vehicle{{ availableCars.length === 1 ? '' : 's' }} found
+            </ng-container>
+            <ng-container *ngIf="isSearching">Checking vehicle availability</ng-container>
+          </h2>
+        </div>
+
+        <button type="button" class="filter-btn" (click)="toggleFilters()">
+          {{ showFilters ? 'Hide Filters' : 'Filters' }}
+        </button>
+      </div>
+
+      <app-renter-filters
+        [showFilters]="showFilters"
+        [rentalType]="rentalType"
+        [seatOptions]="seatOptions"
+        [selectedSeats]="selectedSeats"
+        [carTypes]="carTypes"
+        [selectedCarType]="selectedCarType"
+        [transmission]="transmission"
+        [insuranceCoverageOptions]="insuranceCoverageOptions"
+        [selectedInsuranceCoverages]="selectedInsuranceCoverages"
+        (rentalTypeChange)="setRentalType($event)"
+        (seatChange)="selectSeats($event)"
+        (carTypeChange)="selectCarType($event)"
+        (transmissionChange)="selectTransmission($event)"
+        (insuranceCoverageChange)="toggleInsuranceCoverage($event.coverage, $event.selected)"
+      ></app-renter-filters>
+
+      <app-renter-search-results
+        [vehicles]="availableCars"
+        [isSearching]="isSearching"
+        [errorMessage]="errorMessage"
+        [hasSearched]="hasSearched"
+        [loadedVehicleCount]="loadedVehicleCount"
+        [hasInsuranceFilters]="hasInsuranceFilters"
+        (bookNow)="openBookingPanel($event)"
+      ></app-renter-search-results>
+    </section>
+
+    <app-renter-booking-panel
+      id="bookingPanel"
+      *ngIf="selectedVehicle"
+      [vehicle]="selectedVehicle"
+      [startDate]="startDate"
+      [endDate]="endDate"
+      [pickupTime]="pickupTime"
+      [returnTime]="returnTime"
+      (closed)="closeBookingPanel()"
+      data-animate
+    ></app-renter-booking-panel>
+
+    <app-renter-testimonials
+      [testimonials]="testimonials"
+      data-animate
+    ></app-renter-testimonials>
+
+    <app-latest-from-cgic
+      [items]="newsItems"
+      data-animate
+    ></app-latest-from-cgic>
+
+    <app-renter-faq
+      [faqs]="faqs"
+      (faqToggle)="toggleFaq($event)"
+      data-animate
+    ></app-renter-faq>
+  </main>
+
+  <app-renter-footer></app-renter-footer>
+</div>

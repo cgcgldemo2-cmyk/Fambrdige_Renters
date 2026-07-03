@@ -1,0 +1,63 @@
+<button
+  type="button"
+  class="summary-pill return-duration-pill"
+  [disabled]="disabled"
+  (click)="openPicker()"
+>
+  <div class="summary-icon">
+    <span class="ui-icon" aria-hidden="true">📅</span>
+  </div>
+
+  <div class="summary-text">
+    <strong>{{ displayReturnDate }}</strong>
+    <span>{{ displayReturnSubText }}</span>
+  </div>
+</button>
+
+<div class="duration-backdrop" *ngIf="isOpen" (click)="closePicker()"></div>
+
+<section class="duration-dialog" *ngIf="isOpen" role="dialog" aria-modal="true" aria-label="Set return duration">
+  <div class="duration-card" (click)="$event.stopPropagation()">
+    <button type="button" class="dialog-close-btn" (click)="closePicker()" aria-label="Close return duration picker">
+      <span class="ui-icon" aria-hidden="true">×</span>
+    </button>
+
+    <h2>Set Duration</h2>
+    <p>Please set how many days would you like to rent the vehicle?</p>
+
+    <div class="duration-stepper">
+      <button type="button" [disabled]="!canDecrease" (click)="decreaseDays()" aria-label="Decrease duration">
+        <span class="ui-icon" aria-hidden="true">−</span>
+      </button>
+
+      <strong>{{ durationLabel }}</strong>
+
+      <button type="button" [disabled]="!canIncrease" (click)="increaseDays()" aria-label="Increase duration">
+        <span class="ui-icon" aria-hidden="true">+</span>
+      </button>
+    </div>
+
+    <label class="half-day-toggle">
+      <input
+        type="checkbox"
+        [ngModel]="addHalfDay"
+        (ngModelChange)="setAddHalfDay($event)"
+      />
+      <span class="toggle-track"><span class="toggle-thumb"></span></span>
+      <span>Add 12 hours to the duration.</span>
+    </label>
+
+    <div class="return-preview">
+      <span>You return on</span>
+      <strong>{{ computedReturnLabel }}</strong>
+    </div>
+
+    <div class="duration-error" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <button type="button" class="confirm-btn" (click)="confirm()">
+      Confirm
+    </button>
+  </div>
+</section>

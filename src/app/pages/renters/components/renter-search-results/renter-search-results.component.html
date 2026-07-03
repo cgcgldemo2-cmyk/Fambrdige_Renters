@@ -1,0 +1,56 @@
+<section class="search-results-section">
+  <div class="feedback-message error" *ngIf="errorMessage">
+    {{ errorMessage }}
+  </div>
+
+  <div class="empty-state loading" *ngIf="isSearching">
+    <span class="spinner large"></span>
+    <strong>Checking vehicle availability</strong>
+    <small>Fetching matching vehicles and available dates.</small>
+  </div>
+
+  <div class="empty-state" *ngIf="hasSearched && vehicles.length === 0 && !errorMessage && !isSearching">
+    <span>🔍</span>
+    <strong>No available vehicles found</strong>
+    <small>
+      Loaded {{ loadedVehicleCount }} vehicles.
+      {{ hasInsuranceFilters ? 'Try removing an insurance coverage filter or changing dates.' : 'Try another seat count, car type, or shorter date range.' }}
+    </small>
+  </div>
+
+  <div class="results-grid" *ngIf="vehicles.length > 0 && !isSearching">
+    <article class="result-card" *ngFor="let vehicle of vehicles">
+      <img [src]="vehicle.imageUrl" [alt]="vehicle.name" />
+
+      <div class="result-info">
+        <div class="title-row">
+          <div>
+            <h3>{{ vehicle.name }}</h3>
+            <p>{{ vehicle.pickupAddress }}</p>
+          </div>
+          <span>{{ vehicle.rating }} ★</span>
+        </div>
+
+        <div class="spec-grid">
+          <span>{{ vehicle.carType }}</span>
+          <span>{{ vehicle.seats }} seats</span>
+          <span>{{ vehicle.transmission }}</span>
+          <span>{{ vehicle.fuelType }}</span>
+        </div>
+
+        <div class="insurance-row" *ngIf="vehicle.hasInsurance">
+          🛡 {{ vehicle.insuranceCoverages.join(' · ') }}
+        </div>
+      </div>
+
+      <div class="price-panel">
+        <small>Starting from</small>
+        <strong>₱{{ vehicle.price24hrs | number }}</strong>
+        <span>/ day</span>
+        <button type="button" (click)="bookNow.emit(vehicle)">
+          {{ vehicle.isFullyAvailable ? 'Book Now' : 'View Dates' }}
+        </button>
+      </div>
+    </article>
+  </div>
+</section>

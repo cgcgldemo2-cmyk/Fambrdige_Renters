@@ -3,6 +3,7 @@ import { VerificationCreditsComponent } from './pages/verification-credits/verif
 import { RenterReportsComponent } from './pages/renter-reports/renter-reports.component';
 import { BookingReportsComponent } from './pages/booking-reports/booking-reports.component';
 import { SettingsComponent } from './pages/settings/settings.component';
+import { RentersComponent } from './pages/renters/renters.component';
 
 export const routes: Routes = [
   {
@@ -74,6 +75,10 @@ export const routes: Routes = [
   {
     path: 'settings',
     component: SettingsComponent
+  },
+  {
+    path: 'renters-preview',
+    component: RentersComponent
   },
   {
     path: '',

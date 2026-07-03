@@ -1,0 +1,100 @@
+<section class="inline-filter-panel" *ngIf="showFilters">
+  <div class="field-group">
+    <label>Rental Type</label>
+
+    <div class="segmented-control">
+      <button
+        type="button"
+        [class.active]="rentalType === 'with_driver'"
+        (click)="rentalTypeChange.emit('with_driver')"
+      >
+        <span class="ui-icon" aria-hidden="true">👤</span>
+        <span>With Driver</span>
+      </button>
+
+      <button
+        type="button"
+        [class.active]="rentalType === 'without_driver'"
+        (click)="rentalTypeChange.emit('without_driver')"
+      >
+        <span class="ui-icon" aria-hidden="true">🔑</span>
+        <span>Without Driver</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="field-group">
+    <label>Seats</label>
+
+    <div class="chip-grid seats">
+      <button
+        type="button"
+        *ngFor="let seat of seatOptions"
+        [class.active]="selectedSeats === seat"
+        (click)="seatChange.emit(seat)"
+      >
+        {{ seat }}
+      </button>
+    </div>
+  </div>
+
+  <div class="field-group car-type-group">
+    <label>Car Type</label>
+
+    <div class="chip-grid">
+      <button
+        type="button"
+        *ngFor="let type of carTypes"
+        [class.active]="selectedCarType === type"
+        (click)="carTypeChange.emit(type)"
+      >
+        {{ type }}
+      </button>
+    </div>
+  </div>
+
+  <div
+    class="field-group"
+    *ngIf="selectedCarType && rentalType === 'without_driver'"
+  >
+    <label>Transmission</label>
+
+    <div class="segmented-control compact">
+      <button
+        type="button"
+        [class.active]="transmission === 'Automatic'"
+        (click)="transmissionChange.emit('Automatic')"
+      >
+        Automatic
+      </button>
+
+      <button
+        type="button"
+        [class.active]="transmission === 'Manual'"
+        (click)="transmissionChange.emit('Manual')"
+      >
+        Manual
+      </button>
+    </div>
+  </div>
+
+  <div class="field-group insurance-group">
+    <label>Insurance Coverage</label>
+
+    <div class="insurance-options compact-insurance-options">
+      <label *ngFor="let coverage of insuranceCoverageOptions">
+        <input
+          type="checkbox"
+          [ngModel]="isInsuranceCoverageSelected(coverage.value)"
+          (ngModelChange)="toggleInsuranceCoverage(coverage.value, $event)"
+        />
+
+        <span class="insurance-check">
+          <span class="ui-icon" aria-hidden="true">✓</span>
+        </span>
+
+        <span>{{ coverage.label }}</span>
+      </label>
+    </div>
+  </div>
+</section>

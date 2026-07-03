@@ -1,0 +1,17 @@
+<section id="why" class="why-section">
+  <div class="section-title">
+    <h2>Why choose <span>CGIC</span>?</h2>
+    <p>Simple steps. Seamless experience.</p>
+  </div>
+
+  <div class="steps-grid">
+    <article *ngFor="let step of steps; let index = index">
+      <div class="step-icon">{{ step.icon }}</div>
+      <div>
+        <h3>{{ step.title }}</h3>
+        <p>{{ step.description }}</p>
+      </div>
+      <span class="step-arrow" *ngIf="index < steps.length - 1">→</span>
+    </article>
+  </div>
+</section>

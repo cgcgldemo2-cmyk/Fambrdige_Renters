@@ -1,0 +1,25 @@
+<section id="vehicles" class="category-section">
+  <div class="section-heading">
+    <h2><span>Wide choices</span> of vehicles!</h2>
+    <p>Top quality and with the <strong>lowest price</strong> in the market.</p>
+  </div>
+
+  <div class="category-carousel">
+    <button type="button" class="nav-btn">‹</button>
+
+    <button
+      type="button"
+      class="category-card"
+      *ngFor="let category of categories"
+      (click)="categorySelected.emit(category)"
+    >
+      <img [src]="category.imageUrl" [alt]="category.name" />
+      <strong>{{ category.name }}</strong>
+      <small>From ₱{{ category.fromPrice | number }}/day</small>
+    </button>
+
+    <button type="button" class="nav-btn">›</button>
+  </div>
+
+  <button type="button" class="view-all-btn">View All Vehicles</button>
+</section>

@@ -1,0 +1,54 @@
+<section id="book" class="hero-section">
+  <button type="button" class="hero-arrow left">‹</button>
+  <button type="button" class="hero-arrow right">›</button>
+
+  <div class="hero-content">
+    <div class="hero-copy gsap-hero-copy">
+      <h1>Travel easier with <span>CGIC</span></h1>
+      <p>Book now and drive it yourself with verified vehicles, clear pricing, and reliable support.</p>
+
+      <div class="hero-points">
+        <span class="gsap-trust-pill">🚗 Wide selections</span>
+        <span class="gsap-trust-pill">🛡 Best price guarantee</span>
+        <span class="gsap-trust-pill">⭐ Trusted by thousands</span>
+      </div>
+    </div>
+
+    <div class="hero-car gsap-hero-car">
+      <div class="car-shape"></div>
+      <strong>CGIC</strong>
+    </div>
+  </div>
+
+  <div class="hero-search gsap-search">
+    <app-renter-top-search
+      [pickupLocation]="pickupLocation"
+      [startDate]="startDate"
+      [endDate]="endDate"
+      [pickupTime]="pickupTime"
+      [returnTime]="returnTime"
+      [selectedSeats]="selectedSeats"
+      [selectedCarType]="selectedCarType"
+      [seatOptions]="seatOptions"
+      [carTypeBySeats]="carTypeBySeats"
+      [isSearching]="isSearching"
+      (pickupLocationChange)="pickupLocationChange.emit($event)"
+      (startDateChange)="startDateChange.emit($event)"
+      (pickupTimeChange)="pickupTimeChange.emit($event)"
+      (endDateChange)="endDateChange.emit($event)"
+      (returnTimeChange)="returnTimeChange.emit($event)"
+      (selectAllVehiclesRequest)="selectAllVehiclesRequest.emit()"
+      (selectSeatRequest)="selectSeatRequest.emit($event)"
+      (selectCarTypeRequest)="selectCarTypeRequest.emit($event)"
+      (searchRequest)="searchRequest.emit()"
+    ></app-renter-top-search>
+  </div>
+
+  <div class="payment-strip">
+    <span>We accept</span>
+    <strong>GCash</strong>
+    <strong>VISA</strong>
+    <strong>QR Ph</strong>
+    <strong>Mastercard</strong>
+  </div>
+</section>
