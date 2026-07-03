@@ -1,0 +1,240 @@
+$primary: #ff4104;
+$primary-dark: #e03705;
+$dark: #001621;
+$text: #111827;
+$muted: #667085;
+$border: #e5eaf2;
+$green: #2f7d32;
+
+.settings-card {
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 14px 30px rgba($dark, 0.05);
+}
+
+.card-title {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  margin-bottom: 14px;
+
+  > span {
+    color: $primary;
+    font-size: 20px;
+  }
+
+  h2,
+  p {
+    margin: 0;
+  }
+
+  h2 {
+    color: $dark;
+    font-size: 17px;
+    font-weight: 900;
+  }
+
+  p {
+    margin-top: 4px;
+    color: $muted;
+    font-size: 12px;
+  }
+}
+
+.domain-options {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.domain-option {
+  min-height: 52px;
+  border: 1px solid $border;
+  border-radius: 12px;
+  background: #ffffff;
+  color: $dark;
+  padding: 0 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  text-align: left;
+
+  &.active {
+    border-color: rgba($primary, 0.55);
+    background: rgba($primary, 0.04);
+  }
+
+  .radio {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    border: 2px solid #cbd5e1;
+    flex: 0 0 16px;
+  }
+
+  &.active .radio {
+    border-color: $primary;
+    box-shadow: inset 0 0 0 4px #ffffff;
+    background: $primary;
+  }
+
+  strong {
+    font-size: 13px;
+  }
+}
+
+.domain-fields {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.input-group {
+  display: grid;
+  gap: 7px;
+
+  span {
+    color: $dark;
+    font-size: 12px;
+    font-weight: 900;
+  }
+
+  input {
+    width: 100%;
+    height: 40px;
+    border: 1px solid $border;
+    border-radius: 10px;
+    background: #ffffff;
+    padding: 0 12px;
+    color: $dark;
+    outline: none;
+    font-weight: 700;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.12);
+    }
+  }
+}
+
+.subdomain-input {
+  display: flex;
+  align-items: center;
+  border: 1px solid $border;
+  border-radius: 10px;
+  overflow: hidden;
+
+  input {
+    border: 0;
+    border-radius: 0;
+    min-width: 110px;
+  }
+
+  small {
+    padding-right: 10px;
+    color: $muted;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+}
+
+.status {
+  position: relative;
+  padding-left: 18px;
+  font-style: normal;
+  font-size: 12px;
+  font-weight: 800;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 0;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  &.pending {
+    color: $primary;
+
+    &::before {
+      background: rgba($primary, 0.15);
+      border: 2px solid $primary;
+    }
+  }
+
+  &.disconnected {
+    color: $muted;
+
+    &::before {
+      background: #cbd5e1;
+    }
+  }
+}
+
+.domain-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 14px;
+
+  button {
+    min-height: 42px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, $primary, $primary-dark);
+    color: #ffffff;
+    font-weight: 900;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 700px) {
+  .settings-card {
+    padding: 14px;
+    border-radius: 14px;
+  }
+
+  .card-title {
+    h2 {
+      font-size: 15px;
+    }
+  }
+
+  .domain-options {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px;
+  }
+
+  .domain-option {
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 8px;
+
+    .radio {
+      display: none;
+    }
+
+    strong {
+      font-size: 12px;
+    }
+
+    &.active {
+      background: $primary;
+      color: #ffffff;
+    }
+  }
+
+  .domain-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .domain-actions {
+    display: none;
+  }
+}

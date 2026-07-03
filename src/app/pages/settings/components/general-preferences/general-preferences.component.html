@@ -1,0 +1,48 @@
+<article class="settings-card preferences-card">
+  <div class="card-title">
+    <span>☷</span>
+    <h2>5. General Preferences</h2>
+  </div>
+
+  <div class="preferences-grid">
+    <section class="preference-item">
+      <div>
+        <h3>Email Notifications</h3>
+        <p>Receive email notifications for applications and verifications.</p>
+      </div>
+
+      <button
+        type="button"
+        class="toggle"
+        [class.enabled]="emailNotifications"
+        (click)="toggleEmailNotifications()"
+      >
+        <span></span>
+      </button>
+    </section>
+
+    <section class="preference-item">
+      <div>
+        <h3>Enable Public Booking Site</h3>
+        <p>Allow customers to submit applications through your public site.</p>
+      </div>
+
+      <button
+        type="button"
+        class="toggle"
+        [class.enabled]="publicBookingSite"
+        (click)="togglePublicBookingSite()"
+      >
+        <span></span>
+      </button>
+    </section>
+
+    <section class="business-name-field">
+      <label>
+        <span>Display Business Name</span>
+        <input type="text" [(ngModel)]="displayBusinessName" />
+        <small>This name will appear in the lessor app and public pages.</small>
+      </label>
+    </section>
+  </div>
+</article>

@@ -1,0 +1,54 @@
+<article class="settings-card domain-card">
+  <div class="card-title">
+    <span>🌐</span>
+    <div>
+      <h2>2. Domain & Website</h2>
+      <p>Choose how your website will be used.</p>
+    </div>
+  </div>
+
+  <div class="domain-options">
+    <button
+      type="button"
+      class="domain-option"
+      [class.active]="domainMode === 'subdomain'"
+      (click)="selectDomainMode('subdomain')"
+    >
+      <span class="radio"></span>
+      <strong>Use FamBridge Subdomain</strong>
+    </button>
+
+    <button
+      type="button"
+      class="domain-option"
+      [class.active]="domainMode === 'custom'"
+      (click)="selectDomainMode('custom')"
+    >
+      <span class="radio"></span>
+      <strong>Use Custom Domain</strong>
+    </button>
+  </div>
+
+  <div class="domain-fields">
+    <label class="input-group">
+      <span>Subdomain</span>
+
+      <div class="subdomain-input">
+        <input type="text" [(ngModel)]="subdomain" />
+        <small>{{ rootDomain }}</small>
+      </div>
+
+      <em class="status pending">DNS verification pending</em>
+    </label>
+
+    <label class="input-group">
+      <span>Custom Domain</span>
+      <input type="text" [(ngModel)]="customDomain" />
+      <em class="status disconnected">Not connected</em>
+    </label>
+  </div>
+
+  <div class="domain-actions">
+    <button type="button" (click)="saveDomain()">Save Domain</button>
+  </div>
+</article>

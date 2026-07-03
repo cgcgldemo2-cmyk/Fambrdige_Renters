@@ -91,8 +91,7 @@ export class LessorSidebarComponent implements OnInit, OnDestroy {
     {
       label: 'Settings',
       route: '/settings',
-      icon: '⚙',
-      disabled: true
+      icon: '⚙'
     }
   ];
 

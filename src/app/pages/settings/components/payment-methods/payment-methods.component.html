@@ -1,0 +1,65 @@
+<article class="settings-card payment-card">
+  <div class="card-title">
+    <span>💳</span>
+    <div>
+      <h2>4. Payment Methods</h2>
+      <p>Configure payment options available to renters.</p>
+    </div>
+  </div>
+
+  <div class="phase-note">
+    <span>i</span>
+    Phase 1: Payments are collected via QR code scanning only.
+  </div>
+
+  <div class="payment-method-grid">
+    <section class="payment-method" *ngFor="let method of paymentMethods">
+      <div class="method-header">
+        <div>
+          <span class="method-icon">{{ method.icon }}</span>
+          <strong>{{ method.name }}</strong>
+        </div>
+
+        <button
+          type="button"
+          class="toggle"
+          [class.enabled]="method.enabled"
+          (click)="toggleMethod(method)"
+          [attr.aria-label]="'Toggle ' + method.name"
+        >
+          <span></span>
+        </button>
+      </div>
+
+      <label class="qr-box" [class.disabled]="!method.enabled">
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          [disabled]="!method.enabled"
+          (change)="onQrSelected($event, method)"
+        />
+
+        <img *ngIf="method.qrPreviewUrl" [src]="method.qrPreviewUrl" [alt]="method.name + ' QR preview'" />
+
+        <div *ngIf="!method.qrPreviewUrl" class="qr-placeholder">
+          <span>▦</span>
+          <small>QR Code</small>
+        </div>
+      </label>
+
+      <label class="upload-button" [class.disabled]="!method.enabled">
+        Upload QR
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          [disabled]="!method.enabled"
+          (change)="onQrSelected($event, method)"
+        />
+      </label>
+
+      <small class="file-name" *ngIf="method.qrFileName">{{ method.qrFileName }}</small>
+    </section>
+  </div>
+
+  <p class="footer-note">Ensure QR codes are clear and scannable.</p>
+</article>

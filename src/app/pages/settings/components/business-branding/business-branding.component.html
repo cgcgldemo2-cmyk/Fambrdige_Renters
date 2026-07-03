@@ -1,0 +1,40 @@
+<article class="settings-card branding-card">
+  <div class="card-title">
+    <span>🎨</span>
+    <h2>1. Business Branding</h2>
+  </div>
+
+  <div class="branding-content">
+    <label class="logo-box">
+      <input
+        type="file"
+        accept="image/png,image/jpeg,image/webp"
+        (change)="onLogoSelected($event)"
+      />
+
+      <img *ngIf="logoPreviewUrl" [src]="logoPreviewUrl" alt="Business logo preview" />
+
+      <div *ngIf="!logoPreviewUrl" class="logo-placeholder">
+        <div class="logo-mark">♜</div>
+        <strong>YOUR LOGO</strong>
+      </div>
+    </label>
+
+    <div class="branding-copy">
+      <p>
+        Upload your business logo. This logo will be used in the lessor app and public pages.
+      </p>
+
+      <label class="change-logo-button">
+        Change App Logo
+        <input
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          (change)="onLogoSelected($event)"
+        />
+      </label>
+
+      <small *ngIf="selectedLogoName">Selected: {{ selectedLogoName }}</small>
+    </div>
+  </div>
+</article>

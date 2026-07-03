@@ -1,0 +1,45 @@
+<article class="settings-card api-card">
+  <div class="card-title">
+    <span>🔑</span>
+    <div>
+      <h2>3. API Key Generation</h2>
+      <p>Use these keys to integrate with FamBridge API.</p>
+    </div>
+  </div>
+
+  <div class="key-fields">
+    <label>
+      <span>client_key</span>
+      <div class="key-box">
+        <code>{{ maskedClientKey }}</code>
+        <button type="button" (click)="copy(clientKey)" aria-label="Copy client key">⧉</button>
+      </div>
+    </label>
+
+    <label>
+      <span>secret_key</span>
+      <div class="key-box">
+        <code>{{ displayedSecretKey }}</code>
+        <button type="button" (click)="toggleSecret()" aria-label="Show or hide secret key">
+          {{ showSecret ? '🙈' : '👁' }}
+        </button>
+        <button type="button" (click)="copy(secretKey)" aria-label="Copy secret key">⧉</button>
+      </div>
+    </label>
+  </div>
+
+  <div class="key-actions">
+    <button type="button" class="primary" (click)="generateNewKey()">
+      Generate New Key ↻
+    </button>
+
+    <button type="button" class="secondary" (click)="regenerateSecret()">
+      Regenerate Secret ↻
+    </button>
+  </div>
+
+  <div class="warning-note">
+    <span>⚠</span>
+    Keep your secret key private and secure. Do not share it publicly.
+  </div>
+</article>

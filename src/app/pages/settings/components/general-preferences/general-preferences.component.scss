@@ -1,0 +1,161 @@
+$primary: #ff4104;
+$dark: #001621;
+$text: #111827;
+$muted: #667085;
+$border: #e5eaf2;
+
+.settings-card {
+  background: #ffffff;
+  border: 1px solid $border;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 14px 30px rgba($dark, 0.05);
+}
+
+.card-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+
+  span {
+    color: $primary;
+    font-size: 20px;
+  }
+
+  h2 {
+    margin: 0;
+    color: $dark;
+    font-size: 17px;
+    font-weight: 900;
+  }
+}
+
+.preferences-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.2fr;
+  gap: 20px;
+}
+
+.preference-item,
+.business-name-field {
+  padding-right: 20px;
+  border-right: 1px solid $border;
+
+  &:last-child {
+    padding-right: 0;
+    border-right: 0;
+  }
+}
+
+.preference-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  h3 {
+    color: $dark;
+    font-size: 14px;
+    font-weight: 900;
+  }
+
+  p {
+    margin-top: 5px;
+    color: $muted;
+    font-size: 12px;
+    line-height: 1.35;
+  }
+}
+
+.toggle {
+  flex: 0 0 38px;
+  width: 38px;
+  height: 22px;
+  border: 0;
+  border-radius: 999px;
+  background: #cbd5e1;
+  padding: 2px;
+  cursor: pointer;
+
+  span {
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: #ffffff;
+    transition: 0.2s ease;
+  }
+
+  &.enabled {
+    background: $primary;
+
+    span {
+      transform: translateX(16px);
+    }
+  }
+}
+
+.business-name-field {
+  label {
+    display: grid;
+    gap: 7px;
+  }
+
+  span {
+    color: $dark;
+    font-size: 13px;
+    font-weight: 900;
+  }
+
+  input {
+    width: 100%;
+    height: 40px;
+    border: 1px solid $border;
+    border-radius: 10px;
+    padding: 0 12px;
+    color: $dark;
+    font-weight: 700;
+    outline: none;
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba($primary, 0.12);
+    }
+  }
+
+  small {
+    color: $muted;
+    font-size: 12px;
+  }
+}
+
+@media (max-width: 900px) {
+  .preferences-grid {
+    grid-template-columns: 1fr;
+    gap: 0;
+  }
+
+  .preference-item,
+  .business-name-field {
+    padding: 12px 0;
+    border-right: 0;
+    border-bottom: 1px solid $border;
+
+    &:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+  }
+}
+
+@media (max-width: 700px) {
+  .settings-card {
+    display: none;
+  }
+}

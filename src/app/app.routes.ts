@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { VerificationCreditsComponent } from './pages/verification-credits/verification-credits.component';
 import { RenterReportsComponent } from './pages/renter-reports/renter-reports.component';
 import { BookingReportsComponent } from './pages/booking-reports/booking-reports.component';
+import { SettingsComponent } from './pages/settings/settings.component';
 
 export const routes: Routes = [
   {
@@ -69,6 +70,10 @@ export const routes: Routes = [
   {
     path: 'reports/bookings',
     component: BookingReportsComponent
+  },
+  {
+    path: 'settings',
+    component: SettingsComponent
   },
   {
     path: '',
