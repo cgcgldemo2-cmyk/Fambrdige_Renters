@@ -1,18 +1,27 @@
 <section class="popular-section">
   <div class="section-heading">
-    <h2><span>{{ title.split(' ')[0] }}</span> {{ title.split(' ').slice(1).join(' ') }}</h2>
+    <div>
+      <span>Recommended rides</span>
+      <h2><span>{{ title.split(' ')[0] }}</span> {{ title.split(' ').slice(1).join(' ') }}</h2>
+    </div>
     <a href="#vehicleResults">View all vehicles →</a>
   </div>
 
   <div class="vehicle-grid">
     <article class="vehicle-card" *ngFor="let vehicle of vehicles">
-      <button type="button" class="favorite-btn">♡</button>
+      <span class="card-shine" aria-hidden="true"></span>
+      <button type="button" class="favorite-btn" aria-label="Save vehicle">♡</button>
       <span class="badge" *ngIf="vehicle.badge">{{ vehicle.badge }}</span>
 
-      <img [src]="vehicle.imageUrl" [alt]="vehicle.name" />
+      <div class="vehicle-image-wrap">
+        <img [src]="vehicle.imageUrl" [alt]="vehicle.name" />
+      </div>
 
       <div class="vehicle-body">
-        <h3>{{ vehicle.name }}</h3>
+        <div class="title-row">
+          <h3>{{ vehicle.name }}</h3>
+          <span>{{ vehicle.rating }} ★</span>
+        </div>
 
         <div class="specs">
           <span>👥 {{ vehicle.seats }} Seats</span>

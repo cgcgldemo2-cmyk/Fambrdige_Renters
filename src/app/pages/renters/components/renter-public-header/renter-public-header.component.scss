@@ -3,17 +3,18 @@ $dark: #001621;
 $border: #e5eaf2;
 
 .public-header {
-  height: 68px;
+  height: 72px;
   padding: 0 max(24px, calc((100vw - 1180px) / 2));
   display: flex;
   align-items: center;
   gap: 32px;
-  background: rgba(#ffffff, 0.94);
-  backdrop-filter: blur(16px);
-  border-bottom: 1px solid $border;
+  background: rgba(#ffffff, 0.86);
+  backdrop-filter: blur(18px);
+  border-bottom: 1px solid rgba($border, 0.75);
   position: sticky;
   top: 0;
   z-index: 30;
+  box-shadow: 0 12px 30px rgba($dark, 0.05);
 }
 
 .brand {
@@ -21,10 +22,22 @@ $border: #e5eaf2;
   color: $dark;
   display: grid;
   line-height: 1;
+  position: relative;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    bottom: -8px;
+    width: 34px;
+    height: 3px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, $primary, #ff4104);
+  }
 
   .brand-mark {
     color: $primary;
-    font-size: 30px;
+    font-size: 31px;
     font-weight: 1000;
     letter-spacing: -1px;
     font-style: italic;
@@ -44,13 +57,32 @@ nav {
   flex: 1;
   display: flex;
   justify-content: center;
-  gap: 32px;
+  gap: 30px;
 
   a {
     color: #111827;
     text-decoration: none;
     font-size: 14px;
-    font-weight: 800;
+    font-weight: 850;
+    position: relative;
+    padding: 8px 0;
+
+    &::after {
+      content: '';
+      position: absolute;
+      left: 50%;
+      right: 50%;
+      bottom: 0;
+      height: 2px;
+      border-radius: 999px;
+      background: $primary;
+      transition: left 0.22s ease, right 0.22s ease;
+    }
+
+    &:hover::after {
+      left: 0;
+      right: 0;
+    }
   }
 }
 
@@ -62,7 +94,7 @@ nav {
   a {
     min-height: 42px;
     padding: 0 24px;
-    border-radius: 8px;
+    border-radius: 10px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -75,6 +107,7 @@ nav {
 .outline-link {
   border: 1px solid rgba($primary, 0.55);
   color: $primary;
+  background: #ffffff;
 }
 
 .primary-link {
@@ -85,10 +118,28 @@ nav {
 
 .menu-toggle {
   display: none;
+  width: 42px;
+  height: 42px;
   border: 0;
-  background: transparent;
+  border-radius: 12px;
+  background: rgba($primary, 0.08);
   color: $dark;
-  font-size: 28px;
+  place-items: center;
+  gap: 4px;
+  padding: 10px;
+
+  span {
+    display: block;
+    width: 20px;
+    height: 2px;
+    border-radius: 999px;
+    background: $dark;
+    transition: 0.2s ease;
+  }
+
+  &.open span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+  &.open span:nth-child(2) { opacity: 0; }
+  &.open span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
 }
 
 @media (max-width: 900px) {
@@ -99,13 +150,14 @@ nav {
 
   nav {
     position: fixed;
-    top: 64px;
+    top: 72px;
     left: 12px;
     right: 12px;
     padding: 14px;
     border: 1px solid $border;
-    border-radius: 16px;
-    background: #ffffff;
+    border-radius: 18px;
+    background: rgba(#ffffff, 0.96);
+    backdrop-filter: blur(16px);
     box-shadow: 0 18px 34px rgba($dark, 0.16);
     display: none;
     flex-direction: column;
@@ -113,11 +165,16 @@ nav {
 
     &.open {
       display: flex;
+      animation: menu-drop 0.22s ease-out;
     }
 
     a {
       padding: 13px;
       border-radius: 12px;
+
+      &:hover {
+        background: rgba($primary, 0.07);
+      }
     }
   }
 
@@ -137,10 +194,15 @@ nav {
 
   .menu-toggle {
     order: -1;
-    display: block;
+    display: grid;
   }
 
   .brand .brand-mark {
     font-size: 24px;
   }
+}
+
+@keyframes menu-drop {
+  from { opacity: 0; transform: translateY(-8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
 }

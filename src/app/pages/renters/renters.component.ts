@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, ElementRef, OnDestroy } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -187,19 +187,42 @@ export class RentersComponent implements AfterViewInit, OnDestroy {
     }
   ];
 
+  scrollProgress = 0;
+
   private gsapContext?: gsap.Context;
   private sectionObserver?: IntersectionObserver;
+  private prefersReducedMotion = false;
 
   constructor(private host: ElementRef<HTMLElement>) {}
 
   ngAfterViewInit(): void {
+    this.prefersReducedMotion = typeof window !== 'undefined' && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    this.updateScrollProgress();
     this.runGsapIntro();
     this.prepareScrollAnimations();
+    this.attachMicroInteractions();
   }
 
   ngOnDestroy(): void {
     this.gsapContext?.revert();
     this.sectionObserver?.disconnect();
+  }
+
+
+
+  @HostListener('window:scroll')
+  onWindowScroll(): void {
+    this.updateScrollProgress();
+  }
+
+  @HostListener('window:mousemove', ['$event'])
+  onPointerMove(event: MouseEvent): void {
+    if (this.prefersReducedMotion) {
+      return;
+    }
+
+    this.host.nativeElement.style.setProperty('--pointer-x', `${event.clientX}px`);
+    this.host.nativeElement.style.setProperty('--pointer-y', `${event.clientY}px`);
   }
 
   get loadedVehicleCount(): number {
@@ -297,6 +320,7 @@ export class RentersComponent implements AfterViewInit, OnDestroy {
 
       this.isSearching = false;
       this.scrollToVehicles();
+      this.animateSearchResults();
     }, 650);
   }
 
@@ -305,6 +329,7 @@ export class RentersComponent implements AfterViewInit, OnDestroy {
     setTimeout(() => {
       const panel = this.host.nativeElement.querySelector('#bookingPanel');
       panel?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      this.animateBookingPanel();
     });
   }
 
@@ -334,27 +359,63 @@ export class RentersComponent implements AfterViewInit, OnDestroy {
   }
 
   private runGsapIntro(): void {
-    if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (typeof window === 'undefined' || this.prefersReducedMotion) {
       return;
     }
 
     this.gsapContext = gsap.context(() => {
+      gsap.set(['.gsap-hero-copy > *', '.gsap-hero-car', '.gsap-search', '.hero-arrow', '.payment-strip'], { opacity: 0 });
+
       const tl = gsap.timeline({ defaults: { ease: 'power3.out' } });
-      tl.from('.gsap-header', { y: -28, opacity: 0, duration: 0.55 })
-        .from('.gsap-hero-copy > *', { y: 28, opacity: 0, duration: 0.55, stagger: 0.08 }, '-=0.15')
-        .from('.gsap-hero-car', { x: 70, opacity: 0, scale: 0.96, duration: 0.75 }, '-=0.45')
-        .from('.gsap-search', { y: 34, opacity: 0, duration: 0.55 }, '-=0.25')
-        .from('.gsap-trust-pill', { y: 16, opacity: 0, duration: 0.35, stagger: 0.07 }, '-=0.1');
+      tl.from('.gsap-header', { y: -34, opacity: 0, duration: 0.55 })
+        .from('.public-header nav a, .header-actions a', { y: -10, opacity: 0, duration: 0.35, stagger: 0.045 }, '-=0.25')
+        .to('.gsap-hero-copy > *', { y: 0, opacity: 1, duration: 0.62, stagger: 0.09 }, '-=0.1')
+        .fromTo('.gsap-hero-copy > *', { y: 34 }, { y: 0, duration: 0.62, stagger: 0.09 }, '<')
+        .fromTo('.hero-badge', { scale: 0.84, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.48 }, '-=0.35')
+        .to('.gsap-hero-car', { x: 0, opacity: 1, scale: 1, rotation: 0, duration: 0.85 }, '-=0.42')
+        .fromTo('.gsap-hero-car', { x: 90, scale: 0.92, rotation: -2 }, { x: 0, scale: 1, rotation: 0, duration: 0.85 }, '<')
+        .to('.hero-arrow', { opacity: 1, scale: 1, duration: 0.4, stagger: 0.08 }, '-=0.5')
+        .to('.gsap-search', { y: 0, opacity: 1, duration: 0.58 }, '-=0.35')
+        .fromTo('.gsap-search', { y: 42 }, { y: 0, duration: 0.58 }, '<')
+        .from('.summary-pill, .location-pill, .summary-search-btn', { y: 16, opacity: 0, duration: 0.32, stagger: 0.045 }, '-=0.22')
+        .to('.payment-strip', { y: 0, opacity: 1, duration: 0.42 }, '-=0.18');
+
+      gsap.to('.car-shape', {
+        y: -10,
+        rotation: -0.7,
+        duration: 3.2,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+
+      gsap.to('.hero-glow', {
+        scale: 1.08,
+        opacity: 0.75,
+        duration: 2.8,
+        repeat: -1,
+        yoyo: true,
+        ease: 'sine.inOut'
+      });
+
+      gsap.to('.floating-dot', {
+        y: -14,
+        duration: 2.4,
+        repeat: -1,
+        yoyo: true,
+        stagger: 0.25,
+        ease: 'sine.inOut'
+      });
     }, this.host.nativeElement);
   }
 
   private prepareScrollAnimations(): void {
-    if (typeof window === 'undefined' || window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (typeof window === 'undefined' || this.prefersReducedMotion) {
       return;
     }
 
     const elements = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('[data-animate]'));
-    gsap.set(elements, { y: 34, opacity: 0 });
+    gsap.set(elements, { y: 46, opacity: 0, scale: 0.985 });
 
     this.sectionObserver = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -362,18 +423,90 @@ export class RentersComponent implements AfterViewInit, OnDestroy {
           return;
         }
 
-        gsap.to(entry.target, {
+        const target = entry.target as HTMLElement;
+        const staggerSelector = target.dataset['stagger'];
+
+        gsap.to(target, {
           y: 0,
           opacity: 1,
-          duration: 0.65,
+          scale: 1,
+          duration: 0.72,
           ease: 'power3.out'
         });
 
-        this.sectionObserver?.unobserve(entry.target);
+        if (staggerSelector) {
+          const children = Array.from(target.querySelectorAll<HTMLElement>(staggerSelector));
+          gsap.fromTo(children,
+            { y: 26, opacity: 0, scale: 0.96 },
+            { y: 0, opacity: 1, scale: 1, duration: 0.48, stagger: 0.06, ease: 'power3.out', delay: 0.12 }
+          );
+        }
+
+        this.sectionObserver?.unobserve(target);
       });
-    }, { threshold: 0.12 });
+    }, { threshold: 0.14, rootMargin: '0px 0px -6% 0px' });
 
     elements.forEach(element => this.sectionObserver?.observe(element));
+  }
+
+  private attachMicroInteractions(): void {
+    if (typeof window === 'undefined' || this.prefersReducedMotion) {
+      return;
+    }
+
+    const buttons = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('button, .primary-link, .outline-link'));
+
+    buttons.forEach(button => {
+      button.addEventListener('mouseenter', () => {
+        gsap.to(button, { y: -2, scale: 1.015, duration: 0.2, ease: 'power2.out' });
+      });
+
+      button.addEventListener('mouseleave', () => {
+        gsap.to(button, { y: 0, scale: 1, duration: 0.25, ease: 'power2.out' });
+      });
+    });
+  }
+
+  private animateSearchResults(): void {
+    if (this.prefersReducedMotion) {
+      return;
+    }
+
+    setTimeout(() => {
+      const cards = Array.from(this.host.nativeElement.querySelectorAll<HTMLElement>('.result-card'));
+      gsap.fromTo(cards,
+        { y: 22, opacity: 0, scale: 0.965 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.42, stagger: 0.06, ease: 'power3.out' }
+      );
+    });
+  }
+
+  private animateBookingPanel(): void {
+    if (this.prefersReducedMotion) {
+      return;
+    }
+
+    setTimeout(() => {
+      const panel = this.host.nativeElement.querySelector<HTMLElement>('#bookingPanel .booking-panel');
+      if (!panel) {
+        return;
+      }
+
+      gsap.fromTo(panel,
+        { y: 28, opacity: 0, scale: 0.97 },
+        { y: 0, opacity: 1, scale: 1, duration: 0.45, ease: 'power3.out' }
+      );
+    });
+  }
+
+  private updateScrollProgress(): void {
+    if (typeof document === 'undefined') {
+      return;
+    }
+
+    const scrollTop = window.scrollY || document.documentElement.scrollTop;
+    const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    this.scrollProgress = scrollHeight > 0 ? Math.min(100, Math.max(0, scrollTop / scrollHeight * 100)) : 0;
   }
 
   private createVehicle(

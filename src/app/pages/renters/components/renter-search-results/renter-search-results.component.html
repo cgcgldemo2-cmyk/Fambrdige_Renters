@@ -20,7 +20,10 @@
 
   <div class="results-grid" *ngIf="vehicles.length > 0 && !isSearching">
     <article class="result-card" *ngFor="let vehicle of vehicles">
-      <img [src]="vehicle.imageUrl" [alt]="vehicle.name" />
+      <div class="result-image">
+        <img [src]="vehicle.imageUrl" [alt]="vehicle.name" />
+        <span>{{ vehicle.rentalType === 'with_driver' ? 'With Driver' : 'Self Drive' }}</span>
+      </div>
 
       <div class="result-info">
         <div class="title-row">

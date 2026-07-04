@@ -1,11 +1,13 @@
 <section id="why" class="why-section">
   <div class="section-title">
+    <span>Four easy steps</span>
     <h2>Why choose <span>CGIC</span>?</h2>
-    <p>Simple steps. Seamless experience.</p>
+    <p>Simple steps. Safer booking. Better rental experience.</p>
   </div>
 
   <div class="steps-grid">
-    <article *ngFor="let step of steps; let index = index">
+    <article class="step-card" *ngFor="let step of steps; let index = index">
+      <div class="step-index">0{{ index + 1 }}</div>
       <div class="step-icon">{{ step.icon }}</div>
       <div>
         <h3>{{ step.title }}</h3>

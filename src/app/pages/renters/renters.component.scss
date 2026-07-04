@@ -7,10 +7,15 @@ $border: #e5eaf2;
 $soft: #f8fafc;
 
 .renter-page {
+  --pointer-x: 50vw;
+  --pointer-y: 30vh;
+  --scroll-progress: 0%;
   min-height: 100vh;
   background: #ffffff;
   color: $dark;
   font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  position: relative;
+  overflow-x: hidden;
 }
 
 button,
@@ -20,20 +25,112 @@ select {
   font-family: inherit;
 }
 
+.scroll-progress-bar {
+  position: fixed;
+  inset: 0 0 auto 0;
+  height: 4px;
+  z-index: 100;
+  background: transparent;
+  pointer-events: none;
+
+  span {
+    display: block;
+    width: var(--scroll-progress);
+    height: 100%;
+    border-radius: 0 999px 999px 0;
+    background: linear-gradient(90deg, $primary, $orange, #f59e0b);
+    box-shadow: 0 0 22px rgba($orange, 0.6);
+  }
+}
+
+.pointer-glow {
+  position: fixed;
+  left: var(--pointer-x);
+  top: var(--pointer-y);
+  width: 360px;
+  height: 360px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, rgba($orange, 0.13), rgba($primary, 0.06) 42%, transparent 70%);
+  pointer-events: none;
+  z-index: 1;
+  mix-blend-mode: multiply;
+}
+
+.page-orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  filter: blur(2px);
+  z-index: 0;
+
+  &.orb-one {
+    top: 18%;
+    left: -90px;
+    width: 210px;
+    height: 210px;
+    background: radial-gradient(circle, rgba($primary, 0.12), transparent 70%);
+  }
+
+  &.orb-two {
+    right: -120px;
+    top: 54%;
+    width: 280px;
+    height: 280px;
+    background: radial-gradient(circle, rgba(#0ea5e9, 0.12), transparent 70%);
+  }
+}
+
+.page-noise {
+  position: fixed;
+  inset: 0;
+  opacity: 0.035;
+  pointer-events: none;
+  z-index: 0;
+  background-image:
+    radial-gradient(circle at 1px 1px, #001621 1px, transparent 0);
+  background-size: 18px 18px;
+}
+
+app-renter-public-header,
+main,
+app-renter-footer,
+app-renter-hero {
+  z-index: 2;
+}
+
 main {
   background:
-    radial-gradient(circle at top left, rgba($primary, 0.04), transparent 24%),
+    radial-gradient(circle at top left, rgba($primary, 0.05), transparent 24%),
+    radial-gradient(circle at 90% 32%, rgba(#2563eb, 0.055), transparent 22%),
     linear-gradient(180deg, #ffffff 0%, #fbfdff 58%, #ffffff 100%);
+}
+
+.landing-section {
+  transform-origin: center top;
 }
 
 .results-shell {
   max-width: 1180px;
   margin: 0 auto 34px;
   padding: 22px;
-  border: 1px solid $border;
-  border-radius: 24px;
-  background: #ffffff;
+  border: 1px solid rgba($border, 0.95);
+  border-radius: 26px;
+  background:
+    linear-gradient(180deg, rgba(#ffffff, 0.96), rgba(#ffffff, 0.9)),
+    radial-gradient(circle at 10% 0%, rgba($orange, 0.08), transparent 32%);
   box-shadow: 0 24px 50px rgba($dark, 0.08);
+  backdrop-filter: blur(16px);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 5px;
+    background: linear-gradient(180deg, $primary, $orange);
+  }
 }
 
 .results-toolbar {
@@ -63,7 +160,7 @@ main {
 }
 
 .filter-btn {
-  min-height: 44px;
+  min-height: 46px;
   padding: 0 18px;
   border: 1px solid rgba($primary, 0.25);
   border-radius: 14px;
@@ -71,9 +168,25 @@ main {
   color: $primary;
   font-weight: 900;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  box-shadow: 0 10px 24px rgba($primary, 0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  &:hover {
+    border-color: rgba($primary, 0.5);
+    box-shadow: 0 16px 30px rgba($primary, 0.13);
+  }
 }
 
 @media (max-width: 768px) {
+  .pointer-glow,
+  .page-orb,
+  .page-noise {
+    display: none;
+  }
+
   .results-shell {
     margin: 0 14px 22px;
     padding: 14px;

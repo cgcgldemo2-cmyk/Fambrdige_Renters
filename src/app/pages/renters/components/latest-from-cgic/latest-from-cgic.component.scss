@@ -1,7 +1,7 @@
+$primary: #d40000;
 $dark: #001621;
 $muted: #667085;
 $border: #e5eaf2;
-$primary: #d40000;
 
 .news-section {
   max-width: 1180px;
@@ -10,47 +10,70 @@ $primary: #d40000;
 }
 
 .section-heading {
-  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  margin-bottom: 18px;
 
-  h2,
-  p {
-    margin: 0;
+  span {
+    color: $primary;
+    font-size: 12px;
+    font-weight: 1000;
+    letter-spacing: 1px;
+    text-transform: uppercase;
   }
 
   h2 {
+    margin: 5px 0 0;
     color: $dark;
-    font-size: 24px;
+    font-size: 30px;
     font-weight: 1000;
   }
 
   p {
-    margin-top: 4px;
+    margin: 6px 0 0;
     color: $muted;
+    font-weight: 700;
+  }
+
+  a {
+    color: $primary;
+    font-weight: 900;
+    text-decoration: none;
   }
 }
 
 .news-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  gap: 16px;
 }
 
 article {
-  border: 1px solid $border;
-  border-radius: 18px;
+  border: 1px solid rgba($border, 0.95);
+  border-radius: 20px;
   background: #ffffff;
   overflow: hidden;
-  box-shadow: 0 14px 34px rgba($dark, 0.04);
+  box-shadow: 0 14px 30px rgba($dark, 0.06);
+  transition: 0.22s ease;
 
-  img {
-    width: 100%;
-    height: 122px;
-    object-fit: cover;
-  }
+  &:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 24px 42px rgba($dark, 0.11);
 
-  div {
-    padding: 14px;
+    img { transform: scale(1.06); }
   }
+}
+
+img {
+  width: 100%;
+  height: 130px;
+  object-fit: cover;
+  transition: transform 0.26s ease;
+}
+
+article > div {
+  padding: 14px;
 
   span {
     display: inline-flex;
@@ -60,21 +83,20 @@ article {
     color: $primary;
     font-size: 10px;
     font-weight: 1000;
-    text-transform: uppercase;
   }
 
   h3 {
-    margin: 9px 0 0;
+    margin: 10px 0 0;
     color: $dark;
-    font-size: 14px;
-    line-height: 1.35;
+    font-size: 15px;
+    line-height: 1.3;
+    font-weight: 1000;
   }
 
   small {
     display: block;
     margin-top: 8px;
     color: $muted;
-    font-size: 11px;
     font-weight: 800;
   }
 }
@@ -85,15 +107,8 @@ article {
   }
 
   .news-grid {
-    grid-template-columns: 1fr;
-  }
-
-  article {
-    display: grid;
-    grid-template-columns: 120px 1fr;
-
-    img {
-      height: 100%;
-    }
+    grid-template-columns: repeat(4, minmax(230px, 1fr));
+    overflow-x: auto;
+    padding-bottom: 10px;
   }
 }

@@ -1,7 +1,14 @@
-<div class="renter-page">
+<div class="renter-page" [style.--scroll-progress]="scrollProgress + '%'">
+  <div class="scroll-progress-bar" aria-hidden="true"><span></span></div>
+  <div class="pointer-glow" aria-hidden="true"></div>
+  <div class="page-orb orb-one" aria-hidden="true"></div>
+  <div class="page-orb orb-two" aria-hidden="true"></div>
+  <div class="page-noise" aria-hidden="true"></div>
+
   <app-renter-public-header class="gsap-header"></app-renter-public-header>
 
   <app-renter-hero
+    class="landing-section hero-host"
     [pickupLocation]="pickupLocation"
     [startDate]="startDate"
     [endDate]="endDate"
@@ -26,25 +33,34 @@
 
   <main>
     <app-vehicle-category-showcase
+      class="landing-section category-host"
       [categories]="vehicleCategories"
       (categorySelected)="selectCategory($event)"
       data-animate
+      data-stagger=".category-card"
     ></app-vehicle-category-showcase>
 
     <app-why-choose-cgic
+      class="landing-section why-host"
       [steps]="bookingSteps"
       data-animate
+      data-stagger=".step-card"
     ></app-why-choose-cgic>
 
-    <app-cgic-care-banner data-animate></app-cgic-care-banner>
+    <app-cgic-care-banner
+      class="landing-section care-host"
+      data-animate
+    ></app-cgic-care-banner>
 
     <app-popular-vehicles
+      class="landing-section popular-host"
       [vehicles]="filteredFeaturedVehicles"
       (bookNow)="openBookingPanel($event)"
       data-animate
+      data-stagger=".vehicle-card"
     ></app-popular-vehicles>
 
-    <section id="vehicleResults" class="results-shell" *ngIf="hasSearched || isSearching || errorMessage" data-animate>
+    <section id="vehicleResults" class="results-shell landing-section" *ngIf="hasSearched || isSearching || errorMessage" data-animate>
       <div class="results-toolbar">
         <div>
           <p>Search Results</p>
@@ -57,7 +73,8 @@
         </div>
 
         <button type="button" class="filter-btn" (click)="toggleFilters()">
-          {{ showFilters ? 'Hide Filters' : 'Filters' }}
+          <span>{{ showFilters ? 'Hide Filters' : 'Filters' }}</span>
+          <i aria-hidden="true">⚙</i>
         </button>
       </div>
 
@@ -91,6 +108,7 @@
 
     <app-renter-booking-panel
       id="bookingPanel"
+      class="landing-section booking-host"
       *ngIf="selectedVehicle"
       [vehicle]="selectedVehicle"
       [startDate]="startDate"
@@ -102,21 +120,27 @@
     ></app-renter-booking-panel>
 
     <app-renter-testimonials
+      class="landing-section testimonial-host"
       [testimonials]="testimonials"
       data-animate
+      data-stagger="article"
     ></app-renter-testimonials>
 
     <app-latest-from-cgic
+      class="landing-section news-host"
       [items]="newsItems"
       data-animate
+      data-stagger="article"
     ></app-latest-from-cgic>
 
     <app-renter-faq
+      class="landing-section faq-host"
       [faqs]="faqs"
       (faqToggle)="toggleFaq($event)"
       data-animate
+      data-stagger="article"
     ></app-renter-faq>
   </main>
 
-  <app-renter-footer></app-renter-footer>
+  <app-renter-footer class="footer-host"></app-renter-footer>
 </div>

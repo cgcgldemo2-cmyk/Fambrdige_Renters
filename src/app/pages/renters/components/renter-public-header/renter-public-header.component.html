@@ -17,7 +17,9 @@
     <a class="primary-link" routerLink="/register">Create Account</a>
   </div>
 
-  <button type="button" class="menu-toggle" (click)="toggleMenu()" aria-label="Toggle menu">
-    ☰
+  <button type="button" class="menu-toggle" [class.open]="isMenuOpen" (click)="toggleMenu()" aria-label="Toggle menu">
+    <span></span>
+    <span></span>
+    <span></span>
   </button>
 </header>
