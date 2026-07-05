@@ -11,6 +11,12 @@ export const routes: Routes = [
     component: RentersComponent
   },
   {
+    path: 'renters/search-results',
+    loadComponent: () =>
+      import('./pages/renters-search-results/renters-search-results.component')
+        .then(m => m.RentersSearchResultsComponent)
+  },
+  {
     path: '**',
     redirectTo: 'login'
   }
