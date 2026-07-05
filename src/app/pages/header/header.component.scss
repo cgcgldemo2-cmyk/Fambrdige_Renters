@@ -1,0 +1,23 @@
+.main-header {
+  background-color: var(--bg-dark);
+  padding: 1rem 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: white;
+
+  .brand-logo { font-weight: 900; font-size: 1.5rem; }
+
+  .nav-actions {
+    display: flex;
+    gap: 1rem;
+
+    .btn-solid {
+      background: var(--primary-color);
+      color: white;
+      padding: 0.6rem 1.2rem;
+      border-radius: 4px;
+      font-weight: 700;
+    }
+  }
+}

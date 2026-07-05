@@ -1,0 +1,54 @@
+<section class="cars container">
+  <div class="section-head">
+    <div>
+      <h2>Available Cars</h2>
+      <p>Choose a vehicle that fits your needs</p>
+    </div>
+
+    <button class="view-all">View All Cars →</button>
+  </div>
+
+  <div class="slider-wrapper">
+    <button class="arrow left" (click)="prev()" [disabled]="currentIndex === 0">
+      ‹
+    </button>
+
+    <div class="cars-grid">
+      <div class="car-card" *ngFor="let car of visibleCars">
+        <span class="badge" *ngIf="car.badge">{{ car.badge }}</span>
+
+        <img [src]="car.image" [alt]="car.name" />
+
+        <h3>{{ car.name }}</h3>
+
+        <div class="meta">
+          <span>👥 {{ car.seats }} Seats</span>
+          <span>⚙ {{ car.transmission }}</span>
+        </div>
+
+        <p class="price">
+          ₱{{ car.price | number }}
+          <small>/ {{ car.duration }}</small>
+        </p>
+
+        <button class="details-btn">View Details</button>
+      </div>
+    </div>
+
+    <button
+      class="arrow right"
+      (click)="next()"
+      [disabled]="currentIndex >= cars.length - 4"
+    >
+      ›
+    </button>
+  </div>
+
+  <div class="dots">
+    <span
+      *ngFor="let dot of dots; let i = index"
+      [class.active]="i === currentIndex"
+      (click)="goTo(i)"
+    ></span>
+  </div>
+</section>

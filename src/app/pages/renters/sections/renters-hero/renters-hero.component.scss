@@ -1,0 +1,73 @@
+$primary: #ff4104;
+$dark: #001621;
+.container {
+  width: min(1180px, calc(100% - 32px));
+  margin: auto;
+}
+.hero {
+  min-height: 520px;
+  color: #fff;
+  display: flex;
+  align-items: center;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.hero-content {
+  max-width: 650px;
+  padding-bottom: 70px;
+}
+.badge {
+  display: inline-block;
+  background: $primary;
+  padding: 10px 16px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 24px;
+}
+h1 {
+  font-size: clamp(42px, 6vw, 72px);
+  line-height: 0.95;
+  margin: 0;
+  letter-spacing: -3px;
+  span {
+    color: $primary;
+  }
+}
+p {
+  margin-top: 24px;
+  max-width: 520px;
+  font-size: 17px;
+  line-height: 1.7;
+  color: rgba(255, 255, 255, 0.86);
+}
+.hero-points {
+  margin-top: 32px;
+  display: flex;
+  gap: 28px;
+  div {
+    border-right: 1px solid rgba(255, 255, 255, 0.25);
+    padding-right: 28px;
+    &:last-child {
+      border-right: 0;
+    }
+  }
+  strong,
+  small {
+    display: block;
+  }
+  small {
+    margin-top: 4px;
+    opacity: 0.75;
+  }
+}
+@media (max-width: 700px) {
+  .hero-points {
+    display: none;
+  }
+  .hero {
+    min-height: 440px;
+  }
+}

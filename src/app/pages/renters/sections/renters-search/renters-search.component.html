@@ -1,0 +1,83 @@
+<section class="search-section">
+  <div class="container">
+    <div class="search-card">
+      <label class="pickup-field">
+        Pickup Location
+
+        <input
+          [(ngModel)]="pickupKeyword"
+          (input)="onPickupInput()"
+          (focus)="onPickupInput()"
+          (blur)="hidePickupSuggestions()"
+          placeholder="Enter pickup location"
+        />
+
+        <div class="suggestions" *ngIf="showPickupSuggestions && pickupKeyword">
+          <div class="suggestion-loading" *ngIf="isLoadingPickupLocations">
+            Loading locations...
+          </div>
+
+          <button
+            type="button"
+            class="suggestion-item"
+            *ngFor="let location of filteredPickupLocations"
+            (mousedown)="selectPickupLocation(location)"
+          >
+            <strong>{{ location.shortName }}</strong>
+            <span>{{ location.name }}</span>
+            <small>{{ location.city }}, {{ location.province }}</small>
+          </button>
+
+          <div
+            class="suggestion-empty"
+            *ngIf="!isLoadingPickupLocations && filteredPickupLocations.length === 0"
+          >
+            {{ pickupErrorMessage || 'Location not found.' }}
+          </div>
+        </div>
+      </label>
+
+      <label>
+        Pickup Date
+        <input type="date" />
+      </label>
+
+      <label>
+        Pickup Time
+        <input type="time" />
+      </label>
+
+      <label>
+        Rental Duration
+
+        <div class="duration-input">
+          <button type="button" (click)="decreaseDays()">−</button>
+
+          <input
+            type="number"
+            min="1"
+            [(ngModel)]="rentalDays"
+            (blur)="onRentalDaysChange()"
+          />
+
+          <span>{{ rentalDays === 1 ? 'Day' : 'Days' }}</span>
+
+          <button type="button" (click)="increaseDays()">+</button>
+        </div>
+      </label>
+
+      <label>
+        Rental Type
+
+        <select>
+          <option>With Driver</option>
+          <option>Self Drive</option>
+        </select>
+      </label>
+
+      <button class="search-btn" type="button" (click)="searchCars()">
+        🔍 Search Available Cars
+      </button>
+    </div>
+  </div>
+</section>
