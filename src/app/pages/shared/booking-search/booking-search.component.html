@@ -1,0 +1,39 @@
+<section class="booking-section" [class.summary-mode]="mode === 'summary'">
+  <div class="container">
+    <div class="search-card" *ngIf="mode === 'form'">
+      <label class="pickup-field">Pickup Location
+        <input [(ngModel)]="pickupKeyword" (input)="onPickupInput()" (focus)="onPickupInput()" (blur)="hidePickupSuggestions()" placeholder="Enter pickup location" />
+        <div class="suggestions" *ngIf="showPickupSuggestions && pickupKeyword">
+          <div class="suggestion-loading" *ngIf="isLoadingPickupLocations">Loading locations...</div>
+          <button type="button" class="suggestion-item" *ngFor="let location of filteredPickupLocations" (mousedown)="selectPickupLocation(location)">
+            <strong>{{ location.shortName }}</strong><span>{{ location.name }}</span><small>{{ location.city }}, {{ location.province }}</small>
+          </button>
+          <div class="suggestion-empty" *ngIf="!isLoadingPickupLocations && filteredPickupLocations.length === 0">{{ pickupErrorMessage || 'Location not found.' }}</div>
+        </div>
+      </label>
+
+      <label>Pickup Date <input type="date" [(ngModel)]="search.pickupDate" /></label>
+      <label>Pickup Time <input type="time" [(ngModel)]="search.pickupTime" /></label>
+      <label>Rental Duration
+        <div class="duration-input">
+          <button type="button" (click)="decreaseDays()">−</button>
+          <input type="number" min="1" [(ngModel)]="search.rentalDays" (blur)="onRentalDaysChange()" />
+          <span>{{ search.rentalDays === 1 ? 'Day' : 'Days' }}</span>
+          <button type="button" (click)="increaseDays()">+</button>
+        </div>
+      </label>
+      <label>Rental Type
+        <select [(ngModel)]="search.rentalType"><option>With Driver</option><option>Self Drive</option></select>
+      </label>
+      <button class="search-btn" type="button" (click)="submitSearch()">🔍 Search Available Cars</button>
+    </div>
+
+    <div class="summary-card" *ngIf="mode === 'summary'">
+      <div class="summary-item"><span class="icon">📍</span><div><small>Pickup Location</small><strong>{{ search.pickupLocation }}</strong><p>{{ search.pickupCity }}</p></div></div>
+      <div class="summary-item"><span class="icon">📅</span><div><small>Pickup Date & Time</small><strong>{{ summaryPickupDate }}</strong><p>{{ summaryPickupTime }}</p></div></div>
+      <div class="summary-item"><span class="icon">🕒</span><div><small>Rental Duration</small><strong>{{ search.rentalDays }} Days</strong><p>{{ summaryDateRange }}</p></div></div>
+      <div class="summary-item"><span class="icon">👤</span><div><small>Rental Type</small><strong>{{ search.rentalType }}</strong></div></div>
+      <button class="edit-btn" type="button" (click)="editSearch.emit()">Edit Search</button>
+    </div>
+  </div>
+</section>

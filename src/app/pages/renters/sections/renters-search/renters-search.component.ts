@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { Router } from '@angular/router';
 
 interface PickupLocation {
   id: number;
@@ -39,7 +40,10 @@ export class RentersSearchComponent implements OnInit {
 
   rentalDays = 1;
 
-  constructor(private http: HttpClient) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {}
 
   ngOnInit(): void {
     this.loadPickupLocations();
@@ -123,10 +127,12 @@ export class RentersSearchComponent implements OnInit {
   }
 
   searchCars(): void {
-    console.log({
-      pickupLocationId: this.selectedPickupLocation?.id || null,
-      pickupLocation: this.pickupKeyword,
-      rentalDays: this.rentalDays
+    this.router.navigate(['/renters/search-results'], {
+      queryParams: {
+        pickupLocationId: this.selectedPickupLocation?.id || '',
+        pickupLocation: this.pickupKeyword,
+        rentalDays: this.rentalDays
+      }
     });
   }
 }

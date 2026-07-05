@@ -1,0 +1,38 @@
+<section class="summary-card">
+  <div class="summary-item location">
+    <span class="icon">📍</span>
+    <div>
+      <small>Pickup Location</small>
+      <strong>{{ search.pickupLocation }}</strong>
+      <p>{{ search.pickupCity }}</p>
+    </div>
+  </div>
+
+  <div class="summary-item">
+    <span class="icon">📅</span>
+    <div>
+      <small>Pickup Date & Time</small>
+      <strong>{{ search.pickupDate }}</strong>
+      <p>{{ search.pickupTime }}</p>
+    </div>
+  </div>
+
+  <div class="summary-item">
+    <span class="icon">🕒</span>
+    <div>
+      <small>Rental Duration</small>
+      <strong>{{ search.duration }} Days</strong>
+      <p>{{ search.dateRange }}</p>
+    </div>
+  </div>
+
+  <div class="summary-item">
+    <span class="icon">👤</span>
+    <div>
+      <small>Rental Type</small>
+      <strong>{{ search.rentalType }}</strong>
+    </div>
+  </div>
+
+  <button>Edit Search</button>
+</section>

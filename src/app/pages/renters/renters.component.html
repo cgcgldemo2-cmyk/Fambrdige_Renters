@@ -1,7 +1,7 @@
 <main class="renters-page">
-  <app-renters-header [store]="store"></app-renters-header>
+  <app-store-header [store]="store"></app-store-header>
   <app-renters-hero [store]="store"></app-renters-hero>
-  <app-renters-search></app-renters-search>
+  <app-booking-search mode="form" [search]="search"></app-booking-search>
   <app-renters-benefits></app-renters-benefits>
   <app-renters-cars [cars]="cars"></app-renters-cars>
   <app-renters-reviews [reviews]="reviews"></app-renters-reviews>

@@ -1,0 +1,16 @@
+<main class="results-page">
+  <app-store-header [store]="store"></app-store-header>
+  <div class="container">
+    <app-booking-search mode="summary" [search]="search" (editSearch)="showMobileFilter=false"></app-booking-search>
+    <div class="mobile-toolbar"><div><strong>{{ cars.length }} cars available</strong></div><button type="button" (click)="showMobileFilter = true">☰ Filters</button></div>
+    <div class="content-layout">
+      <app-results-filter class="desktop-filter"></app-results-filter>
+      <div class="main-content">
+        <div class="results-top"><div><h2>Search Results</h2><p>{{ cars.length }} cars available</p></div><select><option>Recommended</option><option>Lowest Price</option><option>Highest Price</option><option>Most Seats</option></select></div>
+        <app-results-list [cars]="cars" [search]="search"></app-results-list>
+        <app-results-pagination></app-results-pagination>
+      </div>
+    </div>
+  </div>
+  <div class="filter-drawer" *ngIf="showMobileFilter"><div class="drawer-backdrop" (click)="showMobileFilter=false"></div><div class="drawer-panel"><div class="drawer-handle"></div><app-results-filter></app-results-filter></div></div>
+</main>

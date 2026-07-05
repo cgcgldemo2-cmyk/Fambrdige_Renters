@@ -1,0 +1,19 @@
+$primary: #ff4104;
+$dark: #001621;
+$border: #e5eaf2;
+$muted: #667085;
+
+.container { width: min(1180px, calc(100% - 32px)); margin: auto; }
+
+.top-bar {
+  background: $dark; color: #fff; font-size: 12px;
+  .container { height: 36px; display: flex; justify-content: space-between; align-items: center; }
+  b { color: $primary; }
+}
+
+.header { background: #fff; border-bottom: 1px solid $border; position: sticky; top: 0; z-index: 50; }
+.header-inner { height: 88px; display: flex; align-items: center; justify-content: space-between; }
+.logo { font-size: 30px; font-weight: 900; color: $dark; line-height: 1; span { color: $primary; } small { display: block; margin-top: 5px; font-size: 12px; color: $muted; font-weight: 500; } }
+nav { display: flex; gap: 30px; a { font-weight: 700; font-size: 14px; cursor: pointer; &.active { color: $primary; border-bottom: 2px solid $primary; padding-bottom: 12px; } } }
+.actions { display: flex; gap: 12px; button { border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 800; cursor: pointer; } .phone { background: #fff; border: 1px solid $border; } .login { background: $dark; color: #fff; } }
+@media (max-width: 900px) { nav, .phone, .top-bar { display: none; } .header-inner { height: 72px; } }
