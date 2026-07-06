@@ -1,19 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component } from '@angular/core';
-import { StoreHeaderComponent } from '../shared/store-header/store-header.component';
-import { BookingSearchComponent, BookingSearchData } from '../shared/booking-search/booking-search.component';
-import { RentersHeroComponent } from './sections/renters-hero/renters-hero.component';
-import { RentersBenefitsComponent } from './sections/renters-benefits/renters-benefits.component';
-import { RentersCarsComponent } from './sections/renters-cars/renters-cars.component';
-import { RentersReviewsComponent } from './sections/renters-reviews/renters-reviews.component';
-import { RentersWhyBookComponent } from './sections/renters-why-book/renters-why-book.component';
-import { RentersCtaComponent } from './sections/renters-cta/renters-cta.component';
-import { RentersFooterComponent } from './sections/renters-footer/renters-footer.component';
+import { BookingSearchData } from '../shared/booking-search/booking-search.component';
+import { RentersSharedModule } from './renters-shared.module';
 
 @Component({
   selector: 'app-renters',
   standalone: true,
-  imports: [CommonModule, StoreHeaderComponent, BookingSearchComponent, RentersHeroComponent, RentersBenefitsComponent, RentersCarsComponent, RentersReviewsComponent, RentersWhyBookComponent, RentersCtaComponent, RentersFooterComponent],
+  imports: [CommonModule, RentersSharedModule],
   templateUrl: './renters.component.html',
   styleUrls: ['./renters.component.scss']
 })
