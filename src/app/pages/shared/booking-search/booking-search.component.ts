@@ -122,11 +122,26 @@ export class BookingSearchComponent implements OnInit {
 
   submitSearch(): void {
     const payload: BookingSearchData = {
-      ...this.search,
-      pickupLocationId: this.selectedPickupLocation?.id || null,
-      pickupLocation: this.search.pickupLocation || this.pickupKeyword
+      pickupLocationId: this.selectedPickupLocation?.id,
+      pickupLocation: this.pickupKeyword,
+      pickupCity: this.selectedPickupLocation
+        ? `${this.selectedPickupLocation.city}, ${this.selectedPickupLocation.province}`
+        : this.search.pickupCity || '',
+      pickupDate: this.search.pickupDate,
+      pickupTime: this.search.pickupTime,
+      rentalDays: this.search.rentalDays,
+      rentalType: this.search.rentalType
     };
-    this.searchSubmitted.emit(payload);
-    this.router.navigate(['/renters/search-results'], { queryParams: payload as any });
+
+    console.log('this.mode:', this.mode);
+    console.log('this.searchSubmitted.observed:', this.searchSubmitted.observed);
+    if (this.mode === 'form' && this.searchSubmitted.observed) {
+      this.searchSubmitted.emit(payload);
+      return;
+    }
+
+    this.router.navigate(['/renters/search-results'], {
+      queryParams: payload
+    });
   }
 }

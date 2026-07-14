@@ -1,7 +1,11 @@
 <main class="results-page">
   <app-store-header [store]="store"></app-store-header>
   <div class="container">
-    <app-booking-search mode="summary" [search]="search" (editSearch)="showMobileFilter=false"></app-booking-search>
+    <app-booking-search
+      mode="form"
+      [search]="search"
+      (searchSubmitted)="onSearchUpdated($event)">
+    </app-booking-search>
     <div class="mobile-toolbar"><div><strong>{{ cars.length }} cars available</strong></div><button type="button" (click)="showMobileFilter = true">☰ Filters</button></div>
     <div class="content-layout">
       <app-results-filter class="desktop-filter"></app-results-filter>
