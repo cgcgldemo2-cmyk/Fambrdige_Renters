@@ -267,7 +267,7 @@ export class RenterApprovalComponent {
       ],
       notes: [
         { source: 'Renter', createdBy: 'Juan Dela Cruz', createdAt: 'Jul 10, 2026 08:41 AM', message: 'Uploaded new documents and previous rental references.' },
-        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 10, 2026 08:41 AM', message: 'Renter approval request was submitted for lessor review.' }
+        { source: 'System', createdBy: 'CarBNB API', createdAt: 'Jul 10, 2026 08:41 AM', message: 'Renter approval request was submitted for lessor review.' }
       ]
     },
     {
@@ -361,7 +361,7 @@ export class RenterApprovalComponent {
         { lessor: 'Island Ride PH', rating: 5, date: 'May 22, 2026', vehicle: 'Toyota Innova', comment: 'Smooth transaction.' }
       ],
       notes: [
-        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 16, 2026 10:12 AM', message: 'Renter approval request was submitted.' },
+        { source: 'System', createdBy: 'CarBNB API', createdAt: 'Jul 16, 2026 10:12 AM', message: 'Renter approval request was submitted.' },
         { source: 'Lessor', createdBy: 'Lessor Admin', createdAt: 'Jul 16, 2026 11:05 AM', message: 'Renter approved. Documents are valid and previous rental records are good.' }
       ]
     },
@@ -451,7 +451,7 @@ export class RenterApprovalComponent {
         { lessor: 'Palawan Wheels Rental', rating: 4, date: 'Apr 04, 2026', vehicle: 'Toyota Hiace', comment: 'Okay renter, but document submission needs improvement.' }
       ],
       notes: [
-        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 20, 2026 03:20 PM', message: 'Renter approval request was submitted with documents needing review.' },
+        { source: 'System', createdBy: 'CarBNB API', createdAt: 'Jul 20, 2026 03:20 PM', message: 'Renter approval request was submitted with documents needing review.' },
         { source: 'Lessor', createdBy: 'Lessor Admin', createdAt: 'Jul 20, 2026 04:15 PM', message: 'Requested clearer driver license and complete proof of address.' }
       ]
     },
@@ -536,7 +536,7 @@ export class RenterApprovalComponent {
       bookingHistory: [],
       reviews: [],
       notes: [
-        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 22, 2026 01:15 PM', message: 'Renter approval request was submitted.' },
+        { source: 'System', createdBy: 'CarBNB API', createdAt: 'Jul 22, 2026 01:15 PM', message: 'Renter approval request was submitted.' },
         { source: 'Lessor', createdBy: 'Lessor Admin', createdAt: 'Jul 22, 2026 02:10 PM', message: 'Renter rejected due to document mismatch and expired ID.' }
       ]
     },
@@ -629,7 +629,7 @@ export class RenterApprovalComponent {
       ],
       notes: [
         { source: 'Renter', createdBy: 'Carlo Mendoza', createdAt: 'Jul 24, 2026 09:30 AM', message: 'Submitted updated documents for approval.' },
-        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 24, 2026 09:31 AM', message: 'Renter approval request is pending lessor review.' }
+        { source: 'System', createdBy: 'CarBNB API', createdAt: 'Jul 24, 2026 09:31 AM', message: 'Renter approval request is pending lessor review.' }
       ]
     },
     {
@@ -722,7 +722,7 @@ export class RenterApprovalComponent {
       ],
       notes: [
         { source: 'Renter', createdBy: 'Rhea Gonzales', createdAt: 'Jul 25, 2026 11:05 AM', message: 'Submitted complete documents and rental references.' },
-        { source: 'System', createdBy: 'FamBridge API', createdAt: 'Jul 25, 2026 11:06 AM', message: 'Renter approval request submitted with high trust profile.' }
+        { source: 'System', createdBy: 'CarBNB API', createdAt: 'Jul 25, 2026 11:06 AM', message: 'Renter approval request submitted with high trust profile.' }
       ]
     }
   ];
@@ -949,7 +949,7 @@ export class RenterApprovalComponent {
       },
       {
         source: 'System',
-        createdBy: 'FamBridge API',
+        createdBy: 'CarBNB API',
         createdAt: 'Today',
         message: `Additional document request created with accepted document type codes: ${selectedCodes}.`
       }
@@ -1044,7 +1044,7 @@ export class RenterApprovalComponent {
       },
       {
         source: 'System',
-        createdBy: 'FamBridge API',
+        createdBy: 'CarBNB API',
         createdAt: 'Today',
         message: `Document group status changed to Verified for ${this.selectedDocumentGroup.title}.`
       }
@@ -1094,7 +1094,7 @@ export class RenterApprovalComponent {
       },
       {
         source: 'System',
-        createdBy: 'FamBridge API',
+        createdBy: 'CarBNB API',
         createdAt: 'Today',
         message: `Document group status changed to Rejected for ${this.selectedDocumentGroup.title}. Rejection remarks met the minimum 50-character requirement.`
       }

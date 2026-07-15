@@ -141,7 +141,7 @@ export class ReservationFeesComponent implements OnInit {
         },
         {
           source: 'System',
-          createdBy: 'FamBridge API',
+          createdBy: 'CarBNB API',
           createdAt: 'Jul 18, 2026 08:43 AM',
           message: 'Payment reference was submitted together with the booking request.'
         },
@@ -159,7 +159,7 @@ export class ReservationFeesComponent implements OnInit {
         },
         {
           source: 'System',
-          createdBy: 'FamBridge API',
+          createdBy: 'CarBNB API',
           createdAt: 'Jul 18, 2026 09:11 AM',
           message: 'A new payment attempt was submitted and is waiting for lessor confirmation.'
         }
@@ -241,7 +241,7 @@ export class ReservationFeesComponent implements OnInit {
       notes: [
         {
           source: 'System',
-          createdBy: 'FamBridge API',
+          createdBy: 'CarBNB API',
           createdAt: 'Jul 22, 2026 07:05 AM',
           message: 'Booking request was created but renter has not submitted payment proof yet.'
         }
@@ -292,7 +292,7 @@ export class ReservationFeesComponent implements OnInit {
         },
         {
           source: 'System',
-          createdBy: 'FamBridge API',
+          createdBy: 'CarBNB API',
           createdAt: 'Jul 23, 2026 02:41 PM',
           message: 'Payment was rejected. Booking request remains active unless the lessor cancels the booking separately.'
         }
@@ -487,7 +487,7 @@ export class ReservationFeesComponent implements OnInit {
       },
       {
         source: 'System',
-        createdBy: 'FamBridge API',
+        createdBy: 'CarBNB API',
         createdAt: 'Today',
         message: 'Payment was rejected. Booking request remains active unless the lessor cancels the booking separately.'
       }
@@ -536,7 +536,7 @@ export class ReservationFeesComponent implements OnInit {
       },
       {
         source: 'System',
-        createdBy: 'FamBridge API',
+        createdBy: 'CarBNB API',
         createdAt: 'Today',
         message: 'Booking request has been cancelled by the lessor.'
       }

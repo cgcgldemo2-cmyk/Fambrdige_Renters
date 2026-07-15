@@ -72,7 +72,7 @@ export class ApiUsageComponent {
       statusCode: 200,
       durationMs: 142,
       apiCredits: 1,
-      clientApp: 'FamBridge Lessor App',
+      clientApp: 'CarBNB Lessor App',
       ipAddress: '103.12.45.90',
       payload: '{ "tenantId": "TENANT-001" }',
       response: '{ "pendingBookings": 23, "pendingRenters": 8, "vehicles": 18 }'
@@ -88,7 +88,7 @@ export class ApiUsageComponent {
       statusCode: 200,
       durationMs: 188,
       apiCredits: 1,
-      clientApp: 'FamBridge Lessor App',
+      clientApp: 'CarBNB Lessor App',
       ipAddress: '103.12.45.90',
       payload: '{ "page": 1, "limit": 20 }',
       response: '{ "data": [ ... ], "total": 18 }'
@@ -104,7 +104,7 @@ export class ApiUsageComponent {
       statusCode: 200,
       durationMs: 210,
       apiCredits: 1,
-      clientApp: 'FamBridge Lessor App',
+      clientApp: 'CarBNB Lessor App',
       ipAddress: '103.12.45.90',
       payload: '{ "bookingNo": "BR-2026-0002" }',
       response: '{ "bookingStatus": "Pending Lessor Approval" }'
@@ -120,7 +120,7 @@ export class ApiUsageComponent {
       statusCode: 200,
       durationMs: 275,
       apiCredits: 2,
-      clientApp: 'FamBridge Lessor App',
+      clientApp: 'CarBNB Lessor App',
       ipAddress: '103.12.45.90',
       payload: '{ "bookingNo": "BR-2026-0002", "action": "CONFIRM_PAYMENT" }',
       response: '{ "paymentStatus": "Reservation Fee Confirmed" }'
@@ -136,7 +136,7 @@ export class ApiUsageComponent {
       statusCode: 422,
       durationMs: 320,
       apiCredits: 1,
-      clientApp: 'FamBridge Lessor App',
+      clientApp: 'CarBNB Lessor App',
       ipAddress: '103.12.45.90',
       payload: '{ "documentId": 22, "remarks": "Too short" }',
       response: '{ "message": "Remarks must be at least 50 characters." }',
@@ -153,7 +153,7 @@ export class ApiUsageComponent {
       statusCode: 200,
       durationMs: 254,
       apiCredits: 2,
-      clientApp: 'FamBridge Lessor App',
+      clientApp: 'CarBNB Lessor App',
       ipAddress: '103.12.45.90',
       payload: '{ "documentId": 21, "status": "Verified" }',
       response: '{ "documentStatus": "Verified", "reviewedBy": "Admin User" }'
@@ -169,7 +169,7 @@ export class ApiUsageComponent {
       statusCode: 401,
       durationMs: 198,
       apiCredits: 1,
-      clientApp: 'FamBridge Lessor App',
+      clientApp: 'CarBNB Lessor App',
       ipAddress: '180.191.45.22',
       payload: '{ "email": "admin@demo.com", "password": "***MASKED***" }',
       response: '{ "message": "Invalid credentials" }',
