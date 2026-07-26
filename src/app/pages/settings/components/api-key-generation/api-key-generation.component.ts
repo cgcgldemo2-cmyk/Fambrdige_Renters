@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
-import { Component } from '@angular/core';
-import { environment } from '../../../../../environment/environment';
+import { Component, OnInit } from '@angular/core';
+import { StripeService } from '../../../../services/stripe.service';
 
 @Component({
   selector: 'app-api-key-generation',
@@ -9,10 +9,36 @@ import { environment } from '../../../../../environment/environment';
   templateUrl: './api-key-generation.component.html',
   styleUrls: ['./api-key-generation.component.scss']
 })
-export class ApiKeyGenerationComponent {
-  clientKey = environment.clientKey;
-  secretKey = environment.secretKey;
+export class ApiKeyGenerationComponent implements OnInit {
+  clientKey = '';
+  secretKey = '';
   showSecret = false;
+  isLoading = true;
+  error: string | null = null;
+
+  constructor(private stripeService: StripeService) {}
+
+  ngOnInit(): void {
+    this.loadStripeKeys();
+  }
+
+  private loadStripeKeys(): void {
+    this.isLoading = true;
+    this.error = null;
+
+    this.stripeService.getStripeKeys().subscribe({
+      next: (keys) => {
+        this.clientKey = keys.clientKey;
+        this.secretKey = keys.secretKey;
+        this.isLoading = false;
+      },
+      error: (error) => {
+        console.error('Error loading Stripe keys:', error);
+        this.error = 'Failed to load API keys. Please try again.';
+        this.isLoading = false;
+      }
+    });
+  }
 
   get maskedClientKey(): string {
     return this.maskKey(this.clientKey, 8);

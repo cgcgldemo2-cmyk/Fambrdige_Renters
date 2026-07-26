@@ -1,4 +1,4 @@
 export const environment = {
-  clientKey: process.env['STRIPE_CLIENT_KEY'] || '',
-  secretKey: process.env['STRIPE_SECRET_KEY'] || '',
+  clientKey: '',  // Set via API or environment-specific file
+  secretKey: '',  // Set via API or environment-specific file
 };
