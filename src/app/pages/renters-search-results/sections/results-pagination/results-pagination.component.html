@@ -1,1 +1,5 @@
-<div class="pagination"><button>‹ Previous</button><button class="active">1</button><button>2</button><button>3</button><span>...</span><button>5</button><button>Next ›</button></div>
+<div class="pagination" *ngIf="pagination && pagination.last_page > 1">
+  <button type="button" [disabled]="pagination.current_page === 1" (click)="pageChanged.emit(pagination.current_page - 1)">Previous</button>
+  <button type="button" *ngFor="let page of pages" [class.active]="page === pagination.current_page" (click)="pageChanged.emit(page)">{{page}}</button>
+  <button type="button" [disabled]="pagination.current_page === pagination.last_page" (click)="pageChanged.emit(pagination.current_page + 1)">Next</button>
+</div>

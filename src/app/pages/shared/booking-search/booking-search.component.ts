@@ -2,7 +2,8 @@ import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
+import { RenterVehicleSearchService } from '../../../services/renter-vehicle-search.service';
 
 export interface PickupLocation {
   id: number;
@@ -22,6 +23,7 @@ interface PickupLocationResponse {
 }
 
 export interface BookingSearchData {
+  code?: string;
   pickupLocationId?: number | null;
   pickupLocation: string;
   pickupCity: string;
@@ -59,9 +61,17 @@ export class BookingSearchComponent implements OnInit {
   isLoadingPickupLocations = false;
   pickupErrorMessage = '';
 
-  constructor(private http: HttpClient, private router: Router) {}
+  constructor(
+    private http: HttpClient,
+    private router: Router,
+    private route: ActivatedRoute,
+    private vehicleSearchService: RenterVehicleSearchService
+  ) {}
 
   ngOnInit(): void {
+    this.search.code = this.search.code
+      || this.route.snapshot.queryParamMap.get('code')
+      || this.vehicleSearchService.getConfiguredBusinessCode();
     this.pickupKeyword = this.search.pickupLocation || '';
     this.loadPickupLocations();
   }
@@ -122,6 +132,7 @@ export class BookingSearchComponent implements OnInit {
 
   submitSearch(): void {
     const payload: BookingSearchData = {
+      code: this.search.code,
       pickupLocationId: this.selectedPickupLocation?.id,
       pickupLocation: this.pickupKeyword,
       pickupCity: this.selectedPickupLocation
@@ -133,8 +144,6 @@ export class BookingSearchComponent implements OnInit {
       rentalType: this.search.rentalType
     };
 
-    console.log('this.mode:', this.mode);
-    console.log('this.searchSubmitted.observed:', this.searchSubmitted.observed);
     if (this.mode === 'form' && this.searchSubmitted.observed) {
       this.searchSubmitted.emit(payload);
       return;

@@ -1,1 +1,23 @@
-<article class="car-result-card"><div class="car-image"><img [src]="car.image" [alt]="car.name"></div><div class="car-info"><div class="title-row"><h3>{{car.name}}</h3><span *ngIf="car.badge">{{car.badge}}</span></div><div class="meta"><span>👤 {{car.seats}} Seats</span><span>⚙ {{car.transmission}}</span><span>⛽ {{car.fuel}}</span></div><p>📍 Pickup: {{search.pickupLocation}}</p><p>Free cancellation up to 24 hours before pickup</p></div><div class="price-box"><h3>₱{{car.price|number}} <small>/ day</small></h3><p>Total for {{search.rentalDays}} days: <strong>₱{{totalPrice|number}}</strong></p><p>Inclusions: {{search.rentalType}}, Fuel</p><div class="actions"><button class="details">View Details</button><button class="save">♡ Save</button></div></div></article>
+<article class="car-result-card">
+  <div class="car-image">
+    <img *ngIf="car.image_url; else noImage" [src]="car.image_url" [alt]="car.name">
+    <ng-template #noImage><div class="image-placeholder">Vehicle image unavailable</div></ng-template>
+  </div>
+  <div class="car-info">
+    <div class="title-row"><h3>{{car.name}}</h3><span *ngIf="car.badge">{{car.badge}}</span></div>
+    <div class="meta">
+      <span>{{car.vehicle_type}}</span>
+      <span>{{car.seats}} Seats</span>
+      <span>{{car.transmission}}</span>
+      <span>{{car.fuel_type}}</span>
+    </div>
+    <p>Pickup: {{car.pickup_address || search.pickupLocation}}</p>
+    <p>{{rentalTypeLabel}}</p>
+  </div>
+  <div class="price-box">
+    <h3>₱{{dailyPrice | number}} <small>/ day</small></h3>
+    <p>Total for {{search.rentalDays}} days: <strong>₱{{totalPrice | number}}</strong></p>
+    <p>Available for the selected schedule</p>
+    <div class="actions"><button class="details">View Details</button><button class="save">Save</button></div>
+  </div>
+</article>

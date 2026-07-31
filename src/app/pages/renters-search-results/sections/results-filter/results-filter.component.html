@@ -3,16 +3,16 @@
     <h3>Filters</h3><button>Clear All</button>
   </div>
   <div class="filter-group">
-    <h4>Vehicle Type</h4><label *ngFor="let item of vehicleTypes"><input type="checkbox"
+    <h4>Rental Type</h4><label *ngFor="let item of rentalTypes"><input type="checkbox"
+        [checked]="item==='All Rental Types'">{{item}}</label>
+  </div>
+  <div class="filter-group">
+    <h4>Car Type</h4><label *ngFor="let item of carTypes"><input type="checkbox"
         [checked]="item==='All Types'">{{item}}</label>
   </div>
   <div class="filter-group">
-    <h4>Transmission</h4><label *ngFor="let item of transmissions"><input type="checkbox"
-        [checked]="item==='All'">{{item}}</label>
-  </div>
-  <div class="filter-group">
-    <h4>Seating Capacity</h4><label *ngFor="let item of seats"><input type="checkbox"
-        [checked]="item==='All'">{{item}}</label>
+    <h4>Insurance Coverage</h4><label *ngFor="let item of insuranceCoverages"><input type="checkbox"
+        [checked]="item==='All Coverage'">{{item}}</label>
   </div>
   <div class="filter-group">
     <h4>Price Range <span>(per day)</span></h4><input type="range" min="1000" max="6000" value="6000">

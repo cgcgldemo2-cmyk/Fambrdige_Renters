@@ -9,14 +9,20 @@ import { FormsModule } from '@angular/forms';
   styleUrls: ['./results-filter.component.scss'],
 })
 export class ResultsFilterComponent {
-  vehicleTypes = [
+  rentalTypes = ['All Rental Types', 'With Driver', 'Self Drive'];
+  carTypes = [
     'All Types',
-    'Hatchback (5)',
-    'Sedan (6)',
-    'MPV (7)',
-    'SUV (5)',
-    'Van (2)',
+    'Hatchback',
+    'Sedan',
+    'MPV',
+    'SUV',
+    'Van',
   ];
-  transmissions = ['All', 'Automatic (20)', 'Manual (5)'];
-  seats = ['All', '2 - 4 Seats (6)', '5 - 7 Seats (14)', '8+ Seats (5)'];
+  insuranceCoverages = [
+    'All Coverage',
+    'Comprehensive Insurance',
+    'Personal Accident Coverage',
+    'Third Party Liability Coverage',
+    'Acts of Nature Coverage'
+  ];
 }

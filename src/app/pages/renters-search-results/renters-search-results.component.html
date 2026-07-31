@@ -6,15 +6,52 @@
       [search]="search"
       (searchSubmitted)="onSearchUpdated($event)">
     </app-booking-search>
-    <div class="mobile-toolbar"><div><strong>{{ cars.length }} cars available</strong></div><button type="button" (click)="showMobileFilter = true">☰ Filters</button></div>
+
+    <div class="mobile-toolbar">
+      <div><strong>{{ pagination?.total || 0 }} cars available</strong></div>
+      <button type="button" (click)="showMobileFilter = true">Filters</button>
+    </div>
+
     <div class="content-layout">
       <app-results-filter class="desktop-filter"></app-results-filter>
       <div class="main-content">
-        <div class="results-top"><div><h2>Search Results</h2><p>{{ cars.length }} cars available</p></div><select><option>Recommended</option><option>Lowest Price</option><option>Highest Price</option><option>Most Seats</option></select></div>
-        <app-results-list [cars]="cars" [search]="search"></app-results-list>
-        <app-results-pagination></app-results-pagination>
+        <div class="results-top">
+          <div>
+            <h2>Search Results</h2>
+            <p>{{ pagination?.total || 0 }} cars available</p>
+          </div>
+          <select [(ngModel)]="sortBy" (change)="onSortChanged()">
+            <option value="newest">Recommended</option>
+            <option value="price_asc">Lowest Price</option>
+            <option value="price_desc">Highest Price</option>
+            <option value="seats_desc">Most Seats</option>
+          </select>
+        </div>
+
+        <div class="results-state" *ngIf="isLoading">Loading available vehicles...</div>
+        <div class="results-state error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
+        <div class="results-state" *ngIf="!isLoading && !errorMessage && cars.length === 0">
+          No vehicles are available for this search. Try different dates or search options.
+        </div>
+
+        <app-results-list
+          *ngIf="!isLoading && !errorMessage"
+          [cars]="cars"
+          [search]="search">
+        </app-results-list>
+        <app-results-pagination
+          [pagination]="pagination"
+          (pageChanged)="onPageChanged($event)">
+        </app-results-pagination>
       </div>
     </div>
   </div>
-  <div class="filter-drawer" *ngIf="showMobileFilter"><div class="drawer-backdrop" (click)="showMobileFilter=false"></div><div class="drawer-panel"><div class="drawer-handle"></div><app-results-filter></app-results-filter></div></div>
+
+  <div class="filter-drawer" *ngIf="showMobileFilter">
+    <div class="drawer-backdrop" (click)="showMobileFilter = false"></div>
+    <div class="drawer-panel">
+      <div class="drawer-handle"></div>
+      <app-results-filter></app-results-filter>
+    </div>
+  </div>
 </main>
