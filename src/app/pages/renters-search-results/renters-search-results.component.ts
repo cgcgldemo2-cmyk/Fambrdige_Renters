@@ -1,5 +1,4 @@
 import { CommonModule } from '@angular/common';
-import { HttpErrorResponse } from '@angular/common/http';
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -7,7 +6,6 @@ import { Subject, Subscription, takeUntil } from 'rxjs';
 import {
   RenterVehicle,
   RenterVehiclePagination,
-  RenterVehicleSearchRequest,
   RenterVehicleSearchService,
   RenterVehicleSort
 } from '../../services/renter-vehicle-search.service';
@@ -72,6 +70,7 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
   }
 
   onSearchUpdated(updatedSearch: BookingSearchData): void {
+    console.log('onSearchUpdated', updatedSearch);
     this.isEditingSearch = false;
     this.router.navigate([], {
       relativeTo: this.route,
@@ -85,15 +84,25 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
   }
 
   onPageChanged(page: number): void {
-    if (!this.pagination || page < 1 || page > this.pagination.last_page || page === this.pagination.current_page) {
+    if (!this.pagination || page < 1 || page > this.pagination.lastPage || page === this.pagination.currentPage) {
       return;
     }
     this.updateResultQuery({ page });
   }
 
+  retrySearch(): void {
+    this.loadVehicles(this.pagination?.currentPage || this.toPositiveNumber(this.route.snapshot.queryParamMap.get('page')) || 1);
+  }
+
   private loadVehicles(page: number): void {
-    const request = this.buildRequest(page);
-    if (!request) {
+    if (!this.search.code) {
+      this.errorMessage = 'This rental business is not configured for vehicle search.';
+      this.cars = [];
+      this.pagination = null;
+      return;
+    }
+    if (!this.search.pickupDate || !this.search.pickupTime) {
+      this.errorMessage = 'Choose a pickup date and time to search available vehicles.';
       this.cars = [];
       this.pagination = null;
       return;
@@ -102,50 +111,30 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
     this.activeSearch?.unsubscribe();
-    this.activeSearch = this.vehicleSearchService.search(request).pipe(takeUntil(this.destroy$)).subscribe({
-      next: response => {
-        this.cars = response.data.vehicles;
-        this.pagination = response.data.pagination;
-        this.store = { ...this.store, name: response.data.lessor.name };
-        this.isLoading = false;
-      },
-      error: (error: HttpErrorResponse) => {
-        this.cars = [];
-        this.pagination = null;
-        this.errorMessage = this.getErrorMessage(error);
-        this.isLoading = false;
-      }
-    });
-  }
-
-  private buildRequest(page: number): RenterVehicleSearchRequest | null {
-    if (!this.search.code) {
-      this.errorMessage = 'This rental business is not configured for vehicle search.';
-      return null;
-    }
-    if (!this.search.pickupDate || !this.search.pickupTime) {
-      this.errorMessage = 'Choose a pickup date and time to search available vehicles.';
-      return null;
-    }
-
-    const startsAt = new Date(`${this.search.pickupDate}T${this.search.pickupTime}:00`);
-    if (Number.isNaN(startsAt.getTime())) {
-      this.errorMessage = 'Enter a valid pickup date and time.';
-      return null;
-    }
-    const endsAt = new Date(startsAt);
-    endsAt.setDate(endsAt.getDate() + Math.max(1, this.search.rentalDays));
-
-    return {
+    this.activeSearch = this.vehicleSearchService.search({
       code: this.search.code,
-      startsAt: this.toLocalDateTime(startsAt),
-      endsAt: this.toLocalDateTime(endsAt),
       pickupLocationId: this.search.pickupLocationId || undefined,
-      rentalType: this.search.rentalType === 'With Driver' ? 'with_driver' : 'without_driver',
+      pickupDate: this.search.pickupDate,
+      pickupTime: this.search.pickupTime,
+      rentalDays: this.search.rentalDays,
+      rentalType: this.search.rentalType,
       sortBy: this.sortBy,
       page,
       perPage: 10
-    };
+    }).pipe(takeUntil(this.destroy$)).subscribe({
+      next: response => {
+        this.cars = response.vehicles;
+        this.pagination = response.pagination;
+        this.store = { ...this.store, name: response.lessor.name };
+        this.isLoading = false;
+      },
+      error: (error: Error) => {
+        this.cars = [];
+        this.pagination = null;
+        this.errorMessage = error.message;
+        this.isLoading = false;
+      }
+    });
   }
 
   private updateResultQuery(queryParams: Record<string, string | number>): void {
@@ -161,17 +150,4 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
     return ['newest', 'price_asc', 'price_desc', 'seats_asc', 'seats_desc'].includes(String(value));
   }
 
-  private toLocalDateTime(value: Date): string {
-    const pad = (part: number) => String(part).padStart(2, '0');
-    return `${value.getFullYear()}-${pad(value.getMonth() + 1)}-${pad(value.getDate())}`
-      + `T${pad(value.getHours())}:${pad(value.getMinutes())}:00`;
-  }
-
-  private getErrorMessage(error: HttpErrorResponse): string {
-    const validationErrors = error.error?.errors as Record<string, string[]> | undefined;
-    const firstValidationError = validationErrors && Object.values(validationErrors)[0]?.[0];
-    return firstValidationError
-      || error.error?.message
-      || 'Available vehicles could not be loaded. Please try again.';
-  }
 }

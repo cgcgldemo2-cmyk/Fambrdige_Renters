@@ -1,30 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Router } from '@angular/router';
-
-interface PickupLocation {
-  id: number;
-  name: string;
-  shortName: string;
-  category: string;
-  city: string;
-  province: string;
-  region: string;
-  isActive: boolean;
-}
-
-interface PickupLocationResponse {
-  success: boolean;
-  message: string;
-  data: PickupLocation[];
-}
+import { PickupLocation, PickupLocationsService } from '../../../../services/pickup-locations.service';
 
 @Component({
   selector: 'app-renters-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './renters-search.component.html',
   styleUrls: ['./renters-search.component.scss']
 })
@@ -41,7 +24,7 @@ export class RentersSearchComponent implements OnInit {
   rentalDays = 1;
 
   constructor(
-    private http: HttpClient,
+    private pickupLocationsService: PickupLocationsService,
     private router: Router
   ) {}
 
@@ -53,22 +36,14 @@ export class RentersSearchComponent implements OnInit {
     this.isLoadingPickupLocations = true;
     this.pickupErrorMessage = '';
 
-    this.http
-      .get<PickupLocationResponse>('https://api.cgicsoftwaresolution.com/api/pickup-locations')
-      .subscribe({
-        next: (res) => {
-          if (res.success && res.data.length > 0) {
-            this.pickupLocations = res.data.filter(location => location.isActive);
-          } else {
-            this.pickupLocations = [];
-            this.pickupErrorMessage = res.message || 'No Location Found.';
-          }
-
+    this.pickupLocationsService.getPickupLocations().subscribe({
+        next: locations => {
+          this.pickupLocations = locations;
           this.isLoadingPickupLocations = false;
         },
-        error: () => {
+        error: (error: Error) => {
           this.pickupLocations = [];
-          this.pickupErrorMessage = 'Something went wrong.';
+          this.pickupErrorMessage = error.message || 'Pickup locations could not be loaded.';
           this.isLoadingPickupLocations = false;
         }
       });

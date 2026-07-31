@@ -1,26 +1,9 @@
 import { CommonModule } from '@angular/common';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { PickupLocation, PickupLocationsService } from '../../../services/pickup-locations.service';
 import { RenterVehicleSearchService } from '../../../services/renter-vehicle-search.service';
-
-export interface PickupLocation {
-  id: number;
-  name: string;
-  shortName: string;
-  category: string;
-  city: string;
-  province: string;
-  region: string;
-  isActive: boolean;
-}
-
-interface PickupLocationResponse {
-  success: boolean;
-  message: string;
-  data: PickupLocation[];
-}
 
 export interface BookingSearchData {
   code?: string;
@@ -36,7 +19,7 @@ export interface BookingSearchData {
 @Component({
   selector: 'app-booking-search',
   standalone: true,
-  imports: [CommonModule, FormsModule, HttpClientModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './booking-search.component.html',
   styleUrls: ['./booking-search.component.scss']
 })
@@ -62,9 +45,9 @@ export class BookingSearchComponent implements OnInit {
   pickupErrorMessage = '';
 
   constructor(
-    private http: HttpClient,
     private router: Router,
     private route: ActivatedRoute,
+    private pickupLocationsService: PickupLocationsService,
     private vehicleSearchService: RenterVehicleSearchService
   ) {}
 
@@ -83,19 +66,14 @@ export class BookingSearchComponent implements OnInit {
   loadPickupLocations(): void {
     this.isLoadingPickupLocations = true;
     this.pickupErrorMessage = '';
-    this.http.get<PickupLocationResponse>('https://api.cgicsoftwaresolution.com/api/pickup-locations').subscribe({
-      next: (res) => {
-        if (res.success && res.data.length > 0) {
-          this.pickupLocations = res.data.filter(x => x.isActive);
-        } else {
-          this.pickupLocations = [];
-          this.pickupErrorMessage = res.message || 'No Location Found.';
-        }
+    this.pickupLocationsService.getPickupLocations().subscribe({
+      next: locations => {
+        this.pickupLocations = locations;
         this.isLoadingPickupLocations = false;
       },
-      error: () => {
+      error: (error: Error) => {
         this.pickupLocations = [];
-        this.pickupErrorMessage = 'Something went wrong.';
+        this.pickupErrorMessage = error.message || 'Pickup locations could not be loaded.';
         this.isLoadingPickupLocations = false;
       }
     });
@@ -133,7 +111,7 @@ export class BookingSearchComponent implements OnInit {
   submitSearch(): void {
     const payload: BookingSearchData = {
       code: this.search.code,
-      pickupLocationId: this.selectedPickupLocation?.id,
+      pickupLocationId: this.selectedPickupLocation?.id ?? this.search.pickupLocationId,
       pickupLocation: this.pickupKeyword,
       pickupCity: this.selectedPickupLocation
         ? `${this.selectedPickupLocation.city}, ${this.selectedPickupLocation.province}`

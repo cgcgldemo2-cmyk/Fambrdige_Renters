@@ -110,6 +110,15 @@ select:focus,
   font-weight: 700;
 }
 
+.suggestion-empty button {
+  margin-left: 8px;
+  border: 0;
+  background: none;
+  color: $primary;
+  font-weight: 800;
+  cursor: pointer;
+}
+
 .duration-input {
   display: flex;
   align-items: center;

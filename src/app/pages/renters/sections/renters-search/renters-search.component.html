@@ -28,11 +28,13 @@
             <small>{{ location.city }}, {{ location.province }}</small>
           </button>
 
-          <div
-            class="suggestion-empty"
-            *ngIf="!isLoadingPickupLocations && filteredPickupLocations.length === 0"
-          >
-            {{ pickupErrorMessage || 'Location not found.' }}
+          <div class="suggestion-empty" *ngIf="!isLoadingPickupLocations && pickupErrorMessage">
+            {{ pickupErrorMessage }}
+            <button type="button" (mousedown)="$event.preventDefault(); loadPickupLocations()">Try Again</button>
+          </div>
+
+          <div class="suggestion-empty" *ngIf="!isLoadingPickupLocations && !pickupErrorMessage && filteredPickupLocations.length === 0">
+            Location not found.
           </div>
         </div>
       </label>

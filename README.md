@@ -58,12 +58,96 @@ Angular CLI does not come with an end-to-end testing framework by default. You c
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
 
-# Renter vehicle search configuration
+# Renter vehicle-search API integration
 
-The renter search uses the FamBridge `GET /api/renter/available-vehicles` endpoint. Configure the storefront's lessor business code in `src/index.html`:
+The renter search uses two public FamBridge API endpoints. Their base URL and paths are configured in `src/environments/environment.ts`; no credential is stored in the frontend.
+
+Configure the storefront's lessor business code in `src/index.html`:
 
 ```html
 <meta name="fambridge-business-code" content="FB-YOUR-BUSINESS-CODE">
 ```
 
 For local or shared-link testing, the `code` query parameter overrides the meta tag.
+
+## Pickup locations
+
+- Method and route: `GET /api/pickup-locations`
+- Purpose: load active pickup-location suggestions for the renter search form.
+- Authentication: public; no bearer token is sent.
+- Request parameters and body: none.
+- Billing: no frontend charge is applied; backend billing behavior is not confirmed in this repository.
+- Frontend source: `PickupLocationsService.getPickupLocations()` and `BookingSearchComponent.loadPickupLocations()`.
+
+```bash
+curl --location '{{domain}}/api/pickup-locations' \
+  --header 'Accept: application/json'
+```
+
+Example success response:
+
+```json
+{
+  "success": true,
+  "message": "Pickup locations loaded.",
+  "data": [
+    {
+      "id": 1,
+      "name": "Airport Terminal",
+      "shortName": "Terminal",
+      "category": "Airport",
+      "city": "Sample City",
+      "province": "Sample Province",
+      "region": "Sample Region",
+      "isActive": true
+    }
+  ]
+}
+```
+
+An HTTP error, `success: false`, HTML response, malformed JSON, or malformed `data` array is shown as a retryable pickup-location error.
+
+## Available vehicles
+
+- Method and route: `GET /api/renter/available-vehicles`
+- Purpose: return the lessor's available vehicles for the renter's requested local pickup period.
+- Authentication: public; a valid lessor business `code` provides tenant scope.
+- Required query parameters: `starts_at`, `ends_at`.
+- Optional query parameters: `code`, `pickup_location_id`, `rental_type`, `transmission`, `vehicle_type`, `fuel_type`, `min_price`, `max_price`, `sort_by`, `page`, and `per_page`.
+- Response envelope: vehicle results are read from `data.vehicles`; pagination is read from `data.pagination`.
+- Billing: no frontend charge is applied; the backend may log or bill API usage according to the lessor's agreement.
+- Frontend source: `RenterVehicleSearchService.search()` and `RentersSearchResultsComponent` on `feature/renter-api-integration`.
+
+```bash
+curl --get '{{domain}}/api/renter/available-vehicles' \
+  --header 'Accept: application/json' \
+  --data-urlencode 'code=FB-SAMPLE-BUSINESS' \
+  --data-urlencode 'starts_at=2026-08-10T10:00:00' \
+  --data-urlencode 'ends_at=2026-08-12T10:00:00' \
+  --data-urlencode 'rental_type=without_driver' \
+  --data-urlencode 'page=1' \
+  --data-urlencode 'per_page=10'
+```
+
+Example success response:
+
+```json
+{
+  "success": true,
+  "message": "Available vehicles loaded successfully.",
+  "data": {
+    "lessor": { "id": 1, "code": "FB-SAMPLE-BUSINESS", "name": "Sample Rental Business" },
+    "vehicles": [],
+    "pagination": {
+      "current_page": 1,
+      "per_page": 10,
+      "total": 0,
+      "last_page": 1,
+      "from": null,
+      "to": null
+    }
+  }
+}
+```
+
+Validation failures return HTTP `422`. Invalid tenant scope may return `404`, and unexpected backend failures return `500`. The UI keeps loading, retryable error, empty, and populated success states separate. Local pickup time is preserved when constructing `starts_at` and `ends_at`, and backend-calculated totals are preferred when present.

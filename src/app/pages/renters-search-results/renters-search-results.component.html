@@ -29,13 +29,16 @@
         </div>
 
         <div class="results-state" *ngIf="isLoading">Loading available vehicles...</div>
-        <div class="results-state error" *ngIf="!isLoading && errorMessage">{{ errorMessage }}</div>
+        <div class="results-state error" *ngIf="!isLoading && errorMessage">
+          <p>{{ errorMessage }}</p>
+          <button type="button" (click)="retrySearch()">Try Again</button>
+        </div>
         <div class="results-state" *ngIf="!isLoading && !errorMessage && cars.length === 0">
           No vehicles are available for this search. Try different dates or search options.
         </div>
 
         <app-results-list
-          *ngIf="!isLoading && !errorMessage"
+          *ngIf="!isLoading && !errorMessage && cars.length > 0"
           [cars]="cars"
           [search]="search">
         </app-results-list>

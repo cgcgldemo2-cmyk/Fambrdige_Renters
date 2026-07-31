@@ -1,104 +1,68 @@
-import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, BehaviorSubject, of } from 'rxjs';
-import { catchError, map, tap } from 'rxjs/operators';
+import { Injectable } from '@angular/core';
+import { map, Observable } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface PickupLocation {
-  value: string;
-  label: string;
+  id: number;
+  name: string;
+  shortName: string;
   category: string;
-}
-
-interface PickupLocationGroup {
-  category: string;
-  locations: string[];
+  city: string;
+  province: string;
+  region: string;
+  isActive: boolean;
 }
 
 interface PickupLocationsApiResponse {
-  pickup_locations: PickupLocationGroup[];
+  success: boolean;
+  message?: string;
+  data: PickupLocation[];
 }
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class PickupLocationsService {
-  private readonly baseUrl = environment.apiBaseUrl;
-  private readonly pickupLocationsUrl = `${this.baseUrl}/api/renter/pickup-locations`;
-  private pickupLocationsCache$ = new BehaviorSubject<PickupLocation[]>([]);
-  private isLoading = false;
+  private readonly endpoint = `${environment.apiBaseUrl}${environment.pickupLocationsPath}`;
 
-  constructor(private http: HttpClient) {}
+  constructor(private readonly http: HttpClient) {}
 
-  /**
-   * Fetch pickup locations from the API
-   * Results are cached after first successful fetch
-   */
   getPickupLocations(): Observable<PickupLocation[]> {
-    const cachedLocations = this.pickupLocationsCache$.value;
-    
-    // Return cached data if available
-    if (cachedLocations.length > 0) {
-      return of(cachedLocations);
+    return this.http.get<unknown>(this.endpoint).pipe(
+      map(response => this.parseResponse(response))
+    );
+  }
+
+  private parseResponse(response: unknown): PickupLocation[] {
+    if (!this.isResponse(response) || !response.success) {
+      const message = this.isObject(response) && typeof response['message'] === 'string'
+        ? response['message']
+        : 'Pickup locations could not be loaded.';
+      throw new Error(message);
     }
 
-    // Prevent multiple simultaneous requests
-    if (this.isLoading) {
-      return this.pickupLocationsCache$.asObservable();
-    }
-
-    this.isLoading = true;
-    return this.http.get<PickupLocationsApiResponse>(this.pickupLocationsUrl).pipe(
-      map(response => this.flattenLocations(response.pickup_locations)),
-      tap(locations => {
-        this.pickupLocationsCache$.next(locations);
-        this.isLoading = false;
-      }),
-      catchError(error => {
-        console.error('Error fetching pickup locations:', error);
-        this.isLoading = false;
-        return of([]);
-      })
-    );
+    return response.data.filter(location => location.isActive);
   }
 
-  /**
-   * Force refresh of pickup locations, bypassing cache
-   */
-  refreshPickupLocations(): Observable<PickupLocation[]> {
-    this.isLoading = true;
-    return this.http.get<PickupLocationsApiResponse>(this.pickupLocationsUrl).pipe(
-      map(response => this.flattenLocations(response.pickup_locations)),
-      tap(locations => {
-        this.pickupLocationsCache$.next(locations);
-        this.isLoading = false;
-      }),
-      catchError(error => {
-        console.error('Error refreshing pickup locations:', error);
-        this.isLoading = false;
-        return of([]);
-      })
-    );
+  private isResponse(response: unknown): response is PickupLocationsApiResponse {
+    return this.isObject(response)
+      && typeof response['success'] === 'boolean'
+      && Array.isArray(response['data'])
+      && response['data'].every(location => this.isPickupLocation(location));
   }
 
-  /**
-   * Get cached pickup locations synchronously
-   */
-  getCachedPickupLocations(): PickupLocation[] {
-    return this.pickupLocationsCache$.value;
+  private isPickupLocation(location: unknown): location is PickupLocation {
+    return this.isObject(location)
+      && typeof location['id'] === 'number'
+      && typeof location['name'] === 'string'
+      && typeof location['shortName'] === 'string'
+      && typeof location['category'] === 'string'
+      && typeof location['city'] === 'string'
+      && typeof location['province'] === 'string'
+      && typeof location['region'] === 'string'
+      && typeof location['isActive'] === 'boolean';
   }
 
-  /**
-   * Transform grouped locations into flat array of PickupLocation objects
-   */
-  private flattenLocations(groups: PickupLocationGroup[]): PickupLocation[] {
-    return groups.flatMap(group =>
-      group.locations.map(location => ({
-        value: location,
-        label: location,
-        category: group.category
-      }))
-    );
+  private isObject(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
   }
 }
-

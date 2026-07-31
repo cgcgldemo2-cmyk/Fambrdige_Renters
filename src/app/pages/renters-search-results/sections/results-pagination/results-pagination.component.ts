@@ -17,8 +17,8 @@ export class ResultsPaginationComponent {
     if (!this.pagination) {
       return [];
     }
-    const start = Math.max(1, this.pagination.current_page - 2);
-    const end = Math.min(this.pagination.last_page, start + 4);
+    const start = Math.max(1, this.pagination.currentPage - 2);
+    const end = Math.min(this.pagination.lastPage, start + 4);
     return Array.from({ length: end - start + 1 }, (_, index) => start + index);
   }
 }

@@ -15,23 +15,23 @@ export class ResultsCardComponent {
   @Input() search!: BookingSearchData;
 
   get dailyPrice(): number {
-    return Number(this.car.price_24hrs || 0);
+    return this.car.price24Hours;
   }
 
   get totalPrice(): number {
-    const calculated = this.car.calculated_price;
+    const calculated = this.car.calculatedPrice;
     if (!calculated) {
       return this.dailyPrice * this.search.rentalDays;
     }
     return this.search.rentalType === 'With Driver'
-      ? Number(calculated.estimated_total_with_driver)
-      : Number(calculated.estimated_total_without_driver);
+      ? calculated.estimatedTotalWithDriver
+      : calculated.estimatedTotalWithoutDriver;
   }
 
   get rentalTypeLabel(): string {
-    if (this.car.rental_type === 'both') {
+    if (this.car.rentalType === 'both') {
       return 'With or without driver';
     }
-    return this.car.rental_type === 'with_driver' ? 'With driver' : 'Self drive';
+    return this.car.rentalType === 'with_driver' ? 'With driver' : 'Self drive';
   }
 }

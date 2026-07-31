@@ -1,17 +1,17 @@
 <article class="car-result-card">
   <div class="car-image">
-    <img *ngIf="car.image_url; else noImage" [src]="car.image_url" [alt]="car.name">
+    <img *ngIf="car.imageUrl; else noImage" [src]="car.imageUrl" [alt]="car.name">
     <ng-template #noImage><div class="image-placeholder">Vehicle image unavailable</div></ng-template>
   </div>
   <div class="car-info">
     <div class="title-row"><h3>{{car.name}}</h3><span *ngIf="car.badge">{{car.badge}}</span></div>
     <div class="meta">
-      <span>{{car.vehicle_type}}</span>
+      <span>{{car.vehicleType}}</span>
       <span>{{car.seats}} Seats</span>
       <span>{{car.transmission}}</span>
-      <span>{{car.fuel_type}}</span>
+      <span>{{car.fuelType}}</span>
     </div>
-    <p>Pickup: {{car.pickup_address || search.pickupLocation}}</p>
+    <p>Pickup: {{car.pickupAddress || search.pickupLocation}}</p>
     <p>{{rentalTypeLabel}}</p>
   </div>
   <div class="price-box">
