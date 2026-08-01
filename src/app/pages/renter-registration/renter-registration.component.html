@@ -1,0 +1,60 @@
+<main class="registration-page">
+  <a class="brand" routerLink="/" aria-label="Return to rental website">
+    <span>FamBridge</span>
+    <small>Rental management platform</small>
+  </a>
+
+  <section class="registration-card" aria-labelledby="registration-title">
+    <div class="intro">
+      <p class="eyebrow">Renter registration</p>
+      <h1 id="registration-title">Create your renter account</h1>
+      <p>Register before requesting a vehicle. Your account may require approval from the rental business before protected search or booking actions.</p>
+    </div>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label>
+        Full name
+        <input type="text" formControlName="name" autocomplete="name" placeholder="Juan Dela Cruz">
+        <small *ngIf="hasError('name')">Enter your full name.</small>
+      </label>
+
+      <label>
+        Email address
+        <input type="email" formControlName="email" autocomplete="email" placeholder="juan@example.com">
+        <small *ngIf="hasError('email')">Enter a valid email address.</small>
+      </label>
+
+      <label>
+        Mobile number
+        <input type="tel" formControlName="mobile" autocomplete="tel" inputmode="tel" placeholder="0917 123 4567">
+        <small *ngIf="hasError('mobile')">Enter a valid Philippine mobile number.</small>
+      </label>
+
+      <div class="password-grid">
+        <label>
+          Password
+          <input type="password" formControlName="password" autocomplete="new-password" placeholder="At least 8 characters">
+          <small *ngIf="hasError('password')">Use at least 8 characters.</small>
+        </label>
+
+        <label>
+          Confirm password
+          <input type="password" formControlName="passwordConfirmation" autocomplete="new-password" placeholder="Repeat your password">
+          <small *ngIf="hasError('passwordConfirmation', 'passwordMismatch')">Passwords do not match.</small>
+          <small *ngIf="hasError('passwordConfirmation', 'required')">Confirm your password.</small>
+        </label>
+      </div>
+
+      <div class="alert success" *ngIf="successMessage" role="status">{{ successMessage }}</div>
+      <div class="alert error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+      <button type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Creating account…' : 'Create renter account' }}
+      </button>
+    </form>
+
+    <p class="back-link"><a routerLink="/">Back to the rental website</a></p>
+  </section>
+
+  <footer>Business-owned rental website · Powered by FamBridge</footer>
+</main>

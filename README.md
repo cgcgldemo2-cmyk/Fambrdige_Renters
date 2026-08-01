@@ -151,3 +151,47 @@ Example success response:
 ```
 
 Validation failures return HTTP `422`. Invalid tenant scope may return `404`, and unexpected backend failures return `500`. The UI keeps loading, retryable error, empty, and populated success states separate. Local pickup time is preserved when constructing `starts_at` and `ends_at`, and backend-calculated totals are preferred when present.
+
+# Renter registration API integration
+
+- Method and route: `POST /api/v1/renters/register`
+- Purpose: create a renter account before protected search or booking actions.
+- Authentication and tenant: public registration endpoint; no bearer token or tenant parameter is sent.
+- Headers: `Content-Type: application/json`.
+- Required JSON fields: `name`, `email`, `mobile`, and `password`.
+- Billing: free authentication/registration endpoint according to the Phase 1 API inventory.
+- Backend source: `routes/api/renter.php`, `RenterRegistrationController::store`, and `LandlordUser` / `landlord_users`.
+- Frontend source: `RenterAuthService.register()` and `RenterRegistrationComponent` on `feature/renter-api-integration-v2`.
+
+```bash
+curl --location '{{domain}}/api/v1/renters/register' \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "name": "Test Renter V1",
+    "email": "test.renter.v1@example.com",
+    "mobile": "9179876543",
+    "password": "Password@123"
+  }'
+```
+
+The frontend requires a successful JSON response containing `status: true` and a non-empty `message`. A `status: false` response, malformed response, network error, or HTTP validation error is shown as a registration error. Validation failures return HTTP `422` with a `message` and field-specific `errors`; the form displays the first safe validation message returned by the API.
+
+Example success response:
+
+```json
+{
+  "status": true,
+  "message": "Renter registered successfully."
+}
+```
+
+Example validation response (`422 Unprocessable Entity`):
+
+```json
+{
+  "message": "Validation error.",
+  "errors": {
+    "email": ["The email field is required."]
+  }
+}
+```

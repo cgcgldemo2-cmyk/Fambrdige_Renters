@@ -1,7 +1,7 @@
 <section class="top-bar">
   <div class="container">
-    <span>🛡️ Official reservation store of {{ store?.name }}. All bookings are safe and secure.</span>
-    <span>🔒 {{ store?.domain }} <b>| Powered by CarBNB</b></span>
+    <span>🛡️ Official reservation store of {{ store.name }}. All bookings are safe and secure.</span>
+    <span>🔒 {{ store.domain }} <b>| Powered by FamBridge</b></span>
   </div>
 </section>
 
@@ -21,8 +21,9 @@
     </nav>
 
     <div class="actions">
-      <button class="phone">☎ {{ store?.phone }}</button>
+      <button class="phone">☎ {{ store.phone }}</button>
       <button class="login" routerLink="/login">Login</button>
+      <button class="register" routerLink="/register">Create Account</button>
     </div>
   </div>
 </header>

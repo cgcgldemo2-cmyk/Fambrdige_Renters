@@ -1,100 +1,89 @@
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
+import { Observable, catchError, map, of } from 'rxjs';
+import { environment } from '../../environments/environment';
 
-export interface LocalRentalUser {
-  id: string;
+export interface RenterRegistrationRequest {
   name: string;
   email: string;
-  countryCode: string;
   mobile: string;
   password: string;
-  accountType: string;
-  type: string;
-  typeId?: number;
-  category?: string;
-  categoryId?: number;
+}
+
+interface RenterRegistrationResponse {
+  status: boolean;
+  message: string;
+}
+
+interface RenterApiErrorResponse {
+  message?: string;
+  errors?: Record<string, string[]>;
+}
+
+export interface RenterRegistrationResult {
+  success: boolean;
+  message: string;
 }
 
 @Injectable({ providedIn: 'root' })
 export class RenterAuthService {
-  private readonly usersKey = 'rental_platform_users';
-  private readonly sessionKey = 'rental_platform_current_user';
-  private readonly tokenKey = 'access_token';
+  private readonly registerUrl = `${environment.apiBaseUrl}${environment.renterRegisterPath}`;
 
-  register(user: Omit<LocalRentalUser, 'id'>): { status: boolean; message: string } {
-    const users = this.getUsers();
-    const email = user.email.trim().toLowerCase();
+  constructor(private readonly http: HttpClient) {}
 
-    if (users.some(existingUser => existingUser.email === email)) {
-      return {
-        status: false,
-        message: 'An account already exists for this email.'
-      };
+  register(request: RenterRegistrationRequest): Observable<RenterRegistrationResult> {
+    return this.http.post<RenterRegistrationResponse>(this.registerUrl, {
+      name: request.name.trim(),
+      email: request.email.trim().toLowerCase(),
+      mobile: this.normalizePhilippineMobile(request.mobile),
+      password: request.password
+    }).pipe(
+      map(response => {
+        if (response?.status !== true || typeof response.message !== 'string' || !response.message.trim()) {
+          return {
+            success: false,
+            message: response?.message?.trim() || 'The registration API returned an invalid response.'
+          };
+        }
+
+        return { success: true, message: response.message.trim() };
+      }),
+      catchError(error => of({ success: false, message: this.extractApiError(error) }))
+    );
+  }
+
+  private normalizePhilippineMobile(mobile: string): string {
+    let digits = mobile.replace(/\D/g, '');
+    if (digits.startsWith('63')) {
+      digits = digits.slice(2);
+    }
+    if (digits.startsWith('0')) {
+      digits = digits.slice(1);
+    }
+    return digits;
+  }
+
+  private extractApiError(error: unknown): string {
+    if (!(error instanceof HttpErrorResponse)) {
+      return 'Unable to connect to the rental API. Please try again.';
     }
 
-    const newUser: LocalRentalUser = {
-      ...user,
-      id: `USR-${Date.now().toString().slice(-8)}`,
-      email
-    };
+    const apiError = error.error as RenterApiErrorResponse | string | null;
+    if (apiError && typeof apiError === 'object') {
+      const validationMessage = apiError.errors
+        ? Object.values(apiError.errors).flat().find(message => typeof message === 'string' && message.trim())
+        : undefined;
 
-    localStorage.setItem(this.usersKey, JSON.stringify([...users, newUser]));
-
-    return {
-      status: true,
-      message: 'Account created. You can now sign in.'
-    };
-  }
-
-  login(email: string, password: string): { status: boolean; message: string; token?: string } {
-    const normalizedEmail = email.trim().toLowerCase();
-    const user = this.getUsers()
-      .find(existingUser => existingUser.email === normalizedEmail && existingUser.password === password);
-
-    if (!user) {
-      return {
-        status: false,
-        message: 'Invalid email or password.'
-      };
+      if (validationMessage) {
+        return validationMessage;
+      }
+      if (typeof apiError.message === 'string' && apiError.message.trim()) {
+        return apiError.message.trim();
+      }
     }
 
-    if (user.accountType !== 'Renter') {
-      return {
-        status: false,
-        message: 'This account belongs to a different portal.'
-      };
-    }
-
-    const token = `mock-renter-token-${Date.now()}`;
-    sessionStorage.setItem(this.tokenKey, token);
-    sessionStorage.setItem(this.sessionKey, JSON.stringify({
-      id: user.id,
-      name: user.name,
-      email: user.email,
-      countryCode: user.countryCode,
-      mobile: user.mobile,
-      accountType: user.accountType,
-      type: user.type,
-      category: user.accountType
-    }));
-
-    return {
-      status: true,
-      message: 'Login successful.',
-      token
-    };
-  }
-
-  isLoggedIn(): boolean {
-    return !!sessionStorage.getItem(this.tokenKey);
-  }
-
-  getCurrentUser(): Pick<LocalRentalUser, 'id' | 'name' | 'email' | 'countryCode' | 'mobile' | 'accountType' | 'type'> | null {
-    const currentUser = sessionStorage.getItem(this.sessionKey);
-    return currentUser ? JSON.parse(currentUser) : null;
-  }
-
-  private getUsers(): LocalRentalUser[] {
-    const users = localStorage.getItem(this.usersKey);
-    return users ? JSON.parse(users) : [];
+    return error.status === 0
+      ? 'Unable to reach the rental API. Please check your connection and try again.'
+      : 'Registration could not be completed. Please try again.';
   }
 }

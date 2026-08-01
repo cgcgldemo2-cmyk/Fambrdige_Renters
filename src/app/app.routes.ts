@@ -17,6 +17,12 @@ export const routes: Routes = [
         .then(m => m.RentersSearchResultsComponent)
   },
   {
+    path: 'register',
+    loadComponent: () =>
+      import('./pages/renter-registration/renter-registration.component')
+        .then(m => m.RenterRegistrationComponent)
+  },
+  {
     path: '**',
     redirectTo: 'login'
   }

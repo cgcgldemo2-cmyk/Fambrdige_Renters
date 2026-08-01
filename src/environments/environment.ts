@@ -3,6 +3,7 @@ export const environment = {
   apiBaseUrl: 'https://api.cgicsoftwaresolution.com',
   pickupLocationsPath: '/api/pickup-locations',
   renterAvailableVehiclesPath: '/api/renter/available-vehicles',
+  renterRegisterPath: '/api/v1/renters/register',
   lessorRegisterPath: '/api/landlord/user/register',
   lessorLoginPath: '/api/landlord/user/login',
   lessorProfilePath: '/api/landlord/user/profile',
