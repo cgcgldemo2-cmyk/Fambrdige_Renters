@@ -95,6 +95,7 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
   }
 
   private loadVehicles(page: number): void {
+    console.log('loadVehicles', page, this.search, !this.search.code);
     if (!this.search.code) {
       this.errorMessage = 'This rental business is not configured for vehicle search.';
       this.cars = [];
