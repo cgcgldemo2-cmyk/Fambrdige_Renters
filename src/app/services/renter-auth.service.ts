@@ -3,87 +3,79 @@ import { Injectable } from '@angular/core';
 import { Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../../environments/environment';
 
-export interface RenterRegistrationRequest {
-  name: string;
-  email: string;
-  mobile: string;
-  password: string;
-}
+export interface RenterRegistrationRequest { name: string; email: string; mobile: string; password: string; }
+export interface RenterLoginRequest { email: string; password: string; }
+export interface RenterAuthResult { success: boolean; message: string; }
 
-interface RenterRegistrationResponse {
-  status: boolean;
-  message: string;
-}
-
-interface RenterApiErrorResponse {
+interface RenterApiResponse {
+  status?: boolean;
+  success?: boolean;
   message?: string;
-  errors?: Record<string, string[]>;
+  token?: string;
+  access_token?: string;
+  data?: { token?: string; access_token?: string; renter?: unknown };
 }
 
-export interface RenterRegistrationResult {
-  success: boolean;
-  message: string;
-}
+interface RenterApiErrorResponse { message?: string; errors?: Record<string, string[]>; }
 
 @Injectable({ providedIn: 'root' })
 export class RenterAuthService {
   private readonly registerUrl = `${environment.apiBaseUrl}${environment.renterRegisterPath}`;
+  private readonly loginUrl = `${environment.apiBaseUrl}${environment.renterLoginPath}`;
 
   constructor(private readonly http: HttpClient) {}
 
-  register(request: RenterRegistrationRequest): Observable<RenterRegistrationResult> {
-    return this.http.post<RenterRegistrationResponse>(this.registerUrl, {
-      name: request.name.trim(),
-      email: request.email.trim().toLowerCase(),
-      mobile: this.normalizePhilippineMobile(request.mobile),
-      password: request.password
+  register(request: RenterRegistrationRequest): Observable<RenterAuthResult> {
+    return this.http.post<RenterApiResponse>(this.registerUrl, {
+      name: request.name.trim(), email: request.email.trim().toLowerCase(),
+      mobile: this.normalizePhilippineMobile(request.mobile), password: request.password
+    }).pipe(
+      map(response => this.toResult(response, 'Registration completed.')),
+      catchError(error => of({ success: false, message: this.extractApiError(error, 'Registration could not be completed.') }))
+    );
+  }
+
+  login(request: RenterLoginRequest): Observable<RenterAuthResult> {
+    return this.http.post<RenterApiResponse>(this.loginUrl, {
+      email: request.email.trim().toLowerCase(), password: request.password
     }).pipe(
       map(response => {
-        if (response?.status !== true || typeof response.message !== 'string' || !response.message.trim()) {
-          return {
-            success: false,
-            message: response?.message?.trim() || 'The registration API returned an invalid response.'
-          };
+        const token = response.access_token ?? response.token ?? response.data?.access_token ?? response.data?.token;
+        const successful = (response.status === true || response.success === true || Boolean(token)) && Boolean(token);
+        if (!successful || !token) {
+          return { success: false, message: response.message?.trim() || 'The login API returned an invalid response.' };
         }
-
-        return { success: true, message: response.message.trim() };
+        sessionStorage.setItem('access_token', token);
+        return { success: true, message: response.message?.trim() || 'Login successful.' };
       }),
-      catchError(error => of({ success: false, message: this.extractApiError(error) }))
+      catchError(error => of({ success: false, message: this.extractApiError(error, 'Login could not be completed.') }))
     );
+  }
+
+  logout(): void { sessionStorage.removeItem('access_token'); }
+  isAuthenticated(): boolean { return Boolean(sessionStorage.getItem('access_token')); }
+
+  private toResult(response: RenterApiResponse, fallback: string): RenterAuthResult {
+    const success = response.status === true || response.success === true;
+    return { success, message: response.message?.trim() || (success ? fallback : 'The API returned an invalid response.') };
   }
 
   private normalizePhilippineMobile(mobile: string): string {
     let digits = mobile.replace(/\D/g, '');
-    if (digits.startsWith('63')) {
-      digits = digits.slice(2);
-    }
-    if (digits.startsWith('0')) {
-      digits = digits.slice(1);
-    }
+    if (digits.startsWith('63')) digits = digits.slice(2);
+    if (digits.startsWith('0')) digits = digits.slice(1);
     return digits;
   }
 
-  private extractApiError(error: unknown): string {
-    if (!(error instanceof HttpErrorResponse)) {
-      return 'Unable to connect to the rental API. Please try again.';
-    }
-
+  private extractApiError(error: unknown, fallback: string): string {
+    if (!(error instanceof HttpErrorResponse)) return 'Unable to connect to the rental API. Please try again.';
     const apiError = error.error as RenterApiErrorResponse | string | null;
     if (apiError && typeof apiError === 'object') {
-      const validationMessage = apiError.errors
-        ? Object.values(apiError.errors).flat().find(message => typeof message === 'string' && message.trim())
-        : undefined;
-
-      if (validationMessage) {
-        return validationMessage;
-      }
-      if (typeof apiError.message === 'string' && apiError.message.trim()) {
-        return apiError.message.trim();
-      }
+      const validationMessage = apiError.errors ? Object.values(apiError.errors).flat().find(message => message?.trim()) : undefined;
+      if (validationMessage) return validationMessage;
+      if (apiError.message?.trim()) return apiError.message.trim();
     }
-
-    return error.status === 0
-      ? 'Unable to reach the rental API. Please check your connection and try again.'
-      : 'Registration could not be completed. Please try again.';
+    if (typeof apiError === 'string' && apiError.trim()) return apiError.trim();
+    return error.status === 0 ? 'Unable to reach the rental API. Please check your connection and try again.' : fallback;
   }
 }

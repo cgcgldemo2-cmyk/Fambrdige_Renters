@@ -1,6 +1,6 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { catchError, map, Observable, throwError } from 'rxjs';
 import { environment } from '../../environments/environment';
 
 export interface PickupLocation {
@@ -14,10 +14,14 @@ export interface PickupLocation {
   isActive: boolean;
 }
 
-interface PickupLocationsApiResponse {
+interface DocumentedApiResponse {
   success: boolean;
   message?: string;
-  data: PickupLocation[];
+  data: unknown[];
+}
+
+interface CurrentApiResponse {
+  pickup_locations: unknown[];
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,38 +32,81 @@ export class PickupLocationsService {
 
   getPickupLocations(): Observable<PickupLocation[]> {
     return this.http.get<unknown>(this.endpoint).pipe(
-      map(response => this.parseResponse(response))
+      map(response => this.parseResponse(response)),
+      catchError((error: unknown) => throwError(() => this.toUserError(error)))
     );
   }
 
   private parseResponse(response: unknown): PickupLocation[] {
-    if (!this.isResponse(response) || !response.success) {
-      const message = this.isObject(response) && typeof response['message'] === 'string'
-        ? response['message']
-        : 'Pickup locations could not be loaded.';
-      throw new Error(message);
+    let rawLocations: unknown[];
+
+    if (Array.isArray(response)) {
+      rawLocations = response;
+    } else if (this.isCurrentResponse(response)) {
+      rawLocations = response.pickup_locations;
+    } else if (this.isDocumentedResponse(response)) {
+      if (!response.success) {
+        throw new Error(response.message || 'Pickup locations could not be loaded.');
+      }
+      rawLocations = response.data;
+    } else {
+      throw new Error('The pickup-location response has an unsupported format.');
     }
 
-    return response.data.filter(location => location.isActive);
+    return rawLocations
+      .map(location => this.normalizeLocation(location))
+      .filter((location): location is PickupLocation => location !== null)
+      .filter(location => location.isActive);
   }
 
-  private isResponse(response: unknown): response is PickupLocationsApiResponse {
-    return this.isObject(response)
-      && typeof response['success'] === 'boolean'
-      && Array.isArray(response['data'])
-      && response['data'].every(location => this.isPickupLocation(location));
+  private normalizeLocation(value: unknown): PickupLocation | null {
+    if (!this.isObject(value)) return null;
+
+    const id = Number(value['id']);
+    const name = this.readString(value, 'name', 'location_name');
+    if (!Number.isFinite(id) || !name) return null;
+
+    return {
+      id,
+      name,
+      shortName: this.readString(value, 'shortName', 'short_name') || name,
+      category: this.readString(value, 'category', 'type'),
+      city: this.readString(value, 'city'),
+      province: this.readString(value, 'province'),
+      region: this.readString(value, 'region'),
+      isActive: this.readBoolean(value, 'isActive', 'is_active') ?? true
+    };
   }
 
-  private isPickupLocation(location: unknown): location is PickupLocation {
-    return this.isObject(location)
-      && typeof location['id'] === 'number'
-      && typeof location['name'] === 'string'
-      && typeof location['shortName'] === 'string'
-      && typeof location['category'] === 'string'
-      && typeof location['city'] === 'string'
-      && typeof location['province'] === 'string'
-      && typeof location['region'] === 'string'
-      && typeof location['isActive'] === 'boolean';
+  private toUserError(error: unknown): Error {
+    if (error instanceof Error && !(error instanceof HttpErrorResponse)) return error;
+    return new Error('Pickup locations are temporarily unavailable. Please try again.');
+  }
+
+  private isDocumentedResponse(value: unknown): value is DocumentedApiResponse {
+    return this.isObject(value)
+      && typeof value['success'] === 'boolean'
+      && Array.isArray(value['data']);
+  }
+
+  private isCurrentResponse(value: unknown): value is CurrentApiResponse {
+    return this.isObject(value) && Array.isArray(value['pickup_locations']);
+  }
+
+  private readString(value: Record<string, unknown>, ...keys: string[]): string {
+    for (const key of keys) {
+      if (typeof value[key] === 'string') return value[key].trim();
+    }
+    return '';
+  }
+
+  private readBoolean(value: Record<string, unknown>, ...keys: string[]): boolean | undefined {
+    for (const key of keys) {
+      if (typeof value[key] === 'boolean') return value[key];
+      if (value[key] === 1 || value[key] === '1') return true;
+      if (value[key] === 0 || value[key] === '0') return false;
+    }
+    return undefined;
   }
 
   private isObject(value: unknown): value is Record<string, unknown> {
