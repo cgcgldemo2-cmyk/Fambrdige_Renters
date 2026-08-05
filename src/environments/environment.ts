@@ -1,6 +1,8 @@
 export const environment = {
   production: false,
   apiBaseUrl: 'https://api.cgicsoftwaresolution.com',
+  lessorId: 2,
+  businessCode: 'FB-TEST-ABC123',
   pickupLocationsPath: '/api/renter/pickup-locations',
   renterAvailableVehiclesPath: '/api/renter/available-vehicles',
   renterRegisterPath: '/api/v1/renters/register',
