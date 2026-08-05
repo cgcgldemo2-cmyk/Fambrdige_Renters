@@ -58,47 +58,20 @@ Dark:    #001621
 Preserve the existing responsive design and component structure unless the
 task explicitly requests a redesign.
 
-## Repository and Git workflow
+## Project Identity
 
-Repository:
+- Application: FamBridge Renters
+- Framework: Angular 19.2
+- Active repository: https://github.com/cgcgldemo2-cmyk/Fambrdige_Renters
+- Current development branch: `feature/renter-api-integration-v2`
+- Protected branch: `main`
 
-```text
-https://github.com/cliterato/FambrdigeRenters.git
-```
+Before modifying source code:
 
-Protected base branch:
-
-```text
-RentersMasterBranch
-```
-
-Before editing:
-
-1. Confirm the repository root with `git rev-parse --show-toplevel`.
-2. Read this file and all applicable repository instructions.
-3. Run `git status --short --branch`.
-4. Fetch the latest remote state when network access is available.
-5. Inspect the relevant components, services, routes, interfaces, environment
-   files, and tests.
-6. If uncommitted user changes overlap the task, stop and report the exact
-   files instead of overwriting them.
-
-For implementation work:
-
-- Create or continue a focused branch named `feature/<short-kebab-task-name>`
-  from the latest `origin/RentersMasterBranch`.
-- Never commit, push, merge, rebase, or force-push directly to
-  `RentersMasterBranch` or `main` unless the user explicitly instructs it.
-- Never use destructive cleanup such as `git reset --hard` or
-  `git checkout --`.
-- Never rewrite published history or use `--force`.
-- Stage only files belonging to the requested change.
-- Use a focused conventional commit such as `feat: ...`, `fix: ...`, or
-  `docs: ...`.
-- If publishing is requested, push only the feature branch. Do not create or
-  merge a pull request unless requested.
-- If authentication blocks a push, keep the local branch and commit intact and
-  report the exact error.
+1. Confirm that the current branch is not `main`.
+2. Use a focused feature branch for implementation.
+3. Do not commit, push, merge, rebase, or force-push without explicit approval.
+4. Do not discard unrelated existing changes.
 
 ## Angular implementation rules
 
