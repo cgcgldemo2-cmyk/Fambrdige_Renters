@@ -1,1 +1,28 @@
 .filter-card{background:#fff;border:1px solid #e5eaf2;border-radius:12px;overflow:hidden}.filter-head{padding:20px;border-bottom:1px solid #e5eaf2;display:flex;justify-content:space-between;h3{margin:0}button{border:0;background:none;color:#ff4104;font-weight:800}}.filter-group{padding:20px;border-bottom:1px solid #e5eaf2;h4{margin:0 0 14px}label{display:block;margin-bottom:12px;color:#344054}input[type='checkbox']{margin-right:10px;accent-color:#ff4104}input[type='range']{width:100%;accent-color:#ff4104}}.range-label{display:flex;justify-content:space-between}.apply-btn{margin:20px;width:calc(100% - 40px);height:48px;border:0;border-radius:8px;background:#ff4104;color:#fff;font-weight:900}
+
+.filter-card, .filter-group { min-width: 0; }
+.filter-head { gap: 12px; }
+.filter-head button, .apply-btn { cursor: pointer; }
+.filter-group {
+  h4 { overflow-wrap: anywhere; }
+  label {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+  }
+  input[type='checkbox'] {
+    flex: 0 0 auto;
+    margin-top: 3px;
+    margin-right: 0;
+  }
+  input[type='range'] { min-width: 0; }
+}
+.range-label { gap: 12px; font-size: 13px; }
+
+@media (max-width: 600px) {
+  .filter-card { border: 0; border-radius: 0; }
+  .filter-head, .filter-group { padding: 16px; }
+  .apply-btn { margin: 16px; width: calc(100% - 32px); }
+}

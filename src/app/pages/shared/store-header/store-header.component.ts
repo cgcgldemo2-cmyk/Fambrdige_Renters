@@ -17,4 +17,14 @@ export interface StoreHeaderDetails {
 })
 export class StoreHeaderComponent {
   @Input({ required: true }) store!: StoreHeaderDetails;
+
+  isMenuOpen = false;
+
+  toggleMenu(): void {
+    this.isMenuOpen = !this.isMenuOpen;
+  }
+
+  closeMenu(): void {
+    this.isMenuOpen = false;
+  }
 }

@@ -11,19 +11,24 @@
       <span>AB</span>RENTAL
       <small>Your Trusted Car Rental Partner</small>
     </div>
+    <button class="menu-toggle" type="button" aria-label="Toggle navigation menu" aria-controls="store-navigation" [attr.aria-expanded]="isMenuOpen" (click)="toggleMenu()">
+      <span></span><span></span><span></span>
+    </button>
 
-    <nav>
-      <a class="active">Home</a>
-      <a>Available Cars</a>
-      <a>Rental Information</a>
-      <a>FAQs</a>
-      <a>Contact Us</a>
-    </nav>
+    <div class="header-content" id="store-navigation" [class.open]="isMenuOpen">
+      <nav aria-label="Store navigation">
+        <a class="active" (click)="closeMenu()">Home</a>
+        <a (click)="closeMenu()">Available Cars</a>
+        <a (click)="closeMenu()">Rental Information</a>
+        <a (click)="closeMenu()">FAQs</a>
+        <a (click)="closeMenu()">Contact Us</a>
+      </nav>
 
-    <div class="actions">
+      <div class="actions" aria-label="Account actions">
       <button class="phone">☎ {{ store.phone }}</button>
-      <button class="login" routerLink="/login">Login</button>
-      <button class="register" routerLink="/register">Create Account</button>
+        <button class="login" type="button" routerLink="/login" (click)="closeMenu()">Login</button>
+        <button class="register" type="button" routerLink="/register" (click)="closeMenu()">Create Account</button>
+      </div>
     </div>
   </div>
 </header>

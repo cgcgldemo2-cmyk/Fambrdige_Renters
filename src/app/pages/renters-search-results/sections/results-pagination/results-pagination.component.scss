@@ -1,1 +1,14 @@
 .pagination{margin:24px 0 40px;display:flex;justify-content:center;gap:8px;button{min-width:42px;height:40px;border:1px solid #e5eaf2;background:#fff;border-radius:8px;font-weight:700}.active{background:#ff4104;color:#fff;border-color:#ff4104}span{display:grid;place-items:center;padding:0 8px}}
+
+.pagination {
+  flex-wrap: wrap;
+  button { padding: 0 10px; cursor: pointer; }
+}
+
+@media (max-width: 390px) {
+  .pagination {
+    gap: 6px;
+    button { min-width: 38px; padding: 0 8px; }
+    button:first-child, button:last-child { flex: 1 1 90px; }
+  }
+}
