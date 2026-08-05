@@ -132,7 +132,7 @@ export class RenterVehicleSearchService {
   getConfiguredBusinessCode(): string {
     return this.document
       .querySelector<HTMLMetaElement>('meta[name="fambridge-business-code"]')
-      ?.content.trim() || '';
+      ?.content.trim() || environment.businessCode;
   }
 
   search(criteria: RenterVehicleSearchCriteria): Observable<RenterVehicleSearchResult> {
@@ -166,7 +166,8 @@ export class RenterVehicleSearchService {
       .set('sort_by', criteria.sortBy ?? 'newest');
 
     const optionalParams: Record<string, string | number | undefined> = {
-      code: criteria.code?.trim() || undefined,
+      lessor_id: environment.lessorId,
+      code: criteria.code?.trim() || environment.businessCode,
       pickup_location_id: criteria.pickupLocationId,
       rental_type: criteria.rentalType === 'With Driver' ? 'with_driver' : 'without_driver',
       transmission: criteria.transmission,

@@ -36,6 +36,7 @@ describe('RenterVehicleSearchService', () => {
       req.url === 'https://api.cgicsoftwaresolution.com/api/renter/available-vehicles'
     );
 
+    expect(request.request.params.get('lessor_id')).toBe('2');
     expect(request.request.params.get('code')).toBe('FB-TEST-ABC123');
     expect(request.request.params.get('starts_at')).toBe('2026-08-01T10:00:00');
     expect(request.request.params.get('ends_at')).toBe('2026-08-04T10:00:00');
@@ -73,6 +74,9 @@ describe('RenterVehicleSearchService', () => {
     meta.content = ' FB-STORE-123 ';
 
     expect(service.getConfiguredBusinessCode()).toBe('FB-STORE-123');
+
+    meta.content = '';
+    expect(service.getConfiguredBusinessCode()).toBe('FB-TEST-ABC123');
     meta.content = originalContent;
   });
 
