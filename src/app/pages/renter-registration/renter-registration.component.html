@@ -33,13 +33,13 @@
       <div class="password-grid">
         <label>
           Password
-          <input type="password" formControlName="password" autocomplete="new-password" placeholder="At least 8 characters">
+          <div class="password-field"><input [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="new-password" placeholder="At least 8 characters"><button type="button" class="toggle-password" (click)="showPassword = !showPassword">{{ showPassword ? 'Hide' : 'Show' }}</button></div>
           <small *ngIf="hasError('password')">Use at least 8 characters.</small>
         </label>
 
         <label>
           Confirm password
-          <input type="password" formControlName="passwordConfirmation" autocomplete="new-password" placeholder="Repeat your password">
+          <div class="password-field"><input [type]="showPasswordConfirmation ? 'text' : 'password'" formControlName="passwordConfirmation" autocomplete="new-password" placeholder="Repeat your password"><button type="button" class="toggle-password" (click)="showPasswordConfirmation = !showPasswordConfirmation">{{ showPasswordConfirmation ? 'Hide' : 'Show' }}</button></div>
           <small *ngIf="hasError('passwordConfirmation', 'passwordMismatch')">Passwords do not match.</small>
           <small *ngIf="hasError('passwordConfirmation', 'required')">Confirm your password.</small>
         </label>

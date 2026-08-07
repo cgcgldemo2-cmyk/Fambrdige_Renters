@@ -3,92 +3,122 @@ $dark: #001621;
 $border: #e5eaf2;
 $muted: #667085;
 
+:host { display: block; }
 .container { width: min(1180px, calc(100% - 32px)); margin: auto; }
-
 .top-bar {
-  background: $dark; color: #fff; font-size: 12px;
-  .container { height: 36px; display: flex; justify-content: space-between; align-items: center; }
-  b { color: $primary; }
+  background: $dark;
+  color: #fff;
+  font-size: 12px;
+  .container { min-height: 34px; display: flex; justify-content: space-between; align-items: center; gap: 16px; }
+  b { color: #ff9b7a; }
 }
-
-.header { background: #fff; border-bottom: 1px solid $border; position: sticky; top: 0; z-index: 50; }
-.header-inner { height: 88px; display: flex; align-items: center; justify-content: space-between; }
-.logo { font-size: 30px; font-weight: 900; color: $dark; line-height: 1; span { color: $primary; } small { display: block; margin-top: 5px; font-size: 12px; color: $muted; font-weight: 500; } }
-nav { display: flex; gap: 30px; a { font-weight: 700; font-size: 14px; cursor: pointer; &.active { color: $primary; border-bottom: 2px solid $primary; padding-bottom: 12px; } } }
-.actions { display: flex; gap: 12px; button { border: 0; border-radius: 10px; padding: 12px 18px; font-weight: 800; cursor: pointer; } .phone { background: #fff; border: 1px solid $border; } .login { background: $dark; color: #fff; } .register { background: $primary; color: #fff; } }
-@media (max-width: 900px) { nav, .phone, .top-bar { display: none; } .header-inner { height: 72px; } }
-
-.header-inner { gap: 24px; }
-.logo { flex: 0 0 auto; }
-.header-content { display: flex; align-items: center; justify-content: flex-end; gap: 28px; min-width: 0; }
-nav a, .actions button { white-space: nowrap; }
-.menu-toggle { display: none; }
-
-@media (max-width: 1100px) and (min-width: 901px) {
-  .header-inner { gap: 16px; }
-  .header-content, nav { gap: 16px; }
-  nav a { font-size: 13px; }
-  .actions {
-    gap: 8px;
-    button { padding: 10px 12px; }
-    .phone { display: none; }
-  }
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  background: #fff;
+  border-bottom: 1px solid $border;
+  box-shadow: 0 4px 16px rgba(0, 22, 33, .04);
 }
+.header-inner {
+  position: relative;
+  min-height: 76px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.logo {
+  min-width: 0;
+  display: grid;
+  line-height: 1.1;
+  span { color: $dark; font-size: clamp(20px, 3vw, 28px); font-weight: 900; overflow-wrap: anywhere; }
+  small { margin-top: 4px; color: $muted; font-size: 11px; font-weight: 700; }
+}
+.header-actions { display: flex; align-items: center; gap: 12px; }
+.phone { color: $dark; font-size: 13px; font-weight: 800; }
+.menu-toggle {
+  width: 48px;
+  height: 48px;
+  flex: 0 0 48px;
+  display: grid;
+  place-content: center;
+  gap: 5px;
+  border: 1px solid $border;
+  border-radius: 12px;
+  background: #fff;
+  cursor: pointer;
+  span { width: 22px; height: 2px; border-radius: 2px; background: $dark; }
+  &:focus-visible { outline: 3px solid rgba($primary, .22); outline-offset: 2px; }
+}
+.menu-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: min(370px, calc(100vw - 32px));
+  max-height: calc(100vh - 105px);
+  display: none;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 10px;
+  border: 1px solid $border;
+  border-radius: 18px;
+  background: #fff;
+  box-shadow: 0 24px 60px rgba(0, 22, 33, .2);
 
-@media (max-width: 900px) {
-  .header-inner { height: 72px; }
-  .logo {
-    font-size: 24px;
-    small { font-size: 10px; }
-  }
-  .menu-toggle {
-    width: 44px;
-    height: 44px;
-    flex: 0 0 44px;
-    display: grid;
-    place-content: center;
-    gap: 5px;
-    border: 1px solid $border;
+  &.open { display: grid; }
+  > a, .sign-out {
+    min-height: 48px;
+    display: flex;
+    align-items: center;
+    padding: 0 14px;
+    border: 0;
     border-radius: 10px;
-    background: #fff;
+    background: transparent;
+    color: #263641;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    text-align: left;
     cursor: pointer;
+  }
+  > a:hover, > a.active, .sign-out:hover { background: #f7f9fa; color: $primary; }
+  .create-account { background: $primary; color: #fff; }
+  .create-account:hover { background: #e73a00; color: #fff; }
+  .sign-out { width: 100%; color: #b42318; }
+}
+.menu-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 12px 14px;
+  div { display: grid; }
+  small { color: $muted; font-size: 11px; text-transform: uppercase; letter-spacing: .08em; }
+  strong { color: $dark; }
+  button {
+    width: 40px;
+    height: 40px;
+    border: 0;
+    border-radius: 50%;
+    background: #f2f4f7;
+    color: $dark;
+    font-size: 26px;
+    cursor: pointer;
+  }
+}
+.menu-divider { height: 1px; margin: 7px 10px; background: $border; }
 
-    span { width: 20px; height: 2px; border-radius: 2px; background: $dark; }
-  }
-  .header-content {
-    position: absolute;
-    top: calc(100% + 1px);
-    left: 0;
-    right: 0;
-    display: none;
-    max-height: calc(100vh - 73px);
-    overflow-y: auto;
-    padding: 18px 16px;
-    background: #fff;
-    border-bottom: 1px solid $border;
-    box-shadow: 0 18px 32px rgba(0, 22, 33, .14);
-
-    &.open { display: block; }
-  }
-  nav {
-    display: grid;
-    gap: 0;
-    a { padding: 13px 0; border-bottom: 1px solid $border; font-size: 15px; }
-    a.active { padding: 13px 0 13px 12px; border-bottom: 1px solid $border; border-left: 3px solid $primary; }
-  }
-  .actions {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    margin-top: 16px;
-    .phone { display: block; grid-column: 1 / -1; }
-    button { min-height: 44px; }
-  }
+@media (max-width: 600px) {
+  .top-bar { display: none; }
+  .header-inner { min-height: 68px; }
+  .phone { display: none; }
+  .menu-toggle { width: 44px; height: 44px; flex-basis: 44px; }
+  .menu-panel { top: calc(100% + 6px); right: 0; max-height: calc(100vh - 82px); }
 }
 
 @media (max-width: 390px) {
   .container { width: min(100% - 24px, 1180px); }
-  .actions {
-    grid-template-columns: 1fr;
-    .phone { grid-column: auto; }
-  }
+  .logo small { display: none; }
+  .menu-panel { width: calc(100vw - 24px); }
 }

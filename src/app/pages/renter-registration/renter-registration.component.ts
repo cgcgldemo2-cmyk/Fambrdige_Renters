@@ -15,6 +15,8 @@ import { RenterAuthService } from '../../services/renter-auth.service';
 export class RenterRegistrationComponent {
   readonly form;
   isSubmitting = false;
+  showPassword = false;
+  showPasswordConfirmation = false;
   successMessage = '';
   errorMessage = '';
 

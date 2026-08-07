@@ -1,21 +1,29 @@
 <aside class="filter-card">
   <div class="filter-head">
-    <h3>Filters</h3><button>Clear All</button>
+    <div><h3>Filters</h3><small>Narrow the available vehicles</small></div>
+    <button type="button" (click)="clear()">Clear</button>
   </div>
-  <div class="filter-group">
-    <h4>Rental Type</h4><label *ngFor="let item of rentalTypes"><input type="checkbox"
-        [checked]="item==='All Rental Types'">{{item}}</label>
-  </div>
-  <div class="filter-group">
-    <h4>Car Type</h4><label *ngFor="let item of carTypes"><input type="checkbox"
-        [checked]="item==='All Types'">{{item}}</label>
-  </div>
-  <div class="filter-group">
-    <h4>Insurance Coverage</h4><label *ngFor="let item of insuranceCoverages"><input type="checkbox"
-        [checked]="item==='All Coverage'">{{item}}</label>
-  </div>
-  <div class="filter-group">
-    <h4>Price Range <span>(per day)</span></h4><input type="range" min="1000" max="6000" value="6000">
-    <div class="range-label"><strong>₱1,000</strong><strong>₱6,000+</strong></div>
-  </div><button class="apply-btn">Apply Filters</button>
+  <label class="filter-group">
+    <span>Rental Type</span>
+    <select [(ngModel)]="draft.rentalType">
+      <option value="">Any rental type</option><option>Self Drive</option><option>With Driver</option>
+    </select>
+  </label>
+  <label class="filter-group">
+    <span>Vehicle Type</span>
+    <select [(ngModel)]="draft.vehicleType">
+      <option value="">Any vehicle type</option><option *ngFor="let item of carTypes">{{ item }}</option>
+    </select>
+  </label>
+  <label class="filter-group">
+    <span>Transmission</span>
+    <select [(ngModel)]="draft.transmission">
+      <option value="">Any transmission</option><option>Automatic</option><option>Manual</option>
+    </select>
+  </label>
+  <label class="filter-group">
+    <span>Maximum Daily Price</span>
+    <input type="number" min="0" step="500" [(ngModel)]="draft.maxPrice" placeholder="No maximum">
+  </label>
+  <button class="apply-btn" type="button" (click)="apply()">Apply Filters</button>
 </aside>

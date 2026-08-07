@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { environment } from '../../environments/environment';
 import { PickupLocationsService } from './pickup-locations.service';
 
 describe('PickupLocationsService', () => {
@@ -21,7 +22,7 @@ describe('PickupLocationsService', () => {
       locationNames = locations.map(location => location.name);
     });
 
-    const request = httpTesting.expectOne('https://api.cgicsoftwaresolution.com/api/pickup-locations');
+    const request = httpTesting.expectOne(`${environment.apiBaseUrl}${environment.pickupLocationsPath}`);
     request.flush({
       success: true,
       data: [
@@ -37,10 +38,10 @@ describe('PickupLocationsService', () => {
     let message = '';
     service.getPickupLocations().subscribe({ error: error => message = error.message });
 
-    const request = httpTesting.expectOne('https://api.cgicsoftwaresolution.com/api/pickup-locations');
+    const request = httpTesting.expectOne(`${environment.apiBaseUrl}${environment.pickupLocationsPath}`);
     request.flush('<html>Not JSON</html>');
 
-    expect(message).toContain('could not be loaded');
+    expect(message).toContain('unsupported format');
   });
 
   function location(id: number, name: string, isActive: boolean): Record<string, unknown> {

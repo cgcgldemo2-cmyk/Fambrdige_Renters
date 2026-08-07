@@ -20,10 +20,10 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('fambridge-rental-platform');
   });
 
-  it('should render title', () => {
+  it('should render the application router outlet', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, fambridge-rental-platform');
+    expect(compiled.querySelector('router-outlet')).not.toBeNull();
   });
 });

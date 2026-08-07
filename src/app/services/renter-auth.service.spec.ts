@@ -9,6 +9,7 @@ describe('RenterAuthService', () => {
   let httpTesting: HttpTestingController;
 
   beforeEach(() => {
+    sessionStorage.setItem('access_token', 'e30.eyJleHAiOjQxMDI0NDQ4MDB9.signature');
     TestBed.configureTestingModule({
       providers: [provideHttpClient(), provideHttpClientTesting()]
     });
@@ -16,7 +17,10 @@ describe('RenterAuthService', () => {
     httpTesting = TestBed.inject(HttpTestingController);
   });
 
-  afterEach(() => httpTesting.verify());
+  afterEach(() => {
+    httpTesting.verify();
+    sessionStorage.clear();
+  });
 
   it('posts a normalized renter registration payload', () => {
     let actualResult: { success: boolean; message: string } | undefined;

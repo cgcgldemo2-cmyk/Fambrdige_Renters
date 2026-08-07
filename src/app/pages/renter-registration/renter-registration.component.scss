@@ -86,3 +86,5 @@ footer { color: $muted; text-align: center; font-size: 12px; }
   .registration-card { border-radius: 18px; }
   .password-grid { grid-template-columns: 1fr; }
 }
+
+.password-field { position: relative; input { padding-right: 72px; } .toggle-password { position: absolute; top: 50%; right: 8px; min-height: 38px; padding: 0 9px; transform: translateY(-50%); color: $primary; background: transparent; } }

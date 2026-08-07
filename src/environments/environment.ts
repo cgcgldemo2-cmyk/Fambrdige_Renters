@@ -3,6 +3,11 @@ export const environment = {
   apiBaseUrl: 'https://api.cgicsoftwaresolution.com',
   lessorId: 2,
   businessCode: 'FB-TEST-ABC123',
+  storefront: {
+    name: 'ABRental',
+    domain: 'abrental.cgicsoftwaresolution.com',
+    phone: '0999 123 4567'
+  },
   pickupLocationsPath: '/api/renter/pickup-locations',
   renterAvailableVehiclesPath: '/api/renter/available-vehicles',
   renterRegisterPath: '/api/v1/renters/register',

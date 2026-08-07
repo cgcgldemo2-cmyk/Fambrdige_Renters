@@ -1,1 +1,8 @@
-<footer class="footer"><div class="container footer-grid"><div><h3><span>AB</span>RENTAL</h3><p>Your Trusted Car Rental Partner</p></div><div><h4>Quick Links</h4><a>Available Cars</a><a>Rental Information</a><a>FAQs</a><a>Contact Us</a></div><div><h4>Connect With Us</h4><p>Facebook · Instagram · Messenger</p></div><div><p>© 2026 {{store?.name}}</p><p>Powered by <strong>CarBNB</strong></p></div></div></footer>
+﻿<footer class="footer">
+  <div class="container footer-grid">
+    <div><h3><span>{{ store?.name }}</span></h3><p>Your trusted car rental partner</p></div>
+    <nav aria-label="Footer navigation"><h4>Quick links</h4><a routerLink="/" fragment="search">Find a Car</a><a routerLink="/login">Login</a><a routerLink="/register">Create Account</a></nav>
+    <div><h4>Contact</h4><p>{{ store?.phone }}</p><p>{{ store?.domain }}</p></div>
+    <div><p>&copy; {{ currentYear }} {{ store?.name }}</p><p>Powered by <strong>FamBridge</strong></p></div>
+  </div>
+</footer>

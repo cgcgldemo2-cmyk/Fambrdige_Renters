@@ -1,7 +1,8 @@
 import { HttpClient, HttpErrorResponse } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { Observable, catchError, map, of } from 'rxjs';
+import { inject, Injectable } from '@angular/core';
+import { BehaviorSubject, Observable, catchError, map, of } from 'rxjs';
 import { environment } from '../../environments/environment';
+import { JwtService } from './jwt.service';
 
 export interface RenterRegistrationRequest { name: string; email: string; mobile: string; password: string; }
 export interface RenterLoginRequest { email: string; password: string; }
@@ -22,6 +23,9 @@ interface RenterApiErrorResponse { message?: string; errors?: Record<string, str
 export class RenterAuthService {
   private readonly registerUrl = `${environment.apiBaseUrl}${environment.renterRegisterPath}`;
   private readonly loginUrl = `${environment.apiBaseUrl}${environment.renterLoginPath}`;
+  private readonly jwtService = inject(JwtService);
+  private readonly authStateSubject = new BehaviorSubject<boolean>(this.hasValidToken());
+  readonly authState$ = this.authStateSubject.asObservable();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -46,14 +50,38 @@ export class RenterAuthService {
           return { success: false, message: response.message?.trim() || 'The login API returned an invalid response.' };
         }
         sessionStorage.setItem('access_token', token);
+        this.authStateSubject.next(true);
         return { success: true, message: response.message?.trim() || 'Login successful.' };
       }),
       catchError(error => of({ success: false, message: this.extractApiError(error, 'Login could not be completed.') }))
     );
   }
 
-  logout(): void { sessionStorage.removeItem('access_token'); }
-  isAuthenticated(): boolean { return Boolean(sessionStorage.getItem('access_token')); }
+  logout(): void {
+    sessionStorage.removeItem('access_token');
+    this.authStateSubject.next(false);
+  }
+
+  isAuthenticated(): boolean {
+    const authenticated = this.hasValidToken();
+    if (authenticated !== this.authStateSubject.value) this.authStateSubject.next(authenticated);
+    return authenticated;
+  }
+
+  refreshAuthState(): void {
+    this.authStateSubject.next(this.hasValidToken());
+  }
+
+  private hasValidToken(): boolean {
+    const token = sessionStorage.getItem('access_token');
+    if (!token) return false;
+    const payload = this.jwtService.decode(token);
+    if (payload && typeof payload.exp === 'number' && this.jwtService.isExpired(token)) {
+      sessionStorage.removeItem('access_token');
+      return false;
+    }
+    return true;
+  }
 
   private toResult(response: RenterApiResponse, fallback: string): RenterAuthResult {
     const success = response.status === true || response.success === true;

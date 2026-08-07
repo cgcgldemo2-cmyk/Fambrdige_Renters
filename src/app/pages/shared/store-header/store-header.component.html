@@ -1,34 +1,48 @@
 <section class="top-bar">
   <div class="container">
-    <span>🛡️ Official reservation store of {{ store.name }}. All bookings are safe and secure.</span>
-    <span>🔒 {{ store.domain }} <b>| Powered by FamBridge</b></span>
+    <span>Official reservation website of {{ store.name }}</span>
+    <span>{{ store.domain }} <b>· Powered by FamBridge</b></span>
   </div>
 </section>
 
 <header class="header">
   <div class="container header-inner">
-    <div class="logo">
-      <span>AB</span>RENTAL
-      <small>Your Trusted Car Rental Partner</small>
+    <a class="logo" routerLink="/" aria-label="Go to home page">
+      <span>{{ store.name }}</span>
+      <small>Rental business website</small>
+    </a>
+
+    <div class="header-actions">
+      <a class="phone" [href]="'tel:' + store.phone">{{ store.phone }}</a>
+      <button class="menu-toggle" type="button" aria-label="Open renter menu" aria-haspopup="menu"
+        aria-controls="store-navigation" [attr.aria-expanded]="isMenuOpen" (click)="toggleMenu()">
+        <span></span><span></span><span></span>
+      </button>
     </div>
-    <button class="menu-toggle" type="button" aria-label="Toggle navigation menu" aria-controls="store-navigation" [attr.aria-expanded]="isMenuOpen" (click)="toggleMenu()">
-      <span></span><span></span><span></span>
-    </button>
 
-    <div class="header-content" id="store-navigation" [class.open]="isMenuOpen">
-      <nav aria-label="Store navigation">
-        <a class="active" (click)="closeMenu()">Home</a>
-        <a (click)="closeMenu()">Available Cars</a>
-        <a (click)="closeMenu()">Rental Information</a>
-        <a (click)="closeMenu()">FAQs</a>
-        <a (click)="closeMenu()">Contact Us</a>
-      </nav>
-
-      <div class="actions" aria-label="Account actions">
-      <button class="phone">☎ {{ store.phone }}</button>
-        <button class="login" type="button" routerLink="/login" (click)="closeMenu()">Login</button>
-        <button class="register" type="button" routerLink="/register" (click)="closeMenu()">Create Account</button>
+    <nav class="menu-panel" id="store-navigation" aria-label="Renter navigation" [class.open]="isMenuOpen">
+      <div class="menu-heading">
+        <div><small>Navigation</small><strong>{{ store.name }}</strong></div>
+        <button type="button" aria-label="Close renter menu" (click)="closeMenu()">&times;</button>
       </div>
-    </div>
+
+      <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Home</a>
+      <a routerLink="/" fragment="search">Find a Car</a>
+
+      <ng-container *ngIf="isAuthenticated$ | async; else guestMenu">
+        <div class="menu-divider"></div>
+        <a routerLink="/my-bookings" routerLinkActive="active">My Bookings</a>
+        <a routerLink="/my-profile" routerLinkActive="active">My Profile</a>
+        <a routerLink="/change-password" routerLinkActive="active">Change Password</a>
+        <a routerLink="/delete-account" routerLinkActive="active">How to Delete My Account?</a>
+        <button class="sign-out" type="button" (click)="signOut()">Sign Out</button>
+      </ng-container>
+
+      <ng-template #guestMenu>
+        <div class="menu-divider"></div>
+        <a routerLink="/login" routerLinkActive="active">Login</a>
+        <a class="create-account" routerLink="/register" routerLinkActive="active">Create Account</a>
+      </ng-template>
+    </nav>
   </div>
 </header>

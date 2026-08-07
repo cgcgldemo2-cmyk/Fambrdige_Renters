@@ -8,7 +8,7 @@
     </app-booking-search>
 
     <div class="content-layout">
-      <app-results-filter class="desktop-filter"></app-results-filter>
+      <app-results-filter class="desktop-filter" [filters]="filters" (filtersApplied)="onFiltersApplied($event)"></app-results-filter>
       <div class="main-content">
         <div class="results-top">
           <div>
@@ -58,7 +58,7 @@
         <strong>Refine results</strong>
         <button type="button" aria-label="Close filters" (click)="showMobileFilter = false">&times;</button>
       </div>
-      <app-results-filter></app-results-filter>
+      <app-results-filter [filters]="filters" (filtersApplied)="onFiltersApplied($event)"></app-results-filter>
     </div>
   </div>
 </main>

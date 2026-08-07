@@ -3,6 +3,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, Subscription, takeUntil } from 'rxjs';
+import { environment } from '../../../environments/environment';
 import {
   RenterVehicle,
   RenterVehiclePagination,
@@ -11,6 +12,7 @@ import {
 } from '../../services/renter-vehicle-search.service';
 import { BookingSearchData } from '../shared/booking-search/booking-search.component';
 import { RentersSearchResultsSharedModule } from './renters-search-results-shared.module';
+import { RenterResultsFilter } from './sections/results-filter/results-filter.component';
 
 @Component({
   selector: 'app-renters-search-results',
@@ -23,16 +25,12 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
   private readonly destroy$ = new Subject<void>();
   private activeSearch?: Subscription;
 
-  isEditingSearch = false;
-  store = { name: 'ABRental', domain: 'abrental.cgicsoftwaresolution.com', phone: '0999 123 4567' };
+  readonly store = { ...environment.storefront };
   search: BookingSearchData = {
-    pickupLocation: '',
-    pickupCity: '',
-    pickupDate: '',
-    pickupTime: '',
-    rentalDays: 1,
-    rentalType: 'Self Drive'
+    pickupLocation: '', pickupCity: '', pickupDate: '', pickupTime: '',
+    returnDate: '', returnTime: '', rentalDays: 1, rentalType: 'Self Drive'
   };
+  filters: RenterResultsFilter = { rentalType: '', vehicleType: '', transmission: '', maxPrice: null };
   cars: RenterVehicle[] = [];
   pagination: RenterVehiclePagination | null = null;
   isLoading = false;
@@ -55,9 +53,18 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
         pickupCity: query['pickupCity'] || '',
         pickupDate: query['pickupDate'] || '',
         pickupTime: query['pickupTime'] || '',
+        returnDate: query['returnDate'] || '',
+        returnTime: query['returnTime'] || '',
         rentalDays: this.toPositiveNumber(query['rentalDays']) || 1,
         rentalType: query['rentalType'] || 'Self Drive'
       };
+      this.filters = {
+        rentalType: this.isRentalType(query['filterRentalType']) ? query['filterRentalType'] : '',
+        vehicleType: query['vehicleType'] || '',
+        transmission: this.isTransmission(query['transmission']) ? query['transmission'] : '',
+        maxPrice: this.toPositiveNumber(query['maxPrice']) || null
+      };
+      if (this.filters.rentalType) this.search.rentalType = this.filters.rentalType;
       this.sortBy = this.isSort(query['sortBy']) ? query['sortBy'] : 'newest';
       this.loadVehicles(this.toPositiveNumber(query['page']) || 1);
     });
@@ -70,7 +77,6 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
   }
 
   onSearchUpdated(updatedSearch: BookingSearchData): void {
-    this.isEditingSearch = false;
     this.router.navigate([], {
       relativeTo: this.route,
       queryParams: { ...updatedSearch, page: 1, sortBy: this.sortBy },
@@ -78,14 +84,25 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
     });
   }
 
-  onSortChanged(): void {
-    this.updateResultQuery({ sortBy: this.sortBy, page: 1 });
+  onFiltersApplied(filters: RenterResultsFilter): void {
+    this.showMobileFilter = false;
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: {
+        filterRentalType: filters.rentalType || null,
+        vehicleType: filters.vehicleType || null,
+        transmission: filters.transmission || null,
+        maxPrice: filters.maxPrice || null,
+        page: 1
+      },
+      queryParamsHandling: 'merge'
+    });
   }
 
+  onSortChanged(): void { this.updateResultQuery({ sortBy: this.sortBy, page: 1 }); }
+
   onPageChanged(page: number): void {
-    if (!this.pagination || page < 1 || page > this.pagination.lastPage || page === this.pagination.currentPage) {
-      return;
-    }
+    if (!this.pagination || page < 1 || page > this.pagination.lastPage || page === this.pagination.currentPage) return;
     this.updateResultQuery({ page });
   }
 
@@ -94,18 +111,8 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
   }
 
   private loadVehicles(page: number): void {
-    if (!this.search.code) {
-      this.errorMessage = 'This rental business is not configured for vehicle search.';
-      this.cars = [];
-      this.pagination = null;
-      return;
-    }
-    if (!this.search.pickupDate || !this.search.pickupTime) {
-      this.errorMessage = 'Choose a pickup date and time to search available vehicles.';
-      this.cars = [];
-      this.pagination = null;
-      return;
-    }
+    if (!this.search.code) return this.failSearch('This rental business is not configured for vehicle search.');
+    if (!this.search.pickupDate || !this.search.pickupTime) return this.failSearch('Choose a pickup date and time to search available vehicles.');
 
     this.isLoading = true;
     this.errorMessage = '';
@@ -116,7 +123,10 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
       pickupDate: this.search.pickupDate,
       pickupTime: this.search.pickupTime,
       rentalDays: this.search.rentalDays,
-      rentalType: this.search.rentalType,
+      rentalType: this.filters.rentalType || this.search.rentalType,
+      vehicleType: this.filters.vehicleType || undefined,
+      transmission: this.filters.transmission || undefined,
+      maxPrice: this.filters.maxPrice || undefined,
       sortBy: this.sortBy,
       page,
       perPage: 10
@@ -124,16 +134,18 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
       next: response => {
         this.cars = response.vehicles;
         this.pagination = response.pagination;
-        this.store = { ...this.store, name: response.lessor.name };
+        this.store.name = response.lessor.name;
         this.isLoading = false;
       },
-      error: (error: Error) => {
-        this.cars = [];
-        this.pagination = null;
-        this.errorMessage = error.message;
-        this.isLoading = false;
-      }
+      error: (error: Error) => this.failSearch(error.message)
     });
+  }
+
+  private failSearch(message: string): void {
+    this.cars = [];
+    this.pagination = null;
+    this.errorMessage = message;
+    this.isLoading = false;
   }
 
   private updateResultQuery(queryParams: Record<string, string | number>): void {
@@ -149,4 +161,11 @@ export class RentersSearchResultsComponent implements OnInit, OnDestroy {
     return ['newest', 'price_asc', 'price_desc', 'seats_asc', 'seats_desc'].includes(String(value));
   }
 
+  private isRentalType(value: unknown): value is 'With Driver' | 'Self Drive' {
+    return ['With Driver', 'Self Drive'].includes(String(value));
+  }
+
+  private isTransmission(value: unknown): value is 'Automatic' | 'Manual' {
+    return ['Automatic', 'Manual'].includes(String(value));
+  }
 }

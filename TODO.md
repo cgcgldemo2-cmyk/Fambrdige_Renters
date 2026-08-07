@@ -1,467 +1,971 @@
 # FamBridge Renters TODO
 
-## Current Priority
+## Project
 
-> Complete the FamBridge Renters frontend UI/UX before prioritizing missing backend APIs.
+FamBridge Renters Web Application
 
-API availability must not block frontend design completion.
+## Current Milestone
 
-Missing APIs should be documented and assigned separately to the Backend/API Agent.
+> 100% Renter Website UI/UX Complete
+
+The current development priority is to complete the entire renter-facing website UI/UX.
+
+Backend API completion is not the current priority.
+
+Missing APIs must not prevent frontend UI completion.
 
 ---
 
-## 1. Confirmed Working Features
+# 1. Development Rules
+
+All agents working on the FamBridge Renters project must follow these rules:
+
+- Prioritize frontend UI/UX completion.
+- Preserve existing working functionality.
+- Do not modify Laravel/backend APIs unless explicitly assigned.
+- Do not invent production API endpoints.
+- Use verified APIs when they already exist.
+- If an API is missing, complete the UI using a typed frontend service contract and service-based mock data when necessary.
+- Record confirmed missing APIs separately.
+- Keep API status separate from UI completion.
+- Do not hardcode API URLs.
+- Do not hardcode `lessor_id`.
+- Do not hardcode tenant/client IDs.
+- Use environment configuration for application configuration values.
+- Reuse existing components and styles when practical.
+- Maintain mobile-first responsive behavior.
+
+---
+
+# 2. GitHub Project Workflow
+
+All development work must be represented by GitHub Issues and monitored using the:
+
+`FamBridge Renters Development`
+
+GitHub Project.
+
+The project uses exactly these statuses:
+
+| Status | Meaning |
+|---|---|
+| `Todo` | Work has been identified but is not yet ready to start |
+| `Ready` | Requirements are clear and an agent may begin implementation |
+| `In Progress` | An agent is actively working on the issue |
+| `API Missing` | A confirmed backend API dependency has been discovered |
+| `Done` | Implementation and required verification are complete |
+
+Normal workflow:
+
+```text
+Todo
+  â†“
+Ready
+  â†“
+In Progress
+  â†“
+Done
+```
+
+When an API dependency is discovered:
+
+```text
+In Progress
+  â†“
+API Missing
+```
+
+`API Missing` does not mean frontend development should stop.
+
+The frontend UI should still be completed using the approved service/mock approach.
+
+A separate API task can then be assigned later.
+
+---
+
+# 3. GitHub Issue Rules
+
+Each significant feature should have its own GitHub Issue.
+
+Recommended naming convention:
+
+```text
+[Frontend] Feature Name
+[QA] Feature Name
+[API] Feature Name
+[Integration] Feature Name
+```
+
+Examples:
+
+```text
+[Frontend] Improve Home and Vehicle Search UI
+[Frontend] Complete Pickup Location UX
+[Frontend] Complete Responsive Navigation
+[Frontend] Redesign Available Cars Results
+[Frontend] Complete Vehicle Details UI
+[QA] Full Renter UI Responsive and Regression Testing
+```
+
+Each implementation issue should include:
+
+```markdown
+## Project
+
+FamBridge Renters
+
+## Status
+
+Ready
+
+## Objective
+
+Describe the specific feature being implemented.
+
+## Requirements
+
+- Requirement 1
+- Requirement 2
+- Requirement 3
+
+## Existing Functionality to Preserve
+
+- Login
+- Registration
+- Search Available Cars
+
+## API Dependency
+
+Verified / Missing / Not Required / To Verify
+
+## Branch
+
+agent/<task-name>
+
+## Verification
+
+- [ ] Implementation completed
+- [ ] Production build passed
+- [ ] Mobile checked
+- [ ] Tablet checked
+- [ ] Desktop checked
+- [ ] Existing functionality checked
+- [ ] Missing APIs documented
+```
+
+---
+
+# 4. Confirmed Working Features
+
+The following features are currently working:
 
 - [x] Renter Login
 - [x] Renter Registration
 - [x] Search Available Cars
 
-These working features must be preserved.
+These features must not be broken while completing the remaining UI.
 
 ---
 
-## 2. Main Navigation
+# 5. Home / Vehicle Search
 
-- [ ] Keep hamburger menu visible on all screen sizes
-- [ ] Verify hamburger menu on mobile
-- [ ] Verify hamburger menu on tablet
-- [ ] Verify hamburger menu on desktop
-- [ ] Remove separate desktop Login button
-- [ ] Remove separate desktop Create Account button
-- [ ] Add guest dropdown navigation
-- [ ] Add authenticated renter dropdown navigation
-- [ ] Close menu when item is selected
-- [ ] Close menu when clicking outside
-- [ ] Close menu with Escape key
-- [ ] Close menu after route navigation
-- [ ] Verify menu accessibility
-- [ ] Verify dropdown overlay/z-index behavior
+## GitHub Issue
 
-### Guest Menu
+```text
+[Frontend] Improve Home and Vehicle Search UI
+```
 
-- [ ] Home
-- [ ] Find a Car
-- [ ] Login
-- [ ] Create Account
+## Tasks
 
-### Authenticated Menu
-
-- [ ] Home
-- [ ] Find a Car
-- [ ] My Bookings
-- [ ] My Profile
-- [ ] Change Password
-- [ ] How to Delete My Account?
-- [ ] Sign Out
+- [x] Review current Home page
+- [x] Improve renter-focused hero section
+- [x] Clearly communicate vehicle rental purpose
+- [x] Make vehicle search the primary action
+- [x] Clearly display Pickup Location
+- [x] Clearly display Pickup Date
+- [x] Clearly display Pickup Time
+- [x] Clearly display rental duration or Return Date
+- [x] Display Return Time where applicable
+- [x] Keep Search Available Cars as primary CTA
+- [x] Preserve selected search criteria during navigation
+- [x] Add form validation
+- [x] Add loading feedback where applicable
+- [ ] Improve mobile layout
+- [ ] Improve tablet layout
+- [ ] Improve desktop layout
+- [ ] Preserve existing working search integration
 
 ---
 
-## 3. Home / Search UI
+# 6. Pickup Location
 
-- [ ] Review current home page UI
-- [ ] Improve primary vehicle search experience
-- [ ] Clearly display Pickup Location
-- [ ] Clearly display Pickup Date
-- [ ] Clearly display Pickup Time
-- [ ] Clearly display rental duration or Return Date
-- [ ] Clearly display Return Time when required
-- [ ] Keep Search Available Cars as primary CTA
-- [ ] Preserve selected search criteria during navigation
-- [ ] Improve mobile search layout
-- [ ] Improve desktop search layout
-- [ ] Add form validation states
+## Priority
 
----
+High
 
-## 4. Pickup Location
+## GitHub Issue
 
-> High Priority
+```text
+[Frontend] Complete Pickup Location UX
+```
 
-- [ ] Review current pickup-location implementation
-- [ ] Fix pickup-location loading
-- [ ] Fix pickup-location selection
-- [ ] Display appropriate lessor pickup locations
-- [ ] Add selected-location state
-- [ ] Add loading state
-- [ ] Add empty state
-- [ ] Add error state
-- [ ] Retain selected location during vehicle search
-- [ ] Retain location when opening Vehicle Details
-- [ ] Carry location into booking request
-- [ ] Verify mobile behavior
-- [ ] Verify desktop behavior
+## Tasks
+
+- [x] Review existing pickup-location implementation
+- [x] Verify existing API integration before making changes
+- [x] Fix pickup-location loading
+- [x] Fix pickup-location selection
+- [x] Display appropriate lessor pickup locations
+- [x] Add clearly selected location state
+- [x] Add loading state
+- [x] Add empty state
+- [x] Add error state
+- [x] Add retry behavior where appropriate
+- [x] Retain selected location during search
+- [x] Retain location when opening Vehicle Details
+- [x] Carry location into Rental Request
+- [ ] Verify mobile usability
+- [ ] Verify tablet usability
+- [ ] Verify desktop usability
 
 ---
 
-## 5. Available Cars
+# 7. Responsive Navigation
 
-- [x] Search Available Cars working
-- [ ] Review search results UI
-- [ ] Improve vehicle cards
-- [ ] Display vehicle image
-- [ ] Display vehicle name
-- [ ] Display vehicle type
-- [ ] Display seating capacity
-- [ ] Display transmission
-- [ ] Display rental type
-- [ ] Display pricing
-- [ ] Display availability/status where appropriate
-- [ ] Add View Details action
-- [ ] Improve filters
-- [ ] Add useful sorting
-- [ ] Allow search criteria to be modified
-- [ ] Add loading state
-- [ ] Add no-results state
-- [ ] Add API/search error state
+## GitHub Issue
+
+```text
+[Frontend] Complete Responsive Navigation
+```
+
+## Requirements
+
+The hamburger menu must remain available at all screen sizes.
+
+Do not replace it with separate desktop navigation.
+
+## Guest Menu
+
+- [x] Home
+- [x] Find a Car
+- [x] Login
+- [x] Create Account
+
+## Authenticated Renter Menu
+
+- [x] Home
+- [x] Find a Car
+- [x] My Bookings
+- [x] My Profile
+- [x] Change Password
+- [x] How to Delete My Account?
+- [x] Sign Out
+
+## Behavior
+
+- [x] Keep hamburger menu visible on mobile
+- [x] Keep hamburger menu visible on tablet
+- [x] Keep hamburger menu visible on desktop
+- [x] Remove separate desktop Login button if currently present
+- [x] Remove separate desktop Create Account button if currently present
+- [x] Correctly switch menu after Login
+- [ ] Correctly switch menu after Registration/authentication
+- [x] Correctly restore menu after page reload
+- [x] Correctly handle expired authentication
+- [x] Update menu immediately after Sign Out
+- [x] Close menu when an item is selected
+- [x] Close menu after route navigation
+- [x] Close menu when clicking outside
+- [x] Support Escape to close
+- [x] Verify keyboard accessibility
+- [x] Verify dropdown z-index/overlay behavior
+
+---
+
+# 8. Available Cars
+
+## GitHub Issue
+
+```text
+[Frontend] Redesign Available Cars Results
+```
+
+## Existing Status
+
+- [x] Search Available Cars API integration working
+
+## Tasks
+
+- [x] Review existing results implementation before modifying
+- [x] Preserve existing API integration
+- [x] Improve overall search-results layout
+- [x] Improve vehicle cards
+- [x] Display vehicle image
+- [x] Display vehicle name
+- [x] Display vehicle type
+- [x] Display seating capacity
+- [x] Display transmission
+- [x] Display rental type
+- [x] Display pricing
+- [x] Display availability/status where useful
+- [x] Add clear View Details action
+- [x] Improve filters
+- [x] Add useful sorting
+- [x] Avoid excessive filtering
+- [x] Allow search criteria to be modified
+- [x] Preserve pickup location
+- [x] Preserve rental schedule
+- [x] Add loading state
+- [x] Add no-results state
+- [x] Add search error state
+- [x] Add retry behavior where appropriate
 - [ ] Verify mobile responsiveness
+- [ ] Verify tablet responsiveness
 - [ ] Verify desktop responsiveness
 
 ---
 
-## 6. Vehicle Details
+# 9. Vehicle Details
 
-- [ ] Create or complete Vehicle Details page
-- [ ] Display vehicle images
-- [ ] Display vehicle name
-- [ ] Display vehicle description
-- [ ] Display vehicle specifications
-- [ ] Display seating capacity
-- [ ] Display transmission
-- [ ] Display rental type
-- [ ] Display pricing
-- [ ] Display pickup location
-- [ ] Display selected rental schedule
-- [ ] Display availability
-- [ ] Add primary rental/request CTA
-- [ ] Preserve search context
-- [ ] Add loading state
-- [ ] Add unavailable state
-- [ ] Add error state
+## GitHub Issue
+
+```text
+[Frontend] Complete Vehicle Details UI
+```
+
+## Tasks
+
+- [x] Create or complete Vehicle Details page
+- [x] Display vehicle images
+- [x] Display vehicle name
+- [ ] Display description
+- [x] Display vehicle specifications
+- [x] Display vehicle type
+- [x] Display seating capacity
+- [x] Display transmission
+- [x] Display rental type
+- [x] Display rental pricing
+- [x] Display selected pickup location
+- [x] Display selected rental schedule
+- [x] Display availability
+- [x] Display important rental information
+- [x] Add primary rental/request CTA
+- [x] Preserve search context
+- [x] Preserve selected vehicle when continuing
+- [x] Add loading state
+- [x] Add unavailable state
+- [x] Add error state
 - [ ] Verify mobile layout
+- [ ] Verify tablet layout
 - [ ] Verify desktop layout
 
 ---
 
-## 7. Authentication UI
+# 10. Login
 
-### Login
+## Existing Status
 
 - [x] Login functional
-- [ ] Final Login UI review
-- [ ] Verify validation
-- [ ] Verify loading state
-- [ ] Verify API error presentation
-- [ ] Verify password visibility control
+
+## Remaining UI Tasks
+
+- [ ] Perform final Login UI review
+- [x] Preserve existing API integration
+- [x] Verify required-field validation
+- [x] Verify authentication errors
+- [x] Verify loading state
+- [x] Verify password show/hide
+- [x] Verify navigation after Login
+- [x] Verify authenticated menu update
 - [ ] Verify mobile layout
 - [ ] Verify desktop layout
 
-### Registration
+---
+
+# 11. Registration
+
+## Existing Status
 
 - [x] Registration functional
-- [ ] Final Registration UI review
-- [ ] Verify validation
-- [ ] Verify password confirmation
-- [ ] Verify loading state
-- [ ] Verify success state
-- [ ] Verify API error presentation
+
+## Remaining UI Tasks
+
+- [x] Perform final Registration UI review
+- [x] Preserve existing API integration
+- [x] Verify required-field validation
+- [x] Verify password confirmation
+- [x] Verify loading state
+- [x] Verify success state
+- [x] Verify API errors
+- [x] Verify existing approval workflow
 - [ ] Verify mobile layout
 - [ ] Verify desktop layout
 
 ---
 
-## 8. Rental / Booking Request
+# 12. Rental / Booking Request
 
-- [ ] Create or complete Rental Request page
-- [ ] Display selected vehicle
-- [ ] Display pickup location
-- [ ] Display pickup date/time
-- [ ] Display return date/time or duration
-- [ ] Display renter information
-- [ ] Display rental pricing when available
-- [ ] Add final review section
-- [ ] Add submission confirmation
-- [ ] Prevent accidental duplicate submission
-- [ ] Add validation state
-- [ ] Add loading state
-- [ ] Add success state
-- [ ] Add error state
+## GitHub Issue
+
+```text
+[Frontend] Complete Rental Request Flow
+```
+
+## Tasks
+
+- [x] Create or complete Rental Request page
+- [x] Display selected vehicle
+- [x] Display pickup location
+- [x] Display pickup date/time
+- [x] Display return date/time or duration
+- [x] Display renter information
+- [x] Display pricing when available
+- [x] Display important rental instructions
+- [x] Add final review section
+- [x] Clearly explain rental request status
+- [x] Add validation
+- [x] Add submission loading state
+- [x] Add submission error state
+- [x] Add success handling
+- [x] Prevent accidental duplicate submission
+- [x] Preserve search/vehicle context
+- [ ] Verify mobile layout
+- [ ] Verify tablet layout
+- [ ] Verify desktop layout
+
+---
+
+# 13. Booking Confirmation
+
+## GitHub Issue
+
+```text
+[Frontend] Complete Booking Confirmation
+```
+
+## Tasks
+
+- [x] Create Booking Confirmation UI
+- [x] Display successful request message
+- [x] Display booking/request reference
+- [x] Display selected vehicle
+- [x] Display pickup location
+- [x] Display rental schedule
+- [x] Display current status
+- [x] Display clear next-step instructions
+- [x] Add My Bookings action
+- [x] Add Home / Find a Car action
 - [ ] Verify mobile layout
 - [ ] Verify desktop layout
 
 ---
 
-## 9. Booking Confirmation
+# 14. My Bookings
 
-- [ ] Create Booking Confirmation UI
-- [ ] Display successful-request message
-- [ ] Display booking/request reference
-- [ ] Display vehicle
-- [ ] Display pickup location
-- [ ] Display schedule
-- [ ] Display booking/request status
-- [ ] Display clear next-step instructions
-- [ ] Add My Bookings action
-- [ ] Add Home / Find a Car action
+## Priority
+
+High
+
+## GitHub Issue
+
+```text
+[Frontend] Complete My Bookings
+```
+
+## Tasks
+
+- [x] Create or complete My Bookings page
+- [x] Add authenticated route
+- [x] Protect route
+- [x] Display booking reference
+- [x] Display vehicle
+- [x] Display pickup location
+- [x] Display rental schedule
+- [x] Display booking status
+- [x] Display reservation/payment status when available
+- [x] Add clear View Details action
+- [x] Add simple status filtering where useful
+- [x] Add loading state
+- [x] Add empty state
+- [x] Add error state
+- [x] Add retry action where appropriate
+- [ ] Verify mobile layout
+- [ ] Verify tablet layout
+- [ ] Verify desktop layout
+
+If the required API is unavailable, complete the UI using the approved frontend service/mock approach.
+
+---
+
+# 15. Booking Details
+
+## GitHub Issue
+
+```text
+[Frontend] Complete Booking Details
+```
+
+## Tasks
+
+- [x] Create or complete Booking Details page
+- [x] Display booking reference
+- [x] Display vehicle information
+- [x] Display pickup location
+- [x] Display rental schedule
+- [x] Display booking status
+- [x] Display payment/reservation status
+- [x] Display rental request information
+- [x] Display renter instructions
+- [x] Display clear next step
+- [x] Add status/history timeline only when data supports it
+- [x] Add loading state
+- [x] Add error state
+- [ ] Verify mobile layout
+- [ ] Verify tablet layout
+- [ ] Verify desktop layout
+
+---
+
+# 16. My Profile
+
+## Priority
+
+High
+
+## GitHub Issue
+
+```text
+[Frontend] Complete My Profile
+```
+
+## Tasks
+
+- [x] Create or complete My Profile page
+- [x] Add authenticated route
+- [x] Protect route
+- [x] Add profile photo or initials area
+- [x] Display full name
+- [x] Display email
+- [x] Display mobile number
+- [x] Display address
+- [x] Display account approval status
+- [x] Display verification status
+- [x] Display document status when available
+- [x] Do not expose backend-only identifiers
+- [x] Do not expose tokens
+- [x] Create Edit Profile UI
+- [x] Add form validation
+- [x] Add loading state
+- [x] Add success state
+- [x] Add error state
+- [ ] Verify mobile layout
+- [ ] Verify tablet layout
+- [ ] Verify desktop layout
+
+If Update Profile API is missing, complete the interface and record the API requirement.
+
+---
+
+# 17. Change Password
+
+## Priority
+
+High
+
+## GitHub Issue
+
+```text
+[Frontend] Complete Change Password
+```
+
+## Tasks
+
+- [x] Create Change Password page
+- [x] Add authenticated route
+- [x] Protect route
+- [x] Add Current Password
+- [x] Add New Password
+- [x] Add Confirm New Password
+- [x] Add show/hide controls
+- [x] Add required validation
+- [x] Add password-policy validation
+- [x] Validate matching passwords
+- [x] Validate new password differs from current password
+- [x] Add submit loading state
+- [x] Add success feedback
+- [x] Add error feedback
+- [x] Never store passwords in mock data
+- [x] Never log password values
+- [ ] Verify mobile layout
+- [ ] Verify desktop layout
+
+If Change Password API is unavailable, finish the UI and record the missing API.
+
+---
+
+# 18. How to Delete My Account?
+
+## GitHub Issue
+
+```text
+[Frontend] Create Delete Account Information Page
+```
+
+## Tasks
+
+- [x] Create informational page
+- [x] Add authenticated route
+- [x] Explain account deletion request process using approved information
+- [x] Explain active/pending booking considerations
+- [x] Explain possible record-retention requirements without inventing policies
+- [x] Display configured support/contact information
+- [x] Do not invent support contact details
+- [x] Do not invent retention periods
+- [x] Do not add destructive account deletion unless explicitly approved
 - [ ] Verify mobile layout
 - [ ] Verify desktop layout
 
 ---
 
-## 10. My Bookings
+# 19. Sign Out
 
-> High Priority
+## Priority
 
-- [ ] Create or complete My Bookings page
-- [ ] Add authenticated route
-- [ ] Protect route
-- [ ] Display booking reference
-- [ ] Display vehicle
-- [ ] Display pickup location
-- [ ] Display rental schedule
-- [ ] Display booking status
-- [ ] Display reservation/payment status when available
-- [ ] Add View Details action
-- [ ] Add useful booking status filters if appropriate
-- [ ] Add loading state
-- [ ] Add empty state
-- [ ] Add error state
-- [ ] Verify mobile layout
-- [ ] Verify desktop layout
+High
 
----
+## GitHub Issue
 
-## 11. Booking Details
+```text
+[Frontend] Complete Sign Out Flow
+```
 
-- [ ] Create or complete Booking Details page
-- [ ] Display booking reference
-- [ ] Display vehicle information
-- [ ] Display pickup location
-- [ ] Display rental schedule
-- [ ] Display booking status
-- [ ] Display payment/reservation status
-- [ ] Display rental request information
-- [ ] Display next-step information
-- [ ] Add booking timeline/history when data supports it
-- [ ] Add loading state
-- [ ] Add error state
-- [ ] Verify mobile layout
-- [ ] Verify desktop layout
+## Tasks
 
----
-
-## 12. My Profile
-
-> High Priority
-
-- [ ] Create My Profile page
-- [ ] Add authenticated route
-- [ ] Protect route
-- [ ] Add profile photo/initials area
-- [ ] Display full name
-- [ ] Display email
-- [ ] Display mobile number
-- [ ] Display address
-- [ ] Display account approval status
-- [ ] Display verification status
-- [ ] Display document status when appropriate
-- [ ] Create Edit Profile interface
-- [ ] Add form validation
-- [ ] Add loading state
-- [ ] Add success state
-- [ ] Add error state
-- [ ] Verify mobile layout
-- [ ] Verify desktop layout
-
----
-
-## 13. Change Password
-
-> High Priority
-
-- [ ] Create Change Password page
-- [ ] Add authenticated route
-- [ ] Protect route
-- [ ] Add Current Password
-- [ ] Add New Password
-- [ ] Add Confirm New Password
-- [ ] Add show/hide controls
-- [ ] Add required validation
-- [ ] Add password policy validation
-- [ ] Validate matching passwords
-- [ ] Validate new password differs from current password
-- [ ] Add submit loading state
-- [ ] Add success feedback
-- [ ] Add error feedback
-- [ ] Verify mobile layout
-- [ ] Verify desktop layout
-
----
-
-## 14. How to Delete My Account?
-
-- [ ] Create informational page
-- [ ] Add authenticated route
-- [ ] Explain deletion-request process using approved information
-- [ ] Explain handling of active/pending bookings
-- [ ] Explain possible record-retention requirements without inventing policies
-- [ ] Display configured support/contact information
-- [ ] Avoid immediate destructive deletion
-- [ ] Verify mobile layout
-- [ ] Verify desktop layout
-
----
-
-## 15. Sign Out
-
-> High Priority
-
-- [ ] Add Sign Out to authenticated dropdown
-- [ ] Verify authentication state is cleared
-- [ ] Update menu immediately after logout
-- [ ] Redirect to appropriate public page
-- [ ] Prevent access to protected pages after logout
+- [x] Add Sign Out to authenticated menu
+- [x] Clear renter authentication state
+- [x] Update menu immediately
+- [x] Redirect to appropriate public page
+- [x] Prevent protected pages from remaining accessible
 - [ ] Verify browser Back behavior
-- [ ] Verify expired-session behavior
+- [x] Verify expired-session behavior
+- [x] Preserve unrelated renter preferences where appropriate
 
 ---
 
-## 16. Standard UI States
+# 20. Standard UI States
 
-Ensure applicable pages include:
+Every applicable page must support the appropriate state.
 
-- [ ] Loading states
-- [ ] Empty states
-- [ ] Error states
-- [ ] Success states
-- [ ] Validation states
-- [ ] Disabled/unavailable states
-- [ ] Retry actions where appropriate
+## Loading
 
----
+- [x] Show loading feedback
+- [x] Avoid blank screens
+- [x] Prevent duplicate actions while submitting
 
-## 17. Responsive Design
+## Empty
 
-- [ ] Review Home
-- [ ] Review Search
-- [ ] Review Available Cars
-- [ ] Review Vehicle Details
-- [ ] Review Login
-- [ ] Review Registration
-- [ ] Review Rental Request
-- [ ] Review Booking Confirmation
-- [ ] Review My Bookings
-- [ ] Review Booking Details
-- [ ] Review My Profile
-- [ ] Review Change Password
-- [ ] Review Delete Account Information
-- [ ] Review hamburger/dropdown navigation
-- [ ] Verify mobile
-- [ ] Verify tablet
-- [ ] Verify laptop
-- [ ] Verify desktop
-- [ ] Verify large desktop
-- [ ] Remove unintended horizontal scrolling
-- [ ] Fix overlapping elements
-- [ ] Verify touch-target sizes
+- [x] Explain why no data is available
+- [x] Give the renter a useful next action
+
+## Error
+
+- [x] Display understandable error messages
+- [x] Provide retry where appropriate
+- [x] Avoid exposing technical/server information
+
+## Success
+
+- [x] Clearly confirm successful renter actions
+
+## Validation
+
+- [x] Show validation near the relevant field
+- [x] Make required information clear
+
+## Unavailable
+
+- [x] Explain unavailable actions when appropriate
 
 ---
 
-## 18. Frontend Code Quality
+# 21. Responsive Design
 
-- [ ] Reuse existing shared components
-- [ ] Reuse existing SCSS variables
-- [ ] Reduce duplicated UI styles
-- [ ] Create reusable UI components where appropriate
-- [ ] Create TypeScript interfaces/models
-- [ ] Move mock data out of components
-- [ ] Use service-based mock data when APIs are unavailable
-- [ ] Preserve environment-based configuration
-- [ ] Do not hardcode API URLs
-- [ ] Do not hardcode lessor IDs
-- [ ] Do not hardcode tenant/client IDs
-- [ ] Preserve existing working API integrations
+All renter-facing screens must be reviewed.
 
----
+## Pages
 
-## 19. API Dependencies
+- [ ] Home
+- [ ] Search
+- [ ] Available Cars
+- [ ] Vehicle Details
+- [ ] Login
+- [ ] Registration
+- [ ] Rental Request
+- [ ] Booking Confirmation
+- [ ] My Bookings
+- [ ] Booking Details
+- [ ] My Profile
+- [ ] Change Password
+- [ ] Delete Account Information
+- [ ] Navigation
 
-> API work is not the current frontend priority.
+## Screen Sizes
 
-For every completed UI feature:
+- [ ] Mobile
+- [ ] Tablet
+- [ ] Laptop
+- [ ] Desktop
+- [ ] Large desktop
 
-- [ ] Check whether required API exists
-- [ ] Use verified API if already available
-- [ ] Do not invent API URLs
-- [ ] Complete UI even when API is unavailable
-- [ ] Define typed frontend service contract
-- [ ] Use service-based mock data when necessary
-- [ ] Record missing APIs for Backend/API Agent
-- [ ] Keep API integration status separate from UI completion
+## Responsive Quality
 
----
-
-## 20. API Gaps
-
-Record confirmed missing APIs here.
-
-| Feature | Required Operation | API Status | Backend Status | Frontend Status |
-|---|---|---|---|---|
-| My Bookings | Retrieve renter bookings | To Verify | Pending | UI Pending |
-| Booking Details | Retrieve renter booking details | To Verify | Pending | UI Pending |
-| My Profile | Retrieve renter profile | Existing endpoint to verify | — | UI Pending |
-| Edit Profile | Update renter profile | To Verify | Pending | UI Pending |
-| Change Password | Change renter password | To Verify | Pending | UI Pending |
-| Delete Account | Account deletion request, if required | To Verify | Pending | Info UI Pending |
-| Sign Out | Logout renter session | To Verify | Pending | UI Pending |
-
-Do not assign an endpoint path until it has been verified from the backend.
+- [ ] No unintended horizontal scrolling
+- [ ] No clipped content
+- [ ] No overlapping elements
+- [ ] No inaccessible actions
+- [ ] Appropriate touch targets
+- [ ] Readable text
+- [ ] Correct image scaling
+- [ ] Correct menu behavior
 
 ---
 
-## 21. Regression Verification
+# 22. Frontend Code Quality
 
-Before considering the renter UI complete:
+- [x] Review existing implementation before modifying it
+- [x] Reuse existing shared components
+- [x] Reuse existing SCSS variables/design tokens
+- [x] Reduce duplicated styles
+- [x] Create reusable components where appropriate
+- [x] Use TypeScript interfaces/models
+- [x] Keep mock data out of components
+- [x] Use service-based mock implementations
+- [x] Preserve environment-based configuration
+- [x] Do not hardcode API URLs
+- [x] Do not hardcode `lessor_id`
+- [x] Do not hardcode tenant/client identifiers
+- [x] Preserve existing working API integrations
+- [x] Avoid unnecessary dependencies
+- [x] Keep frontend implementation consistent with existing Angular architecture
+
+---
+
+# 23. API Dependency Handling
+
+API work is not the current frontend priority.
+
+For each frontend feature:
+
+- [x] Determine whether an API is actually required
+- [x] Verify whether the required API already exists
+- [x] Use existing verified APIs where available
+- [x] Do not guess endpoint paths
+- [x] Do not invent backend responses
+- [x] Do not modify Laravel as part of frontend work
+- [x] Complete UI even when API is unavailable
+- [x] Define typed frontend models
+- [x] Define frontend service contract
+- [x] Use service-based mock data when necessary
+- [x] Record confirmed missing API
+- [x] Keep API integration status separate from UI status
+
+---
+
+# 24. Confirmed API Gaps
+
+Only confirmed API gaps should be added to this table.
+
+Do not classify an API as missing until the existing implementation/configuration has been inspected.
+
+| Feature | Required Operation | API Status | Frontend Status |
+|---|---|---|---|
+| Vehicle Details | Retrieve a renter-visible vehicle detail record | Not available in verified renter frontend contracts | UI Complete with selected-result service data |
+| Rental Request | Submit a renter rental/booking request | Not available in verified renter frontend contracts | UI Complete with typed preview service |
+| My Bookings | Retrieve renter bookings | Not available in verified renter frontend contracts | UI Complete with typed preview service |
+| Booking Details | Retrieve booking details | Not available in verified renter frontend contracts | UI Complete with typed preview service |
+| My Profile | Retrieve renter profile | Not available in verified renter frontend contracts | UI Complete with token-safe preview profile |
+| Edit Profile | Update renter profile | Not available in verified renter frontend contracts | UI Complete with session-only preview update |
+| Change Password | Change renter password | Not available in verified renter frontend contracts | UI Complete; passwords are not stored or sent |
+| Sign Out | Logout/end renter server session | Not available in verified renter frontend contracts | UI Complete with local token removal |
+
+Account deletion remains informational unless explicitly approved as a functional feature.
+
+Do not assign endpoint paths until they have been verified.
+
+---
+
+# 25. API Missing Workflow
+
+When the Frontend Agent discovers a confirmed missing API:
+
+1. Do not modify the Laravel backend.
+2. Do not invent the endpoint.
+3. Complete as much of the frontend UI as possible.
+4. Define the required TypeScript model/service contract.
+5. Use service-based mock data if required.
+6. Document what data/action the frontend requires.
+7. Create or request a separate `[API]` GitHub Issue.
+8. Mark the API dependency appropriately in the GitHub Project.
+9. Continue unrelated frontend work.
+
+Example API issue:
+
+```text
+[API] Renter My Bookings
+```
+
+The API issue should describe the required operation rather than inventing a route.
+
+---
+
+# 26. Regression Verification
+
+Before marking the renter website UI milestone complete:
 
 - [ ] Login still works
 - [ ] Registration still works
 - [ ] Search Available Cars still works
-- [ ] Pickup Location works correctly
+- [ ] Pickup Location works
+- [ ] Search criteria are preserved correctly
+- [ ] Vehicle Details navigation works
 - [ ] Guest navigation works
 - [ ] Authenticated navigation works
 - [ ] Protected routes work
-- [ ] Page reload while authenticated works
+- [ ] Authentication survives valid page reloads
 - [ ] Sign Out works
 - [ ] Mobile navigation works
-- [ ] Desktop navigation works
-- [ ] Production build passes
+- [ ] Tablet layout works
+- [ ] Desktop layout works
+- [ ] No critical console errors
+- [x] Production build passes
 
 ---
 
-# Current Recommended Implementation Order
+# 27. QA
 
-1. Fix Pickup Location
-2. Complete always-visible hamburger navigation
-3. Complete Available Cars UI
-4. Complete Vehicle Details
-5. Complete Rental Request flow
-6. Complete Booking Confirmation
-7. Complete My Bookings
-8. Complete Booking Details
-9. Complete My Profile
-10. Complete Change Password
-11. Complete How to Delete My Account?
-12. Complete Sign Out
-13. Complete all loading/empty/error/success states
-14. Perform full responsive review
-15. Perform regression testing
-16. Record all missing APIs for Backend/API Agent
+## GitHub Issue
+
+```text
+[QA] Full Renter UI Responsive and Regression Testing
+```
+
+## Verification
+
+- [ ] Test complete guest journey
+- [ ] Test complete authenticated renter journey
+- [ ] Test Home
+- [ ] Test Vehicle Search
+- [ ] Test Pickup Location
+- [ ] Test Available Cars
+- [ ] Test Vehicle Details
+- [ ] Test Login
+- [ ] Test Registration
+- [ ] Test Rental Request
+- [ ] Test Booking Confirmation
+- [ ] Test My Bookings
+- [ ] Test Booking Details
+- [ ] Test My Profile
+- [ ] Test Change Password
+- [ ] Test Delete Account Information
+- [ ] Test Sign Out
+- [ ] Test loading states
+- [ ] Test empty states
+- [ ] Test error states
+- [ ] Test validation states
+- [ ] Test mobile
+- [ ] Test tablet
+- [ ] Test desktop
+- [x] Run production build
+- [ ] Perform regression test of existing working features
 
 ---
 
-# UI Completion Target
+# 28. Initial GitHub Issues
 
-The current milestone is:
+Create these frontend Issues:
+
+```text
+[Frontend] Improve Home and Vehicle Search UI
+[Frontend] Complete Pickup Location UX
+[Frontend] Complete Responsive Navigation
+[Frontend] Redesign Available Cars Results
+[Frontend] Complete Vehicle Details UI
+[Frontend] Complete Rental Request Flow
+[Frontend] Complete Booking Confirmation
+[Frontend] Complete My Bookings
+[Frontend] Complete Booking Details
+[Frontend] Complete My Profile
+[Frontend] Complete Change Password
+[Frontend] Create Delete Account Information Page
+[Frontend] Complete Sign Out Flow
+[QA] Full Renter UI Responsive and Regression Testing
+```
+
+Do not create speculative API Issues yet.
+
+API Issues should be created only after a dependency has been verified as genuinely missing.
+
+---
+
+# 29. Recommended Implementation Order
+
+1. Home and Vehicle Search
+2. Pickup Location
+3. Responsive Navigation
+4. Available Cars
+5. Vehicle Details
+6. Rental Request
+7. Booking Confirmation
+8. My Bookings
+9. Booking Details
+10. My Profile
+11. Change Password
+12. How to Delete My Account?
+13. Sign Out
+14. Standard loading/empty/error/success states
+15. Responsive review
+16. Regression testing
+17. Record confirmed API gaps
+
+---
+
+# 30. Definition of UI Complete
+
+The renter frontend milestone is complete when:
+
+- [ ] Complete renter journey can be demonstrated
+- [x] All required pages exist
+- [x] Guest navigation is complete
+- [x] Authenticated navigation is complete
+- [x] Forms have appropriate validation
+- [x] Loading states exist
+- [x] Empty states exist
+- [x] Error states exist
+- [x] Success states exist
+- [ ] Mobile layouts are usable
+- [ ] Tablet layouts are usable
+- [ ] Desktop layouts are usable
+- [ ] Existing Login still works
+- [ ] Existing Registration still works
+- [ ] Existing Search Available Cars still works
+- [ ] Pickup Location works correctly
+- [x] Production build succeeds
+- [x] Confirmed API gaps are documented
+
+The frontend may still be considered:
+
+```text
+UI Complete + API Pending
+```
+
+when a backend dependency remains unavailable.
+
+---
+
+# 31. Current Milestone
 
 > **100% Renter Website UI/UX Complete**
 
-Backend APIs and final API integration are tracked separately and must not prevent completion of this milestone.
+Backend API development and final API integration are tracked separately.
+
+The frontend must be reviewable as a complete renter experience even when some verified backend APIs remain pending.

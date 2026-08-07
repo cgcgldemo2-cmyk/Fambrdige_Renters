@@ -1,42 +1,56 @@
-<section class="booking-section" [class.summary-mode]="mode === 'summary'">
+<section class="booking-section" id="search" [class.summary-mode]="mode === 'summary'">
   <div class="container">
-    <div class="search-card" *ngIf="mode === 'form'">
-      <label class="pickup-field">Pickup Location
-        <input [(ngModel)]="pickupKeyword" (input)="onPickupInput()" (focus)="onPickupInput()" (blur)="hidePickupSuggestions()" placeholder="Enter pickup location" />
-        <div class="suggestions" *ngIf="showPickupSuggestions && pickupKeyword">
-          <div class="suggestion-loading" *ngIf="isLoadingPickupLocations">Loading locations...</div>
-          <button type="button" class="suggestion-item" *ngFor="let location of filteredPickupLocations" (mousedown)="selectPickupLocation(location)">
-            <strong>{{ location.shortName }}</strong><span>{{ location.name }}</span><small>{{ location.city }}, {{ location.province }}</small>
+    <form class="search-card" *ngIf="mode === 'form'" (ngSubmit)="submitSearch()" novalidate>
+      <label class="pickup-field">
+        <span>Pickup Location</span>
+        <input [(ngModel)]="pickupKeyword" name="pickupLocation" autocomplete="off"
+          (input)="onPickupInput()" (focus)="onPickupInput()" (blur)="hidePickupSuggestions()"
+          [class.selected]="search.pickupLocationId" placeholder="Choose a pickup location" />
+        <small class="selected-location" *ngIf="search.pickupLocationId && search.pickupCity">Selected · {{ search.pickupCity }}</small>
+        <div class="suggestions" *ngIf="showPickupSuggestions">
+          <div class="suggestion-loading" *ngIf="isLoadingPickupLocations">Loading pickup locations…</div>
+          <button type="button" class="suggestion-item" *ngFor="let location of filteredPickupLocations"
+            (mousedown)="$event.preventDefault(); selectPickupLocation(location)">
+            <strong>{{ location.shortName }}</strong><span>{{ location.name }}</span>
+            <small>{{ location.city }}<ng-container *ngIf="location.province">, {{ location.province }}</ng-container></small>
           </button>
           <div class="suggestion-empty" *ngIf="!isLoadingPickupLocations && pickupErrorMessage">
             {{ pickupErrorMessage }}
             <button type="button" (mousedown)="$event.preventDefault(); loadPickupLocations()">Try Again</button>
           </div>
-          <div class="suggestion-empty" *ngIf="!isLoadingPickupLocations && !pickupErrorMessage && filteredPickupLocations.length === 0">Location not found.</div>
+          <div class="suggestion-empty" *ngIf="!isLoadingPickupLocations && !pickupErrorMessage && filteredPickupLocations.length === 0">
+            No pickup locations match your search.
+          </div>
         </div>
       </label>
 
-      <label>Pickup Date <input type="date" [(ngModel)]="search.pickupDate" /></label>
-      <label>Pickup Time <input type="time" [(ngModel)]="search.pickupTime" /></label>
-      <label>Rental Duration
+      <label><span>Pickup Date</span><input type="date" name="pickupDate" [min]="minPickupDate" [(ngModel)]="search.pickupDate" (change)="onPickupScheduleChange()" /></label>
+      <label><span>Pickup Time</span><input type="time" name="pickupTime" [(ngModel)]="search.pickupTime" (change)="onPickupScheduleChange()" /></label>
+      <label><span>Return Date</span><input type="date" name="returnDate" [min]="search.pickupDate" [(ngModel)]="search.returnDate" (change)="onReturnScheduleChange()" /></label>
+      <label><span>Return Time</span><input type="time" name="returnTime" [(ngModel)]="search.returnTime" (change)="onReturnScheduleChange()" /></label>
+      <label><span>Rental Duration</span>
         <div class="duration-input">
-          <button type="button" (click)="decreaseDays()">−</button>
-          <input type="number" min="1" [(ngModel)]="search.rentalDays" (blur)="onRentalDaysChange()" />
+          <button type="button" aria-label="Decrease rental days" (click)="decreaseDays()">−</button>
+          <input type="number" name="rentalDays" min="1" [(ngModel)]="search.rentalDays" (blur)="onRentalDaysChange()" />
           <span>{{ search.rentalDays === 1 ? 'Day' : 'Days' }}</span>
-          <button type="button" (click)="increaseDays()">+</button>
+          <button type="button" aria-label="Increase rental days" (click)="increaseDays()">+</button>
         </div>
       </label>
-      <label>Rental Type
-        <select [(ngModel)]="search.rentalType"><option>With Driver</option><option>Self Drive</option></select>
+      <label><span>Rental Type</span>
+        <select name="rentalType" [(ngModel)]="search.rentalType"><option>With Driver</option><option>Self Drive</option></select>
       </label>
-      <button class="search-btn" type="button" (click)="submitSearch()">🔍 Search Available Cars</button>
-    </div>
+
+      <div class="validation-message" *ngIf="validationMessage" role="alert">{{ validationMessage }}</div>
+      <button class="search-btn" type="submit" [disabled]="isSubmitting || isLoadingPickupLocations">
+        {{ isSubmitting ? 'Opening available cars…' : 'Search Available Cars' }}
+      </button>
+    </form>
 
     <div class="summary-card" *ngIf="mode === 'summary'">
-      <div class="summary-item"><span class="icon">📍</span><div><small>Pickup Location</small><strong>{{ search.pickupLocation }}</strong><p>{{ search.pickupCity }}</p></div></div>
-      <div class="summary-item"><span class="icon">📅</span><div><small>Pickup Date & Time</small><strong>{{ summaryPickupDate }}</strong><p>{{ summaryPickupTime }}</p></div></div>
-      <div class="summary-item"><span class="icon">🕒</span><div><small>Rental Duration</small><strong>{{ search.rentalDays }} Days</strong><p>{{ summaryDateRange }}</p></div></div>
-      <div class="summary-item"><span class="icon">👤</span><div><small>Rental Type</small><strong>{{ search.rentalType }}</strong></div></div>
+      <div class="summary-item"><div><small>Pickup Location</small><strong>{{ search.pickupLocation }}</strong><p>{{ search.pickupCity }}</p></div></div>
+      <div class="summary-item"><div><small>Pickup</small><strong>{{ summaryPickupDate }}</strong><p>{{ summaryPickupTime }}</p></div></div>
+      <div class="summary-item"><div><small>Return</small><strong>{{ search.returnDate }}</strong><p>{{ search.returnTime }}</p></div></div>
+      <div class="summary-item"><div><small>Rental Type</small><strong>{{ search.rentalType }}</strong><p>{{ search.rentalDays }} day(s)</p></div></div>
       <button class="edit-btn" type="button" (click)="editSearch.emit()">Edit Search</button>
     </div>
   </div>
