@@ -1,0 +1,41 @@
+<main class="login-page">
+  <a class="brand" routerLink="/" aria-label="Return to rental website">
+    <span>FamBridge</span>
+    <small>Rental management platform</small>
+  </a>
+
+  <section class="login-card" aria-labelledby="login-title">
+    <p class="eyebrow">Renter portal</p>
+    <h1 id="login-title">Welcome back</h1>
+    <p class="intro">Sign in to search available vehicles and manage your rental requests.</p>
+
+    <form [formGroup]="form" (ngSubmit)="submit()" novalidate>
+      <label>
+        Email address
+        <input type="email" formControlName="email" autocomplete="email" placeholder="juan@example.com">
+        <small *ngIf="hasError('email')">Enter a valid email address.</small>
+      </label>
+
+      <label>
+        Password
+        <div class="password-field">
+          <input [type]="showPassword ? 'text' : 'password'" formControlName="password" autocomplete="current-password" placeholder="Enter your password">
+          <button type="button" class="toggle-password" (click)="showPassword = !showPassword">
+            {{ showPassword ? 'Hide' : 'Show' }}
+          </button>
+        </div>
+        <small *ngIf="hasError('password')">Enter your password.</small>
+      </label>
+
+      <div class="alert error" *ngIf="errorMessage" role="alert">{{ errorMessage }}</div>
+
+      <button class="submit-button" type="submit" [disabled]="isSubmitting">
+        {{ isSubmitting ? 'Signing in…' : 'Sign in' }}
+      </button>
+    </form>
+
+    <p class="register-link">No renter account yet? <a routerLink="/register">Create an account</a></p>
+  </section>
+
+  <footer>Business-owned rental website · Powered by FamBridge</footer>
+</main>

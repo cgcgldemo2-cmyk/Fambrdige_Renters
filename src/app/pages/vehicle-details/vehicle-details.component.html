@@ -1,0 +1,43 @@
+<app-renter-page-shell>
+  <section class="page-container portal-page">
+    <a class="back-link" routerLink="/renters/search-results" [queryParams]="selection?.search">← Back to Available Cars</a>
+    <div class="state-card" *ngIf="isLoading">Loading vehicle details…</div>
+    <div class="state-card error-state" *ngIf="!isLoading && errorMessage">
+      <h2>Vehicle details unavailable</h2><p>{{ errorMessage }}</p>
+      <a class="primary-button" routerLink="/" fragment="search">Start a new search</a>
+    </div>
+
+    <ng-container *ngIf="selection as item">
+      <div class="api-pending-note">Vehicle details API pending · Showing the selected search-result data.</div>
+      <div class="details-layout">
+        <article class="surface vehicle-gallery">
+          <img *ngIf="item.vehicle.imageUrl; else noImage" [src]="item.vehicle.imageUrl" [alt]="item.vehicle.name">
+          <ng-template #noImage><div class="image-empty">Vehicle image unavailable</div></ng-template>
+        </article>
+        <article class="surface detail-content">
+          <span class="eyebrow">{{ item.vehicle.vehicleType }}</span>
+          <h1>{{ item.vehicle.name }}</h1>
+          <p class="lead">Review the selected vehicle and schedule before continuing with your rental request.</p>
+          <div class="spec-grid">
+            <div><small>Seats</small><strong>{{ item.vehicle.seats }}</strong></div>
+            <div><small>Transmission</small><strong>{{ item.vehicle.transmission }}</strong></div>
+            <div><small>Fuel</small><strong>{{ item.vehicle.fuelType }}</strong></div>
+            <div><small>Rental type</small><strong>{{ item.search.rentalType }}</strong></div>
+          </div>
+          <div class="price-highlight"><span>Estimated total</span><strong>₱{{ item.vehicle.estimatedTotal | number }}</strong><small>₱{{ item.vehicle.dailyPrice | number }} per day</small></div>
+          <a class="primary-button wide" [routerLink]="['/vehicles', item.vehicle.id, 'request']">Continue to Rental Request</a>
+        </article>
+      </div>
+      <div class="surface schedule-card">
+        <h2>Your selected schedule</h2>
+        <div class="summary-grid">
+          <div><small>Pickup location</small><strong>{{ item.search.pickupLocation }}</strong><span>{{ item.search.pickupCity }}</span></div>
+          <div><small>Pickup</small><strong>{{ item.search.pickupDate | date:'mediumDate' }}</strong><span>{{ item.search.pickupTime }}</span></div>
+          <div><small>Return</small><strong>{{ item.search.returnDate | date:'mediumDate' }}</strong><span>{{ item.search.returnTime }}</span></div>
+          <div><small>Duration</small><strong>{{ item.search.rentalDays }} day(s)</strong><span>{{ item.search.rentalType }}</span></div>
+        </div>
+      </div>
+      <div class="surface info-panel"><h2>Important rental information</h2><p>This is a booking request. Vehicle availability, renter approval, payment confirmation, and final approval remain subject to the rental business.</p></div>
+    </ng-container>
+  </section>
+</app-renter-page-shell>
